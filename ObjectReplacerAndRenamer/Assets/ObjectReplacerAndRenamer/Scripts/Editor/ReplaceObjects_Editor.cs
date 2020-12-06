@@ -94,6 +94,22 @@ namespace GursaanjTools
                 return;
             }
 
+            GameObject[] selectedObjects = Selection.gameObjects;
+
+            for (int i = 0, count = selectedObjects.Length; i < count; i++)
+            {
+                GameObject selectedGameObject = selectedObjects[i];
+                Transform selectedTransform = selectedGameObject.transform;
+                GameObject newObject =
+                    Instantiate(_wantedObject, selectedTransform.position, selectedTransform.rotation);
+                newObject.transform.localScale = selectedTransform.localScale;
+                newObject.tag = selectedGameObject.tag;
+                newObject.layer = selectedGameObject.layer;
+                newObject.hideFlags = selectedGameObject.hideFlags;
+                
+                DestroyImmediate(selectedObjects[i]);
+            }
+
 
         }
 

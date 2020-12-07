@@ -65,7 +65,7 @@ namespace GursaanjTools
                 if (GUILayout.Button(_replaceSelectedObjects, GUILayout.ExpandWidth(true),
                     GUILayout.Height(_layoutButtonHeight)))
                 {
-                    ReplaceSelectedObjects(_shouldReplaceName);
+                    ReplaceSelectedObjects();
                 }
 
                 EditorGUILayout.Space();
@@ -85,7 +85,7 @@ namespace GursaanjTools
             _currentSelectionCount = Selection.gameObjects.Length;
         }
         
-        private void ReplaceSelectedObjects(bool shouldReplaceName)
+        private void ReplaceSelectedObjects()
         {
             if (_currentSelectionCount <= 0)
             {
@@ -108,7 +108,7 @@ namespace GursaanjTools
                 GameObject newObject =
                     Instantiate(_wantedObject, selectedTransform.position, selectedTransform.rotation);
 
-                if (!shouldReplaceName)
+                if (!_shouldReplaceName)
                 {
                     newObject.name = selectedGameObject.name;
                 }

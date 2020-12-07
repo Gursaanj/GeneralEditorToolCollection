@@ -1,20 +1,36 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using GursaanjTools;
-using UnityEditor;
-using UnityEngine;
+﻿using UnityEditor;
 
-public static class EditorMenus
+namespace GursaanjTools
 {
-    [MenuItem("GursaanjTools/GameObject Tools/Replace Selected Objects")]
-    public static void ReplaceObjectsTool()
+    public static class EditorMenus
     {
-        ReplaceObjects_Editor.InitWindow();
-    }
+        #region Object Replacer Tool
 
-    [MenuItem("GursaanjTools/GameObject Tools/Rename Selected Objects")]
-    public static void RenameObjectsTool()
-    {
+        [MenuItem("GursaanjTools/GameObject Tools/Replace Selected Objects")]
+        public static void ReplaceObjectsTool()
+        {
+            ReplaceObjects_Editor.InitWindow();
+        }
+
+        #endregion
+
+        #region Object Renamer
+
+        [MenuItem("GursaanjTools/GameObject Tools/Rename Selected Objects", true)]
+        public static bool RenameObjectsToolValidator()
+        {
+            return Selection.gameObjects != null;
+        }
+    
+        [MenuItem("GursaanjTools/GameObject Tools/Rename Selected Objects")]
+        public static void RenameObjectsTool()
+        {
         
+        }
+
+        #endregion
+    
+    
     }
 }
+

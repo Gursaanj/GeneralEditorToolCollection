@@ -8,12 +8,13 @@ namespace GursaanjTools
         #region Variabeles
 
         private static ReplaceObjects_Editor _window = null;
-        private static readonly Vector2 _minSize = new Vector2(300,75);
-        private static readonly Vector2 _maxSize = new Vector2(300,150);
+        private static readonly Vector2 _minSize = new Vector2(300,100);
+        private static readonly Vector2 _maxSize = new Vector2(300,175);
 
         private const string _replaceSelectedObjects = "Replace Selected Objects";
         private const string _objectsToReplaceString = "Object to Replace";
         private const string _selectionCountString = "Selection Count: ";
+        private const string _replaceNameString = "Replace Name?";
         private const int _layoutButtonHeight = 40;
         
         //Display Dialogue Text
@@ -27,6 +28,7 @@ namespace GursaanjTools
         
         private int _currentSelectionCount = 0;
         private GameObject _wantedObject = null;
+        private bool _shouldReplaceName = false;
         #endregion
 
         #region Unity Methods
@@ -57,10 +59,13 @@ namespace GursaanjTools
                     (GameObject)EditorGUILayout.ObjectField(_objectsToReplaceString, _wantedObject, typeof(GameObject), true);
                 EditorGUILayout.Space();
 
+                _shouldReplaceName = EditorGUILayout.Toggle(_replaceNameString, _shouldReplaceName);
+                
+                EditorGUILayout.Space();
                 if (GUILayout.Button(_replaceSelectedObjects, GUILayout.ExpandWidth(true),
                     GUILayout.Height(_layoutButtonHeight)))
                 {
-                    ReplaceSelectedObjects();
+                    ReplaceSelectedObjects(_shouldReplaceName);
                 }
 
                 EditorGUILayout.Space();
@@ -80,7 +85,7 @@ namespace GursaanjTools
             _currentSelectionCount = Selection.gameObjects.Length;
         }
         
-        private void ReplaceSelectedObjects()
+        private void ReplaceSelectedObjects(bool shouldReplaceName)
         {
             if (_currentSelectionCount <= 0)
             {
@@ -102,6 +107,12 @@ namespace GursaanjTools
                 Transform selectedTransform = selectedGameObject.transform;
                 GameObject newObject =
                     Instantiate(_wantedObject, selectedTransform.position, selectedTransform.rotation);
+
+                if (!shouldReplaceName)
+                {
+                    newObject.name = selectedGameObject.name;
+                }
+
                 newObject.transform.localScale = selectedTransform.localScale;
                 newObject.tag = selectedGameObject.tag;
                 newObject.layer = selectedGameObject.layer;

@@ -30,8 +30,7 @@ namespace GursaanjTools
         #endregion
 
         #region Unity Methods
-
-        [MenuItem("GursaanjTools/SceneTools/Replace Selected Objects")]
+        
         public static void InitWindow()
         {
             _window = GetWindow<ReplaceObjects_Editor>();
@@ -42,6 +41,7 @@ namespace GursaanjTools
             _window.Show();
         }
 
+        //Todo: Add a flag asking if name change is desired
         private void OnGUI()
         {
             // Check the amount of selected Objects
@@ -107,9 +107,10 @@ namespace GursaanjTools
                 newObject.layer = selectedGameObject.layer;
                 newObject.hideFlags = selectedGameObject.hideFlags;
                 
-                DestroyImmediate(selectedObjects[i]);
+                Undo.RegisterCreatedObjectUndo(newObject, "Replacement");
+                
+                Undo.DestroyObjectImmediate(selectedObjects[i]);
             }
-
 
         }
 

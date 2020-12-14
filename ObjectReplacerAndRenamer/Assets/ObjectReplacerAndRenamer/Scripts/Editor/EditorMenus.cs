@@ -1,4 +1,5 @@
 ﻿using UnityEditor;
+using UnityEngine;
 
 namespace GursaanjTools
 {
@@ -19,13 +20,14 @@ namespace GursaanjTools
         [MenuItem("GursaanjTools/GameObject Tools/Rename Selected Objects", true)]
         public static bool RenameObjectsToolValidator()
         {
-            return Selection.gameObjects != null;
+            GameObject[] selection = Selection.gameObjects;
+            return selection != null && selection.Length != 0;
         }
     
         [MenuItem("GursaanjTools/GameObject Tools/Rename Selected Objects")]
         public static void RenameObjectsTool()
         {
-        
+            RenameObjects_Editor.InitWindow();
         }
 
         #endregion

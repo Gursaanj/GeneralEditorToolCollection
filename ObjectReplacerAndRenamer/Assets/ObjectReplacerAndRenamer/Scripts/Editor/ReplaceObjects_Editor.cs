@@ -23,7 +23,7 @@ namespace GursaanjTools
         private const string _wantedObjectIsEmptyError = "The Replace object is empty, please assign something!";
 
         private const string _confirmationMessage = "Sounds good";
-        private const string _cancellationMessage = "Actuall, no!";
+        private const string _cancellationMessage = "Actually, no!";
         
         
         private int _currentSelectionCount = 0;

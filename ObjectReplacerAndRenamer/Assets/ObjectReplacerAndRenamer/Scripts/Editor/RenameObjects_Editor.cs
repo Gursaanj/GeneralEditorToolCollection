@@ -1,6 +1,6 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 public class RenameObjects_Editor : EditorWindow
 {
@@ -16,8 +16,14 @@ public class RenameObjects_Editor : EditorWindow
     private const string _nameLabel = "Name: ";
     private const string _suffixLabel = "Suffix: ";
     private const string _addNumberingLabel = "Add Numbering? ";
-    private const string _renameButtonLabel = "Rename Selected Objects";
+    private const string _undoRenameLabel = "Rename";
 
+    private const string _errorTitle = "Error";
+    private const string _nothingSelectedWarning = "No objects to rename!";
+    private const string _confirmationMessage = "Sounds good";
+    
+    private const string _finalNameFormat = "{0}_{1}";
+    
     private const float _horizontalPadding = 10.0f;
     private const float _verticalPadding = 2.5f;
 
@@ -65,7 +71,7 @@ public class RenameObjects_Editor : EditorWindow
 
         using (new EditorGUILayout.HorizontalScope())
         {
-            if (GUILayout.Button(_renameButtonLabel,GUILayout.ExpandWidth(true)) || IsReturnPressed())
+            if (GUILayout.Button(_renameSelectedObjects,GUILayout.ExpandWidth(true)) || IsReturnPressed())
             {
                 RenameGameObjects();
             }
@@ -80,13 +86,55 @@ public class RenameObjects_Editor : EditorWindow
 
     private void RenameGameObjects()
     {
-        Debug.Log("asd");
+        if (_selectedGameObjects == null || _selectedGameObjects.Length == 0)
+        {
+            EditorUtility.DisplayDialog(_errorTitle, _nothingSelectedWarning, _confirmationMessage);
+            return;
+        }
+
+
+        Array.Sort(_selectedGameObjects,
+            delegate(GameObject aGameObject, GameObject bGameObject)
+            {
+                return aGameObject.name.CompareTo(bGameObject.name);
+                
+            });
+        
+        for (int i = 0; i < _selectedGameObjects.Length; i++)
+        {
+            string finalName = string.Empty;
+
+            finalName = AddToFinalName(finalName, _wantedPrefix);
+            finalName = AddToFinalName(finalName, _wantedName);
+            finalName = AddToFinalName(finalName, _wantedSuffix);
+
+            if (_shouldAddNumbering && i > 0)
+            {
+                finalName = string.Format(_finalNameFormat, finalName, i.ToString());
+            }
+
+            GameObject selectedGameObject = _selectedGameObjects[i];
+            Undo.RecordObject(selectedGameObject, _undoRenameLabel);
+            selectedGameObject.name = finalName;
+        }
     }
 
     private bool IsReturnPressed()
     {
         Event currentEvent = Event.current;
         return currentEvent.isKey && currentEvent.keyCode == KeyCode.Return;
+    }
+
+    private string AddToFinalName(string finalName , string nameSegement)
+    {
+        if (!string.IsNullOrEmpty(nameSegement))
+        {
+            finalName = string.IsNullOrEmpty(finalName)
+                ? nameSegement
+                : string.Format(_finalNameFormat, finalName, nameSegement);
+        }
+
+        return finalName;
     }
 
 

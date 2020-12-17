@@ -45,7 +45,7 @@ public class RenameObjects_Editor : EditorWindow
     private bool _shouldFocusOnTextField = true;
     
     private int _currentControlIndex = 0;
-    private List<string> _listOfControls;
+    private List<string> _listOfControls = new List<string>();
 
     #endregion
 
@@ -60,11 +60,6 @@ public class RenameObjects_Editor : EditorWindow
         _window.autoRepaintOnSceneChange = true;
         _window.Focus();
         _window.Show();
-    }
-
-    private void OnEnable()
-    {
-        _listOfControls = new List<string>();
     }
 
     //Todo : Add GUI control to TextField

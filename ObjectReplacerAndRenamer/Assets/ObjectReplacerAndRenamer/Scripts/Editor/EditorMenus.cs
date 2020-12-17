@@ -1,5 +1,4 @@
 ﻿using UnityEditor;
-using UnityEngine;
 
 namespace GursaanjTools
 {
@@ -21,6 +20,16 @@ namespace GursaanjTools
         public static void RenameObjectsTool()
         {
             RenameObjects_Editor.InitWindow();
+        }
+
+        #endregion
+
+        #region Object Grouper
+
+        [MenuItem("GursaanjTools/GameObject Tools/Group or Ungroup Selected Objects")]
+        public static void GroupObjectsTool()
+        {
+            GroupObjects_Editor.InitWindow();
         }
 
         #endregion

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -128,7 +129,9 @@ public class RenameObjects_Editor : EditorWindow
                 return;
             }
         }
-
+        
+        _selectedGameObjects.Reverse();
+        
         Array.Sort(_selectedGameObjects,
             delegate(GameObject aGameObject, GameObject bGameObject)
             {

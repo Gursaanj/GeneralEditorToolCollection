@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
@@ -11,6 +12,7 @@ public class RenameObjects_Editor : EditorWindow
     private static readonly Vector2 _maxSize = new Vector2(300,180);
 
     private const string _renameSelectedObjects = "Rename Selected Objects";
+    private const string _castedCountFormat = "000";
     private const string _selectionCountString = "Selection Count: ";
     private const string _prefixLabel = "Prefix: ";
     private const string _nameLabel = "Name: ";
@@ -20,7 +22,14 @@ public class RenameObjects_Editor : EditorWindow
 
     private const string _errorTitle = "Error";
     private const string _nothingSelectedWarning = "No objects to rename!";
+    private const string _noNameToRenameWithWarning = "Are you sure you want to remove the names from the selected objects?";
     private const string _confirmationMessage = "Sounds good";
+    private const string _cancellationMessage = "Actually, no!";
+    
+    // Handling GUI Control Manually
+    private const string _prefixControlName = "preifxControl";
+    private const string _nameControlName = "nameControl";
+    private const string _suffixControlName = "suffixControl";
     
     private const string _finalNameFormat = "{0}_{1}";
     
@@ -32,6 +41,10 @@ public class RenameObjects_Editor : EditorWindow
     private string _wantedName = string.Empty;
     private string _wantedSuffix = string.Empty;
     private bool _shouldAddNumbering = false;
+    private bool _shouldFocusOnTextField = true;
+    
+    private int _currentControlIndex = 0;
+    private List<string> _listOfControls;
 
     #endregion
 
@@ -44,14 +57,20 @@ public class RenameObjects_Editor : EditorWindow
         _window.minSize = _minSize;
         _window.maxSize = _maxSize;
         _window.autoRepaintOnSceneChange = true;
+        _window.Focus();
         _window.Show();
     }
-    
+
+    private void OnEnable()
+    {
+        _listOfControls = new List<string>();
+    }
+
     //Todo : Add GUI control to TextField
     private void OnGUI()
     {
         _selectedGameObjects = Selection.gameObjects;
-        EditorGUILayout.LabelField(string.Format("{0}{1}", _selectionCountString, _selectedGameObjects.Length.ToString("000")));
+        EditorGUILayout.LabelField(string.Format("{0}{1}", _selectionCountString, _selectedGameObjects.Length.ToString(_castedCountFormat)));
         
         //Add UI
         using (new EditorGUILayout.HorizontalScope())
@@ -59,11 +78,13 @@ public class RenameObjects_Editor : EditorWindow
             GUILayout.Space(_horizontalPadding);
             using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
             {
-                GUILayout.Space(_verticalPadding); 
-                _wantedPrefix = EditorGUILayout.TextField(_prefixLabel, _wantedPrefix, EditorStyles.miniTextField, GUILayout.ExpandWidth(true));
-                _wantedName = EditorGUILayout.TextField(_nameLabel, _wantedName);
-                _wantedSuffix = EditorGUILayout.TextField(_suffixLabel, _wantedSuffix, EditorStyles.miniTextField, GUILayout.ExpandWidth(true));
+                GUILayout.Space(_verticalPadding);
+
+                CreateControlledTextField(_prefixControlName, ref _wantedPrefix, _prefixLabel);
+                CreateControlledTextField(_nameControlName, ref _wantedName, _nameLabel);
+                CreateControlledTextField(_suffixControlName, ref _wantedSuffix, _suffixLabel);
                 _shouldAddNumbering = EditorGUILayout.Toggle(_addNumberingLabel, _shouldAddNumbering);
+                
                 GUILayout.Space(_verticalPadding);
             }
             GUILayout.Space(_horizontalPadding);
@@ -77,7 +98,13 @@ public class RenameObjects_Editor : EditorWindow
             }
         }
 
-        Repaint();
+        ChangeCurrentControl();
+        FocusOnTextField();
+        
+        if (_window != null)
+        {
+            Repaint();
+        }
     }
 
     #endregion
@@ -92,6 +119,15 @@ public class RenameObjects_Editor : EditorWindow
             return;
         }
 
+        if (string.IsNullOrEmpty(_wantedPrefix) && string.IsNullOrEmpty(_wantedName) &&
+            string.IsNullOrEmpty(_wantedSuffix))
+        {
+            if (!EditorUtility.DisplayDialog(_errorTitle, _noNameToRenameWithWarning, _confirmationMessage,
+                _cancellationMessage))
+            {
+                return;
+            }
+        }
 
         Array.Sort(_selectedGameObjects,
             delegate(GameObject aGameObject, GameObject bGameObject)
@@ -135,6 +171,53 @@ public class RenameObjects_Editor : EditorWindow
         }
 
         return finalName;
+    }
+
+    private void CreateControlledTextField(string controlName, ref string textField, string label)
+    {
+        GUI.SetNextControlName(controlName);
+        textField = EditorGUILayout.TextField(label, textField, EditorStyles.miniTextField,
+            GUILayout.ExpandWidth(true));
+
+        if (!_listOfControls.Contains(controlName))
+        {
+            _listOfControls.Add(controlName);
+        }
+    }
+
+    private void ChangeCurrentControl()
+    {
+        Event currentEvent = Event.current;
+
+        if (currentEvent.isKey)
+        {
+            if (currentEvent.keyCode == KeyCode.DownArrow)
+            {
+                if (_currentControlIndex < (_listOfControls.Count - 1))
+                {
+                    _currentControlIndex++;
+                    _shouldFocusOnTextField = true;
+                }
+            }
+            else if (currentEvent.keyCode == KeyCode.UpArrow)
+            {
+                if (_currentControlIndex > 0)
+                {
+                    _currentControlIndex--;
+                    _shouldFocusOnTextField = true;
+                }
+            }
+        }
+    }
+
+    private void FocusOnTextField()
+    {
+        if(_shouldFocusOnTextField && _window != null && _listOfControls != null && _listOfControls.Count != 0)
+        {
+            _window.Focus();
+            EditorGUI.FocusTextInControl(_listOfControls[_currentControlIndex]);
+            _shouldFocusOnTextField = false;
+        }
     }
 
 

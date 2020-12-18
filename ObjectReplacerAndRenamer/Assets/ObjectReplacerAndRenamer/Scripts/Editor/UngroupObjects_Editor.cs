@@ -1,69 +1,73 @@
 ﻿using UnityEditor;
 using UnityEngine;
 
-public class UngroupObjects_Editor : Editor
+namespace GursaanjTools
 {
-    #region Variables
-
-    //Error Messages
-    private const string ErrorTitle = "Error";
-    private const string NoObjectsMessage = "No Objects to Ungroup!";
-    private const string ConfirmationMessage = "Sure thing!";
-
-    private const string UndoUngroupingLabel = "Ungrouping";
-
-    private static GameObject[] _selectedGameObjects;
-
-    #endregion
-
-    #region Builtin Methods
-
-    public static void Init()
+    public class UngroupObjects_Editor : Editor
     {
-        _selectedGameObjects = Selection.gameObjects;
-        UngroupObjects();
-    }
-
-    #endregion
-
-    #region Custom Methods
+        #region Variables
     
-    private static void UngroupObjects()
-    {
-        if (_selectedGameObjects == null || _selectedGameObjects.Length == 0)
+        //Error Messages
+        private const string ErrorTitle = "Error";
+        private const string NoObjectsMessage = "No Objects to Ungroup!";
+        private const string ConfirmationMessage = "Sure thing!";
+    
+        private const string UndoUngroupingLabel = "Ungrouping";
+    
+        private static GameObject[] _selectedGameObjects;
+    
+        #endregion
+    
+        #region Builtin Methods
+    
+        public static void Init()
         {
-            EditorUtility.DisplayDialog(ErrorTitle, NoObjectsMessage, ConfirmationMessage);
-            return;
+            _selectedGameObjects = Selection.gameObjects;
+            UngroupObjects();
         }
+    
+        #endregion
+    
+        #region Custom Methods
         
-
-        for (int i = 0, count = _selectedGameObjects.Length; i < count; i++)
+        private static void UngroupObjects()
         {
-            GameObject parent = _selectedGameObjects[i];
-
-            if (parent.transform.childCount == 0)
+            if (_selectedGameObjects == null || _selectedGameObjects.Length == 0)
             {
-                continue;
-            }
-
-            int childCount = parent.transform.childCount;
-            Transform[] childrenTransforms = new Transform[childCount];
-
-            for (int j = 0, len = childCount; j < len; j++)
-            {
-                childrenTransforms[j] = parent.transform.GetChild(j);
-            }
-
-            for (int j = 0, len = childCount; j < len; j++)
-            {
-                Undo.SetTransformParent(childrenTransforms[j], parent.transform.parent, UndoUngroupingLabel);
+                EditorUtility.DisplayDialog(ErrorTitle, NoObjectsMessage, ConfirmationMessage);
+                return;
             }
             
-            Undo.DestroyObjectImmediate(parent);
+    
+            for (int i = 0, count = _selectedGameObjects.Length; i < count; i++)
+            {
+                GameObject parent = _selectedGameObjects[i];
+    
+                if (parent.transform.childCount == 0)
+                {
+                    continue;
+                }
+    
+                int childCount = parent.transform.childCount;
+                Transform[] childrenTransforms = new Transform[childCount];
+    
+                for (int j = 0, len = childCount; j < len; j++)
+                {
+                    childrenTransforms[j] = parent.transform.GetChild(j);
+                }
+    
+                for (int j = 0, len = childCount; j < len; j++)
+                {
+                    Undo.SetTransformParent(childrenTransforms[j], parent.transform.parent, UndoUngroupingLabel);
+                }
+                
+                Undo.DestroyObjectImmediate(parent);
+            }
+    
+    
         }
-
-
+    
+        #endregion
     }
-
-    #endregion
 }
+

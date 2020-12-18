@@ -17,6 +17,7 @@ namespace GursaanjTools
         private const string _castedCountFormat = "000";
         private const string _groupObjectsLabel = "Enter Group Name";
         private const string _createGroupLabel = "Group Objects";
+        private const string _undoGroupingLabel = "Grouping";
         
         private const string _errorTitle = "Error";
         private const string _nothingSelectedWarning = "No objects to Group!";
@@ -102,6 +103,15 @@ namespace GursaanjTools
                 {
                     return;
                 }
+            }
+            
+            GameObject groupingObject = new GameObject(_groupName);
+            Undo.RegisterCreatedObjectUndo(groupingObject, _undoGroupingLabel);
+
+            for (int i = 0, count = _selectedGameObjects.Length; i < count; i++)
+            {
+                GameObject obj = _selectedGameObjects[i];
+                Undo.SetTransformParent(obj.transform, groupingObject.transform, _undoGroupingLabel);
             }
         }
 

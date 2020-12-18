@@ -28,7 +28,6 @@ public class UngroupObjects_Editor : Editor
 
     #region Custom Methods
     
-    //TODO : Add Undo Capability, Destroy Parent GameObject
     private static void UngroupObjects()
     {
         if (_selectedGameObjects == null || _selectedGameObjects.Length == 0)
@@ -46,15 +45,21 @@ public class UngroupObjects_Editor : Editor
             {
                 continue;
             }
-            
-            //parent.transform.DetachChildren();
 
-            for (int j = 0, len = parent.transform.childCount; j < len; j++)
+            int childCount = parent.transform.childCount;
+            Transform[] childrenTransforms = new Transform[childCount];
+
+            for (int j = 0, len = childCount; j < len; j++)
             {
-                GameObject child = parent.transform.GetChild(j).gameObject;
-                
-                Undo.SetTransformParent(child.transform, parent.transform.parent, _undoUngroupingLabel);
+                childrenTransforms[j] = parent.transform.GetChild(j);
             }
+
+            for (int j = 0, len = childCount; j < len; j++)
+            {
+                Undo.SetTransformParent(childrenTransforms[j], parent.transform.parent, _undoUngroupingLabel);
+            }
+            
+            Undo.DestroyObjectImmediate(parent);
         }
 
 

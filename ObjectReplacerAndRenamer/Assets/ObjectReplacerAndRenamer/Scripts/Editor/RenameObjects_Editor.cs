@@ -4,7 +4,9 @@ using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
-public class RenameObjects_Editor : EditorWindow
+namespace GursaanjTools
+{
+    public class RenameObjects_Editor : EditorWindow
 {
     #region Variables
 
@@ -61,8 +63,7 @@ public class RenameObjects_Editor : EditorWindow
         _window.Focus();
         _window.Show();
     }
-
-    //Todo : Add GUI control to TextField
+    
     private void OnGUI()
     {
         _selectedGameObjects = Selection.gameObjects;
@@ -221,3 +222,5 @@ public class RenameObjects_Editor : EditorWindow
 
     #endregion
 }
+}
+

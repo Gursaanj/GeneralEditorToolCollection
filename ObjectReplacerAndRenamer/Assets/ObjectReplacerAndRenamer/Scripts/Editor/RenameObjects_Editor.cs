@@ -94,8 +94,7 @@ namespace GursaanjTools
                 RenameGameObjects();
             }
         }
-
-        ChangeCurrentControl();
+        
         FocusOnTextField();
         
         if (_window != null)
@@ -211,11 +210,16 @@ namespace GursaanjTools
 
     private void FocusOnTextField()
     {
-        if(_shouldFocusOnTextField && _window != null && _listOfControls != null && _listOfControls.Count != 0)
+        if (_listOfControls != null && _listOfControls.Count > 0)
         {
-            _window.Focus();
-            EditorGUI.FocusTextInControl(_listOfControls[_currentControlIndex]);
-            _shouldFocusOnTextField = false;
+            ChangeCurrentControl();
+
+            if (_shouldFocusOnTextField && _window != null)
+            {
+                _window.Focus();
+                EditorGUI.FocusTextInControl(_listOfControls[_currentControlIndex]);
+                _shouldFocusOnTextField = false;
+            }
         }
     }
 

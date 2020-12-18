@@ -51,7 +51,7 @@ namespace GursaanjTools
 
     #endregion
 
-    #region Unity Methods
+    #region BuiltIn Methods
 
     public static void InitWindow()
     {
@@ -67,7 +67,7 @@ namespace GursaanjTools
     private void OnGUI()
     {
         _selectedGameObjects = Selection.gameObjects;
-        EditorGUILayout.LabelField(string.Format("{0}{1}", _selectionCountString, _selectedGameObjects.Length.ToString(_castedCountFormat)));
+        EditorGUILayout.LabelField($"{_selectionCountString}{_selectedGameObjects.Length.ToString(_castedCountFormat)}");
         
         //Add UI
         using (new EditorGUILayout.HorizontalScope())

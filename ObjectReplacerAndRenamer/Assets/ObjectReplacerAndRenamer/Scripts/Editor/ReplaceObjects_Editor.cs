@@ -31,7 +31,7 @@ namespace GursaanjTools
         private bool _shouldReplaceName = false;
         #endregion
 
-        #region Unity Methods
+        #region BuiltIn Methods
         
         public static void InitWindow()
         {

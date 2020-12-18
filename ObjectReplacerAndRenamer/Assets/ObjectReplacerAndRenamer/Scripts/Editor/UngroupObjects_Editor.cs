@@ -6,11 +6,11 @@ public class UngroupObjects_Editor : Editor
     #region Variables
 
     //Error Messages
-    private const string _errorTitle = "Error";
-    private const string _noObjectsMessage = "No Objects to Ungroup!";
-    private const string _confirmationMessage = "Sure thing!";
+    private const string ErrorTitle = "Error";
+    private const string NoObjectsMessage = "No Objects to Ungroup!";
+    private const string ConfirmationMessage = "Sure thing!";
 
-    private const string _undoUngroupingLabel = "Ungrouping";
+    private const string UndoUngroupingLabel = "Ungrouping";
 
     private static GameObject[] _selectedGameObjects;
 
@@ -32,7 +32,7 @@ public class UngroupObjects_Editor : Editor
     {
         if (_selectedGameObjects == null || _selectedGameObjects.Length == 0)
         {
-            EditorUtility.DisplayDialog(_errorTitle, _noObjectsMessage, _confirmationMessage);
+            EditorUtility.DisplayDialog(ErrorTitle, NoObjectsMessage, ConfirmationMessage);
             return;
         }
         
@@ -56,7 +56,7 @@ public class UngroupObjects_Editor : Editor
 
             for (int j = 0, len = childCount; j < len; j++)
             {
-                Undo.SetTransformParent(childrenTransforms[j], parent.transform.parent, _undoUngroupingLabel);
+                Undo.SetTransformParent(childrenTransforms[j], parent.transform.parent, UndoUngroupingLabel);
             }
             
             Undo.DestroyObjectImmediate(parent);

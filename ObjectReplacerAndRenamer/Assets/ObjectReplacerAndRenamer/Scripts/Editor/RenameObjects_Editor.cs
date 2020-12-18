@@ -11,33 +11,33 @@ namespace GursaanjTools
     #region Variables
 
     private static RenameObjects_Editor _window = null;
-    private static readonly Vector2 _minSize = new Vector2(300,140);
-    private static readonly Vector2 _maxSize = new Vector2(300,180);
+    private static readonly Vector2 MinSize = new Vector2(300,140);
+    private static readonly Vector2 MaxSize = new Vector2(300,180);
 
-    private const string _renameSelectedObjects = "Rename Selected Objects";
-    private const string _castedCountFormat = "000";
-    private const string _selectionCountString = "Selection Count: ";
-    private const string _prefixLabel = "Prefix: ";
-    private const string _nameLabel = "Name: ";
-    private const string _suffixLabel = "Suffix: ";
-    private const string _addNumberingLabel = "Add Numbering? ";
-    private const string _undoRenameLabel = "Rename";
+    private const string RenameSelectedObjects = "Rename Selected Objects";
+    private const string CastedCountFormat = "000";
+    private const string SelectionCountString = "Selection Count: ";
+    private const string PrefixLabel = "Prefix: ";
+    private const string NameLabel = "Name: ";
+    private const string SuffixLabel = "Suffix: ";
+    private const string AddNumberingLabel = "Add Numbering? ";
+    private const string UndoRenameLabel = "Rename";
 
-    private const string _errorTitle = "Error";
-    private const string _nothingSelectedWarning = "No objects to rename!";
-    private const string _noNameToRenameWithWarning = "Are you sure you want to remove the names from the selected objects?";
-    private const string _confirmationMessage = "Sounds good";
-    private const string _cancellationMessage = "Actually, no!";
+    private const string ErrorTitle = "Error";
+    private const string NothingSelectedWarning = "No objects to rename!";
+    private const string NoNameToRenameWithWarning = "Are you sure you want to remove the names from the selected objects?";
+    private const string ConfirmationMessage = "Sounds good";
+    private const string CancellationMessage = "Actually, no!";
     
     // Handling GUI Control Manually
-    private const string _prefixControlName = "preifxControl";
-    private const string _nameControlName = "nameControl";
-    private const string _suffixControlName = "suffixControl";
+    private const string PrefixControlName = "preifxControl";
+    private const string NameControlName = "nameControl";
+    private const string SuffixControlName = "suffixControl";
     
-    private const string _finalNameFormat = "{0}_{1}";
+    private const string FinalNameFormat = "{0}_{1}";
     
-    private const float _horizontalPadding = 10.0f;
-    private const float _verticalPadding = 2.5f;
+    private const float HorizontalPadding = 10.0f;
+    private const float VerticalPadding = 2.5f;
 
     private GameObject[] _selectedGameObjects = null;
     private string _wantedPrefix = string.Empty;
@@ -56,9 +56,9 @@ namespace GursaanjTools
     public static void InitWindow()
     {
         _window = GetWindow<RenameObjects_Editor>();
-        _window.titleContent = new GUIContent(_renameSelectedObjects);
-        _window.minSize = _minSize;
-        _window.maxSize = _maxSize;
+        _window.titleContent = new GUIContent(RenameSelectedObjects);
+        _window.minSize = MinSize;
+        _window.maxSize = MaxSize;
         _window.autoRepaintOnSceneChange = true;
         _window.Focus();
         _window.Show();
@@ -67,29 +67,29 @@ namespace GursaanjTools
     private void OnGUI()
     {
         _selectedGameObjects = Selection.gameObjects;
-        EditorGUILayout.LabelField($"{_selectionCountString}{_selectedGameObjects.Length.ToString(_castedCountFormat)}");
+        EditorGUILayout.LabelField($"{SelectionCountString}{_selectedGameObjects.Length.ToString(CastedCountFormat)}");
         
         //Add UI
         using (new EditorGUILayout.HorizontalScope())
         {
-            GUILayout.Space(_horizontalPadding);
+            GUILayout.Space(HorizontalPadding);
             using (new EditorGUILayout.VerticalScope(EditorStyles.helpBox))
             {
-                GUILayout.Space(_verticalPadding);
+                GUILayout.Space(VerticalPadding);
 
-                CreateControlledTextField(_prefixControlName, ref _wantedPrefix, _prefixLabel);
-                CreateControlledTextField(_nameControlName, ref _wantedName, _nameLabel);
-                CreateControlledTextField(_suffixControlName, ref _wantedSuffix, _suffixLabel);
-                _shouldAddNumbering = EditorGUILayout.Toggle(_addNumberingLabel, _shouldAddNumbering);
+                CreateControlledTextField(PrefixControlName, ref _wantedPrefix, PrefixLabel);
+                CreateControlledTextField(NameControlName, ref _wantedName, NameLabel);
+                CreateControlledTextField(SuffixControlName, ref _wantedSuffix, SuffixLabel);
+                _shouldAddNumbering = EditorGUILayout.Toggle(AddNumberingLabel, _shouldAddNumbering);
                 
-                GUILayout.Space(_verticalPadding);
+                GUILayout.Space(VerticalPadding);
             }
-            GUILayout.Space(_horizontalPadding);
+            GUILayout.Space(HorizontalPadding);
         }
 
         using (new EditorGUILayout.HorizontalScope())
         {
-            if (GUILayout.Button(_renameSelectedObjects,GUILayout.ExpandWidth(true)) || IsReturnPressed())
+            if (GUILayout.Button(RenameSelectedObjects,GUILayout.ExpandWidth(true)) || IsReturnPressed())
             {
                 RenameGameObjects();
             }
@@ -112,15 +112,15 @@ namespace GursaanjTools
     {
         if (_selectedGameObjects == null || _selectedGameObjects.Length == 0)
         {
-            EditorUtility.DisplayDialog(_errorTitle, _nothingSelectedWarning, _confirmationMessage);
+            EditorUtility.DisplayDialog(ErrorTitle, NothingSelectedWarning, ConfirmationMessage);
             return;
         }
 
         if (string.IsNullOrEmpty(_wantedPrefix) && string.IsNullOrEmpty(_wantedName) &&
             string.IsNullOrEmpty(_wantedSuffix))
         {
-            if (!EditorUtility.DisplayDialog(_errorTitle, _noNameToRenameWithWarning, _confirmationMessage,
-                _cancellationMessage))
+            if (!EditorUtility.DisplayDialog(ErrorTitle, NoNameToRenameWithWarning, ConfirmationMessage,
+                CancellationMessage))
             {
                 return;
             }
@@ -145,11 +145,11 @@ namespace GursaanjTools
 
             if (_shouldAddNumbering && i > 0)
             {
-                finalName = string.Format(_finalNameFormat, finalName, i.ToString());
+                finalName = string.Format(FinalNameFormat, finalName, i.ToString());
             }
 
             GameObject selectedGameObject = _selectedGameObjects[i];
-            Undo.RecordObject(selectedGameObject, _undoRenameLabel);
+            Undo.RecordObject(selectedGameObject, UndoRenameLabel);
             selectedGameObject.name = finalName;
         }
     }
@@ -166,7 +166,7 @@ namespace GursaanjTools
         {
             finalName = string.IsNullOrEmpty(finalName)
                 ? nameSegement
-                : string.Format(_finalNameFormat, finalName, nameSegement);
+                : string.Format(FinalNameFormat, finalName, nameSegement);
         }
 
         return finalName;

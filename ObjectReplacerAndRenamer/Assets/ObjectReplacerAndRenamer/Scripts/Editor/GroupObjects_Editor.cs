@@ -28,7 +28,7 @@ namespace GursaanjTools
         private const string _groupNameControl = "groupNameControl";
 
         private GameObject[] _selectedGameObjects;
-        private string _groupName = string.Empty;
+        private string _groupName = "Group";
 
         private bool _shouldFocusOnTextField = true;
         private int _currentControlIndex = 0;

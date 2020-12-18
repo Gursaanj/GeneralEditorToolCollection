@@ -26,11 +26,22 @@ namespace GursaanjTools
 
         #region Object Grouper
 
-        [MenuItem("GursaanjTools/GameObject Tools/Group Selected Objects")]
+        [MenuItem("GursaanjTools/GameObject Tools/Group Selected Objects %#z")]
         public static void GroupObjectsTool()
         {
             GroupObjects_Editor.InitWindow();
         }
+
+        #endregion
+
+        #region Object Ungrouper
+        
+        [MenuItem("GursaanjTools/GameObject Tools/Ungroup Selected Objects %#q")]
+        public static void UngroupObjectsTool()
+        {
+            UngroupObjects_Editor.Init();
+        }
+
 
         #endregion
     

@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 
@@ -25,8 +24,13 @@ namespace GursaanjTools
         private const string _confirmationMessage = "Sounds good";
         private const string _cancellationMessage = "Actually, no!";
 
+        private const string _groupNameControl = "groupNameControl";
+
         private GameObject[] _selectedGameObjects;
         private string _groupName = string.Empty;
+
+        private bool _shouldFocusOnTextField = true;
+        private int _currentControlIndex = 0;
         private List<string> _listOfControls = new List<string>();
         #endregion
     
@@ -56,11 +60,11 @@ namespace GursaanjTools
                     EditorGUILayout.Space();
                     
                     EditorGUILayout.LabelField(_groupObjectsLabel, EditorStyles.boldLabel);
-                    _groupName = EditorGUILayout.TextField(_groupName);
+                    CreateControlledTextField(_groupNameControl, ref _groupName);
                     
                     EditorGUILayout.Space();
 
-                    if (GUILayout.Button(_createGroupLabel, GUILayout.ExpandWidth(true), GUILayout.Height(40f)))
+                    if (GUILayout.Button(_createGroupLabel, GUILayout.ExpandWidth(true), GUILayout.Height(40f)) || IsReturnPressed())
                     {
                         GroupObjects();
                     }
@@ -68,6 +72,14 @@ namespace GursaanjTools
                     EditorGUILayout.Space();
                 }
                 EditorGUILayout.Space();
+            }
+            
+            ChangeCurrentControl();
+            FocusOnTextField();
+
+            if (_window != null)
+            {
+                _window.Repaint();
             }
         }
     
@@ -99,15 +111,49 @@ namespace GursaanjTools
             return currentEvent.isKey && currentEvent.keyCode == KeyCode.Return;
         }
         
-        private void CreateControlledTextField(string controlName, ref string textField, string label)
+        private void CreateControlledTextField(string controlName, ref string textField)
         {
             GUI.SetNextControlName(controlName);
-            textField = EditorGUILayout.TextField(label, textField, EditorStyles.miniTextField,
-                GUILayout.ExpandWidth(true));
+            textField = EditorGUILayout.TextField(textField);
     
             if (!_listOfControls.Contains(controlName))
             {
                 _listOfControls.Add(controlName);
+            }
+        }
+        
+        private void ChangeCurrentControl()
+        {
+            Event currentEvent = Event.current;
+
+            if (currentEvent.isKey)
+            {
+                if (currentEvent.keyCode == KeyCode.DownArrow)
+                {
+                    if (_currentControlIndex < (_listOfControls.Count - 1))
+                    {
+                        _currentControlIndex++;
+                        _shouldFocusOnTextField = true;
+                    }
+                }
+                else if (currentEvent.keyCode == KeyCode.UpArrow)
+                {
+                    if (_currentControlIndex > 0)
+                    {
+                        _currentControlIndex--;
+                        _shouldFocusOnTextField = true;
+                    }
+                }
+            }
+        }
+
+        private void FocusOnTextField()
+        {
+            if(_shouldFocusOnTextField && _window != null && _listOfControls != null && _listOfControls.Count != 0)
+            {
+                _window.Focus();
+                EditorGUI.FocusTextInControl(_listOfControls[_currentControlIndex]);
+                _shouldFocusOnTextField = false;
             }
         }
     

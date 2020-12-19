@@ -23,6 +23,8 @@ namespace GursaanjTools
         private const string WantedObjectIsEmptyError = "The Replace object is empty, please assign something!";
         private const string ConfirmationMessage = "Sounds good";
 
+        private const string UndoReplacementLabel = "Replacement";
+
 
         private int _currentSelectionCount = 0;
         private GameObject _wantedObject = null;
@@ -50,7 +52,7 @@ namespace GursaanjTools
             using (new EditorGUILayout.VerticalScope())
             {
                 EditorGUILayout.Space();
-                EditorGUILayout.LabelField(string.Format("{0}{1}", SelectionCountString, _currentSelectionCount.ToString()), EditorStyles.boldLabel);
+                EditorGUILayout.LabelField($"{SelectionCountString}{_currentSelectionCount.ToString()}", EditorStyles.boldLabel);
                 EditorGUILayout.Space();
 
                 _wantedObject =
@@ -116,7 +118,7 @@ namespace GursaanjTools
                 newObject.layer = selectedGameObject.layer;
                 newObject.hideFlags = selectedGameObject.hideFlags;
                 
-                Undo.RegisterCreatedObjectUndo(newObject, "Replacement");
+                Undo.RegisterCreatedObjectUndo(newObject, UndoReplacementLabel);
                 
                 Undo.DestroyObjectImmediate(selectedObjects[i]);
             }

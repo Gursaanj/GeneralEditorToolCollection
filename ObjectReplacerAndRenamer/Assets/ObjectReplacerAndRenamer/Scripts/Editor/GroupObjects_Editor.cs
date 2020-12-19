@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using UnityEditor;
+using UnityEditor.Graphs;
 using UnityEngine;
 
 namespace GursaanjTools
 {
-    public class GroupObjects_Editor : EditorWindow
+    public class GroupObjects_Editor : GuiControlEditorWindow
     {
         #region Variables
     
@@ -22,6 +23,7 @@ namespace GursaanjTools
         private const string ErrorTitle = "Error";
         private const string NothingSelectedWarning = "No objects to Group!";
         private const string NogroupNameWarning = "No Group name entered! Would you like to continue?";
+        private const string DifferentParentsWarning = "Two or more objects have different parents! Unable to Group!";
         private const string ConfirmationMessage = "Sounds good";
         private const string CancellationMessage = "Actually, no!";
 
@@ -87,7 +89,8 @@ namespace GursaanjTools
         #endregion
     
         #region Custom Methods
-
+        
+        //TODO : Ensure new groups are parented appropriately 
         private void GroupObjects()
         {
             if (_selectedGameObjects == null || _selectedGameObjects.Length == 0)
@@ -104,8 +107,15 @@ namespace GursaanjTools
                     return;
                 }
             }
-            
+
+            if (!CheckForSameParents())
+            {
+                EditorUtility.DisplayDialog(ErrorTitle, DifferentParentsWarning, ConfirmationMessage);
+                return;
+            }
+
             GameObject groupingObject = new GameObject(_groupName);
+            groupingObject.transform.parent = _selectedGameObjects[0].transform.parent;
             Undo.RegisterCreatedObjectUndo(groupingObject, UndoGroupingLabel);
 
             for (int i = 0, count = _selectedGameObjects.Length; i < count; i++)
@@ -115,12 +125,21 @@ namespace GursaanjTools
             }
         }
 
-        private bool IsReturnPressed()
+        private bool CheckForSameParents()
         {
-            Event currentEvent = Event.current;
-            return currentEvent.isKey && currentEvent.keyCode == KeyCode.Return;
+            Transform parentToCheck = _selectedGameObjects[0].transform.parent;
+
+            foreach (GameObject obj in _selectedGameObjects)
+            {
+                if (obj.transform.parent != parentToCheck)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
-        
+
         private void CreateControlledTextField(string controlName, ref string textField)
         {
             GUI.SetNextControlName(controlName);

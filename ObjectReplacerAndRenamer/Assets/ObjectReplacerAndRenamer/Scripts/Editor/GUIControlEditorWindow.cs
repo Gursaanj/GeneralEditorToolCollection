@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace GursaanjTools
 {
-    public abstract class GUIControl_EditorWindow : EditorWindow
+    public abstract class GuiControlEditorWindow : EditorWindow
     {
         //Have ReturnPressed
         //Have FocusControl and ControlSwitching

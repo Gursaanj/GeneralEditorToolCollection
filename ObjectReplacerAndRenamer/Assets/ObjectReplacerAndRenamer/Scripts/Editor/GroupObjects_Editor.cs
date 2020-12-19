@@ -20,16 +20,12 @@ namespace GursaanjTools
         private const string NoGroupNameWarning = "No Group name entered! Would you like to continue?";
         private const string DifferentParentsWarning = "Two or more objects have different parents! Unable to Group!";
         
-        //ControlNames
-        private const string GroupNameControl = "groupNameControl";
-        
         //Undo Labels
         private const string UndoGroupingLabel = "Grouping";
         
-        
         private string _groupName = "Group";
         #endregion
-    
+        
         #region Unity Methods
     
         public static void InitWindow()
@@ -43,8 +39,9 @@ namespace GursaanjTools
             _window.Show();
         }
 
-        protected override void CreateGUI()
+        protected override void CreateGUI(string controlName)
         {
+            _selectedGameObjects = Selection.gameObjects;
             EditorGUILayout.LabelField($"{SelectionCountString}{_selectedGameObjects.Length.ToString(CastedCountFormat)}");
             
             using (new EditorGUILayout.HorizontalScope())
@@ -55,7 +52,9 @@ namespace GursaanjTools
                     EditorGUILayout.Space();
                     
                     EditorGUILayout.LabelField(GroupObjectsLabel, EditorStyles.boldLabel);
-                    CreateControlledTextField(GroupNameControl, ref _groupName);
+                    
+                    GUI.SetNextControlName(controlName);
+                    _groupName = EditorGUILayout.TextField(_groupName);
                     
                     EditorGUILayout.Space();
             
@@ -78,14 +77,13 @@ namespace GursaanjTools
         {
             if (_selectedGameObjects == null || _selectedGameObjects.Length == 0)
             {
-                EditorUtility.DisplayDialog(ErrorTitle, NothingSelectedWarning, ConfirmationMessage);
+                DisplayDialogue(ErrorTitle, NothingSelectedWarning, false);
                 return;
             }
 
             if (string.IsNullOrEmpty(_groupName))
             {
-                if (!EditorUtility.DisplayDialog(ErrorTitle, NoGroupNameWarning, ConfirmationMessage,
-                    CancellationMessage))
+                if (!DisplayDialogue(ErrorTitle, NoGroupNameWarning, true))
                 {
                     return;
                 }
@@ -93,7 +91,7 @@ namespace GursaanjTools
 
             if (!CheckForSameParents())
             {
-                EditorUtility.DisplayDialog(ErrorTitle, DifferentParentsWarning, ConfirmationMessage);
+                DisplayDialogue(ErrorTitle, DifferentParentsWarning, false);
                 return;
             }
 
@@ -122,18 +120,7 @@ namespace GursaanjTools
 
             return true;
         }
-
-        private void CreateControlledTextField(string controlName, ref string textField)
-        {
-            GUI.SetNextControlName(controlName);
-            textField = EditorGUILayout.TextField(textField);
-    
-            if (!_listOfControls.Contains(controlName))
-            {
-                _listOfControls.Add(controlName);
-            }
-        }
-
+        
         #endregion
     }
 }

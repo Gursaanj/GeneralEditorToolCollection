@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 namespace GursaanjTools
@@ -21,26 +19,19 @@ namespace GursaanjTools
         protected const string ConfirmationMessage = "Sounds good";
         protected const string CancellationMessage = "Actually, no!";
 
-
+        //Control Name
+        private const string PrimaryControlName = "Control";
+        
         protected GameObject[] _selectedGameObjects;
-
-        protected List<string> _listOfControls = new List<string>();
-        
-        private bool _shouldFocusOnTextField = true;
-        private int _currentControlIndex = 0;
+        private bool _shouldFocusOnField = true;
 
         #endregion
 
-        #region Properties
-
-        #endregion
-        
         #region Builtin Methods
 
         protected void OnGUI()
         {
-            _selectedGameObjects = Selection.gameObjects;
-            CreateGUI();
+            CreateGUI(PrimaryControlName);
             FinishGUICycle();
         }
 
@@ -48,7 +39,7 @@ namespace GursaanjTools
 
         #region Custom Methods
 
-        protected abstract void CreateGUI();
+        protected abstract void CreateGUI(string controlName);
         
         protected void FinishGUICycle()
         {
@@ -66,46 +57,31 @@ namespace GursaanjTools
             return current.isKey && current.keyCode == KeyCode.Return;
         }
 
+        protected bool DisplayDialogue(string subject, string message, bool canCancel)
+        {
+            _shouldFocusOnField = true;
+
+            if (canCancel)
+            {
+                return EditorUtility.DisplayDialog(subject, message, ConfirmationMessage, CancellationMessage);
+            }
+            
+            return EditorUtility.DisplayDialog(subject, message, ConfirmationMessage);
+        }
+        
         protected void FocusOnTextField()
         {
-            if (_listOfControls != null && _listOfControls.Count > 0)
-            {
-                ChangeCurrentControl();
-
-                if (_shouldFocusOnTextField && _window != null)
-                {
-                    _window.Focus();
-                    EditorGUI.FocusTextInControl(_listOfControls[_currentControlIndex]);
-                    _shouldFocusOnTextField = false;
-                }
+            if (_shouldFocusOnField && _window != null) 
+            { 
+                _window.Focus();
+                
+                //Use both GUI and EditorGUI to ensure focus is made regardless of choice of GUI
+                GUI.FocusControl(PrimaryControlName);
+                EditorGUI.FocusTextInControl(PrimaryControlName);
+                _shouldFocusOnField = false;
             }
         }
-
-        private void ChangeCurrentControl()
-        {
-            Event currentEvent = Event.current;
-
-            if (currentEvent.isKey)
-            {
-                if (currentEvent.keyCode == KeyCode.DownArrow)
-                {
-                    if (_currentControlIndex < (_listOfControls.Count - 1))
-                    {
-                        _currentControlIndex++;
-                        _shouldFocusOnTextField = true;
-                    }
-                }
-                else if (currentEvent.keyCode == KeyCode.UpArrow)
-                {
-                    if (_currentControlIndex > 0)
-                    {
-                        _currentControlIndex--;
-                        _shouldFocusOnTextField = true;
-                    }
-                }
-            }
-        }
-
+        
         #endregion
     }
 }

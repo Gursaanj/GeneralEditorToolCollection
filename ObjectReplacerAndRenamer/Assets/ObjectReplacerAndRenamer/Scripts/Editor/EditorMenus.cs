@@ -3,6 +3,7 @@ using UnityEngine;
 
 namespace GursaanjTools
 {
+    // TODO: Create Static Class to hold titles and window Sizes
     public static class EditorMenus
     {
         #region Object Replacer Tool
@@ -10,7 +11,10 @@ namespace GursaanjTools
         [MenuItem("GursaanjTools/GameObject Tools/Replace Selected Objects")]
         public static void ReplaceObjectsTool()
         {
-            ReplaceObjects_Editor.InitWindow();
+            GUIContent title = new GUIContent("Replace Selected Objects");
+            Vector2 minSize = new Vector2(300,100);
+            Vector2 maxSize = new Vector2(300,175);
+            ReplaceObjects_Editor.Init(typeof(ReplaceObjects_Editor), title, minSize, maxSize);
         }
 
         #endregion

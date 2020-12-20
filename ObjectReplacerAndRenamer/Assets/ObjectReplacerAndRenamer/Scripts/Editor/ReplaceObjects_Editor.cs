@@ -3,56 +3,34 @@ using UnityEngine;
 
 namespace GursaanjTools
 {
-    public class ReplaceObjects_Editor : EditorWindow
+    public class ReplaceObjects_Editor : GuiControlEditorWindow
     {
         #region Variabeles
-
-        private static ReplaceObjects_Editor _window = null;
-        private static readonly Vector2 MinSize = new Vector2(300,100);
-        private static readonly Vector2 MaxSize = new Vector2(300,175);
-
-        private const string ReplaceSelectedObjects = "Replace Selected Objects";
+        
+        //GUI Labels
         private const string ObjectsToReplaceString = "Object to Replace";
-        private const string SelectionCountString = "Selection Count: ";
         private const string ReplaceNameString = "Replace Name?";
         private const int LayoutButtonHeight = 40;
         
-        //Display Dialogue Text
-        private const string ErrorTitle = "Error";
+        //Warning Messages
         private const string NoSelectedObjectsError = "At least one object needs to be selected to be replaced with";
         private const string WantedObjectIsEmptyError = "The Replace object is empty, please assign something!";
-        private const string ConfirmationMessage = "Sounds good";
-
+        
+        //Undo Labels
         private const string UndoReplacementLabel = "Replacement";
-
-
-        private int _currentSelectionCount = 0;
+        
         private GameObject _wantedObject = null;
         private bool _shouldReplaceName = false;
         #endregion
 
-        #region BuiltIn Methods
-        
-        public static void InitWindow()
+        #region Abstracts Methods
+        protected override void CreateGUI(string controlName)
         {
-            _window = GetWindow<ReplaceObjects_Editor>();
-            _window.titleContent = new GUIContent(ReplaceSelectedObjects);
-            _window.minSize = MinSize;
-            _window.maxSize = MaxSize;
-            _window.autoRepaintOnSceneChange = true;
-            _window.Show();
-        }
-
-        //Todo: Add a flag asking if name change is desired
-        private void OnGUI()
-        {
-            // Check the amount of selected Objects
-            GetSelection();
-
+            _selectedGameObjects = Selection.gameObjects;
             using (new EditorGUILayout.VerticalScope())
             {
                 EditorGUILayout.Space();
-                EditorGUILayout.LabelField($"{SelectionCountString}{_currentSelectionCount.ToString()}", EditorStyles.boldLabel);
+                EditorGUILayout.LabelField($"{SelectionCountString}{_selectedGameObjects.Length.ToString(CastedCountFormat)}", EditorStyles.boldLabel);
                 EditorGUILayout.Space();
 
                 _wantedObject =
@@ -62,7 +40,7 @@ namespace GursaanjTools
                 _shouldReplaceName = EditorGUILayout.Toggle(ReplaceNameString, _shouldReplaceName);
                 
                 EditorGUILayout.Space();
-                if (GUILayout.Button(ReplaceSelectedObjects, GUILayout.ExpandWidth(true),
+                if (GUILayout.Button(TitleContent.text, GUILayout.ExpandWidth(true),
                     GUILayout.Height(LayoutButtonHeight)))
                 {
                     ReplaceObjects();
@@ -70,40 +48,29 @@ namespace GursaanjTools
 
                 EditorGUILayout.Space();
             }
-
-
-            Repaint();
         }
 
         #endregion
 
         #region Custom Methods
-
-        private void GetSelection()
-        {
-            _currentSelectionCount = 0;
-            _currentSelectionCount = Selection.gameObjects.Length;
-        }
         
         private void ReplaceObjects()
         {
-            if (_currentSelectionCount <= 0)
+            if (_selectedGameObjects == null || _selectedGameObjects.Length == 0)
             {
-                DisplayCustomError(NoSelectedObjectsError);
+                DisplayDialogue(ErrorTitle, NoSelectedObjectsError, false);
                 return;
             }
 
             if (_wantedObject == null)
             {
-                DisplayCustomError(WantedObjectIsEmptyError);
+                DisplayDialogue(ErrorTitle, WantedObjectIsEmptyError, false);
                 return;
             }
-
-            GameObject[] selectedObjects = Selection.gameObjects;
-
-            for (int i = 0, count = selectedObjects.Length; i < count; i++)
+            
+            for (int i = 0, count = _selectedGameObjects.Length; i < count; i++)
             {
-                GameObject selectedGameObject = selectedObjects[i];
+                GameObject selectedGameObject = _selectedGameObjects[i];
                 Transform selectedTransform = selectedGameObject.transform;
                 GameObject newObject =
                     Instantiate(_wantedObject, selectedTransform.position, selectedTransform.rotation);
@@ -116,20 +83,15 @@ namespace GursaanjTools
                 newObject.transform.localScale = selectedTransform.localScale;
                 newObject.tag = selectedGameObject.tag;
                 newObject.layer = selectedGameObject.layer;
+                newObject.isStatic = selectedGameObject.isStatic;
                 newObject.hideFlags = selectedGameObject.hideFlags;
                 
                 Undo.RegisterCreatedObjectUndo(newObject, UndoReplacementLabel);
                 
-                Undo.DestroyObjectImmediate(selectedObjects[i]);
+                Undo.DestroyObjectImmediate(selectedGameObject);
             }
 
         }
-
-        private void DisplayCustomError(string message)
-        {
-            EditorUtility.DisplayDialog(ErrorTitle, message, ConfirmationMessage);
-        }
-
         #endregion
     }
 }

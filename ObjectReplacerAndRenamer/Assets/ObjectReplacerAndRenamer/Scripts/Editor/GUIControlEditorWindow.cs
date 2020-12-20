@@ -1,9 +1,9 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 using UnityEngine;
 
 namespace GursaanjTools
 {
-    //TODO : Handle creation in another window - Not static
     public abstract class GuiControlEditorWindow : EditorWindow
     {
         #region Variables
@@ -18,7 +18,13 @@ namespace GursaanjTools
         protected const string ErrorTitle = "Error";
         protected const string ConfirmationMessage = "Sounds good";
         protected const string CancellationMessage = "Actually, no!";
-
+        
+        //Window Content
+        protected static GUIContent TitleContent = new GUIContent();
+        protected static Vector2 MinSize = new Vector2(300, 140);
+        protected static Vector2 MaxSize = new Vector2(300, 180);
+        
+        
         //Control Name
         private const string PrimaryControlName = "Control";
         
@@ -28,6 +34,17 @@ namespace GursaanjTools
         #endregion
 
         #region Builtin Methods
+
+        public static void Init(Type type, GUIContent content, Vector2 minSize, Vector2 maxSize)
+        {
+            _window = (GuiControlEditorWindow)GetWindow(type);
+            SetWindowInformation(content, minSize, maxSize);
+            _window.titleContent = content;
+            _window.minSize = minSize;
+            _window.maxSize = maxSize;
+            _window.Focus();
+            _window.Show();
+        }
 
         protected void OnGUI()
         {
@@ -81,7 +98,14 @@ namespace GursaanjTools
                 _shouldFocusOnField = false;
             }
         }
-        
+
+        private static void SetWindowInformation(GUIContent content, Vector2 minimumSize, Vector2 maximumSize)
+        {
+            TitleContent = content;
+            MinSize = minimumSize;
+            MaxSize = maximumSize;
+        }
+
         #endregion
     }
 }

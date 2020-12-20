@@ -6,12 +6,7 @@ namespace GursaanjTools
     public class GroupObjects_Editor : GuiControlEditorWindow
     {
         #region Variables
-        
-        private static readonly Vector2 MinSize = new Vector2(300,140);
-        private static readonly Vector2 MaxSize = new Vector2(300,140);
-        
         //GUI Labels
-        private const string GroupSelectedObjects = "Group Selected Objects";
         private const string GroupObjectsLabel = "Enter Group Name";
         private const string CreateGroupLabel = "Group Objects";
         
@@ -22,23 +17,13 @@ namespace GursaanjTools
         
         //Undo Labels
         private const string UndoGroupingLabel = "Grouping";
+
+        private const float ButtonHeightPadding = 40f;
         
         private string _groupName = "Group";
         #endregion
         
-        #region Unity Methods
-    
-        public static void InitWindow()
-        {
-            _window = GetWindow<GroupObjects_Editor>();
-            _window.titleContent = new GUIContent(GroupSelectedObjects);
-            _window.minSize = MinSize;
-            _window.maxSize = MaxSize;
-            _window.autoRepaintOnSceneChange = true;
-            _window.Focus();
-            _window.Show();
-        }
-
+        #region Abstract Methods
         protected override void CreateGUI(string controlName)
         {
             _selectedGameObjects = Selection.gameObjects;
@@ -58,7 +43,7 @@ namespace GursaanjTools
                     
                     EditorGUILayout.Space();
             
-                    if (GUILayout.Button(CreateGroupLabel, GUILayout.ExpandWidth(true), GUILayout.Height(40f)) || IsReturnPressed())
+                    if (GUILayout.Button(CreateGroupLabel, GUILayout.ExpandWidth(true), GUILayout.Height(ButtonHeightPadding)) || IsReturnPressed())
                     {
                         GroupObjects();
                     }

@@ -11,7 +11,8 @@ namespace GursaanjTools
         private const string ErrorTitle = "Error";
         private const string NoObjectsMessage = "No Objects to Ungroup!";
         private const string ConfirmationMessage = "Sure thing!";
-    
+        
+        //Undo Labels
         private const string UndoUngroupingLabel = "Ungrouping";
     
         private static GameObject[] _selectedGameObjects;

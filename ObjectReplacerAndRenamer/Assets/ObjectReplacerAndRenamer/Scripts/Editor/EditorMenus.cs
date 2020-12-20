@@ -30,7 +30,10 @@ namespace GursaanjTools
         [MenuItem("GursaanjTools/GameObject Tools/Group Selected Objects %#z")]
         public static void GroupObjectsTool()
         {
-            GroupObjects_Editor.InitWindow();
+            GUIContent title = new GUIContent("Group Selected Objects");
+            Vector2 minSize = new Vector2(300,140);
+            Vector2 maxSize = new Vector2(300,140);
+            GroupObjects_Editor.Init(typeof(GroupObjects_Editor), title, minSize, maxSize);
         }
 
         #endregion

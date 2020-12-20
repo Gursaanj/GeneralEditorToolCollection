@@ -24,7 +24,10 @@ namespace GursaanjTools
         [MenuItem("GursaanjTools/GameObject Tools/Rename Selected Objects")]
         public static void RenameObjectsTool()
         {
-            RenameObjects_Editor.InitWindow();
+            GUIContent title = new GUIContent("Rename Selected Objects");
+            Vector2 minSize = new Vector2(300,140);
+            Vector2 maxSize = new Vector2(300,180);
+            RenameObjects_Editor.Init(typeof(RenameObjects_Editor), title, minSize, maxSize);
         }
 
         #endregion

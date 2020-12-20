@@ -7,7 +7,6 @@ namespace GursaanjTools
     public abstract class GuiControlEditorWindow : EditorWindow
     {
         #region Variables
-
         protected static GuiControlEditorWindow _window;
         
         //GUI Labels

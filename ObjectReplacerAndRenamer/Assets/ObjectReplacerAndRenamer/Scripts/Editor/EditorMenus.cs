@@ -6,6 +6,8 @@ namespace GursaanjTools
     // TODO: Create Static Class to hold titles and window Sizes
     public static class EditorMenus
     {
+        #region Object EditorWindows
+
         #region Object Replacer Tool
         
         [MenuItem("GursaanjTools/GameObject Tools/Replace Selected Objects")]
@@ -53,6 +55,20 @@ namespace GursaanjTools
             UngroupObjects_Editor.Init();
         }
 
+        #endregion
+
+        #region Object Aligner
+
+        [MenuItem("GursaanjTools/GameObject Tools/Align Selected Objects")]
+        public static void AlignObjectsTool()
+        {
+            GUIContent title = new GUIContent("Align Selected Objects");
+            Vector2 minSize = new Vector2(350,290);
+            Vector2 maxSize = new Vector2(350,290);
+            AlignObjects_Editor.Init(typeof(AlignObjects_Editor), title, minSize, maxSize);
+        }
+
+        #endregion
 
         #endregion
     }

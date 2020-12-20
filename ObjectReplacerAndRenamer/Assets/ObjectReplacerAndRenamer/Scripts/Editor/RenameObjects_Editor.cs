@@ -27,10 +27,24 @@ namespace GursaanjTools
     //Undo Labels
     private const string UndoRenameLabel = "Rename";
     
+    private GUIStyle _editorLabelWithEllipsis;
+    
     private string _wantedPrefix = string.Empty;
     private string _wantedName = string.Empty;
     private string _wantedSuffix = string.Empty;
     private bool _shouldAddNumbering = false;
+    #endregion
+    
+    #region BuiltIn Methods
+    private void OnEnable()
+    {
+        _editorLabelWithEllipsis = new GUIStyle
+        {
+            clipping = TextClipping.Clip,
+            wordWrap = false
+        };
+    }
+
     #endregion
     
     #region Abstract Methods
@@ -66,7 +80,7 @@ namespace GursaanjTools
             GUILayout.Space(HorizontalPadding);
             using (new EditorGUILayout.VerticalScope())
             {
-                EditorGUILayout.LabelField(string.Format($"{FinalNameLabel} {GetFinalName()}"), EditorStyles.boldLabel);
+                EditorGUILayout.LabelField(string.Format($"{FinalNameLabel} {GetFinalName()}"), _editorLabelWithEllipsis);
 
                 GUILayout.Space(VerticalPadding);
                 

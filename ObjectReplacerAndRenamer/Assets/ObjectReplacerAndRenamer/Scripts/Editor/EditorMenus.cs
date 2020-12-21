@@ -63,8 +63,8 @@ namespace GursaanjTools
         public static void AlignObjectsTool()
         {
             GUIContent title = new GUIContent("Align Selected Objects");
-            Vector2 minSize = new Vector2(350,290);
-            Vector2 maxSize = new Vector2(350,290);
+            Vector2 minSize = new Vector2(320,230);
+            Vector2 maxSize = new Vector2(320,230);
             AlignObjects_Editor.Init(typeof(AlignObjects_Editor), title, minSize, maxSize);
         }
 

@@ -123,6 +123,7 @@ namespace GursaanjTools
         {
             string finalName = GetFinalName();
             
+            //TODO: Look into EnsureUniqueNameForSibiling
             if (_shouldAddNumbering && i > 0)
             {
                 finalName = string.Format(FinalNameFormat, finalName, i.ToString());

@@ -1,9 +1,7 @@
 ﻿using UnityEditor;
-using UnityEngine;
 
 namespace GursaanjTools
 {
-    // TODO: Create Static Class to hold titles and window Sizes
     public static class EditorMenus
     {
         #region Object EditorWindows
@@ -13,10 +11,7 @@ namespace GursaanjTools
         [MenuItem("GursaanjTools/GameObject Tools/Replace Selected Objects")]
         public static void ReplaceObjectsTool()
         {
-            GUIContent title = new GUIContent("Replace Selected Objects");
-            Vector2 minSize = new Vector2(300,100);
-            Vector2 maxSize = new Vector2(300,175);
-            ReplaceObjects_Editor.Init(typeof(ReplaceObjects_Editor), title, minSize, maxSize);
+            ReplaceObjects_Editor.Init(typeof(ReplaceObjects_Editor), EditorWindowData.EditorWindowInformations["Object Replacer"]);
         }
 
         #endregion
@@ -26,10 +21,7 @@ namespace GursaanjTools
         [MenuItem("GursaanjTools/GameObject Tools/Rename Selected Objects")]
         public static void RenameObjectsTool()
         {
-            GUIContent title = new GUIContent("Rename Selected Objects");
-            Vector2 minSize = new Vector2(300,140);
-            Vector2 maxSize = new Vector2(300,180);
-            RenameObjects_Editor.Init(typeof(RenameObjects_Editor), title, minSize, maxSize);
+            RenameObjects_Editor.Init(typeof(RenameObjects_Editor), EditorWindowData.EditorWindowInformations["Object Renamer"]);
         }
 
         #endregion
@@ -39,10 +31,7 @@ namespace GursaanjTools
         [MenuItem("GursaanjTools/GameObject Tools/Group Selected Objects %#z")]
         public static void GroupObjectsTool()
         {
-            GUIContent title = new GUIContent("Group Selected Objects");
-            Vector2 minSize = new Vector2(300,140);
-            Vector2 maxSize = new Vector2(300,140);
-            GroupObjects_Editor.Init(typeof(GroupObjects_Editor), title, minSize, maxSize);
+            GroupObjects_Editor.Init(typeof(GroupObjects_Editor), EditorWindowData.EditorWindowInformations["Object Grouper"]);
         }
 
         #endregion
@@ -62,10 +51,7 @@ namespace GursaanjTools
         [MenuItem("GursaanjTools/GameObject Tools/Align Selected Objects")]
         public static void AlignObjectsTool()
         {
-            GUIContent title = new GUIContent("Align Selected Objects");
-            Vector2 minSize = new Vector2(320,230);
-            Vector2 maxSize = new Vector2(320,230);
-            AlignObjects_Editor.Init(typeof(AlignObjects_Editor), title, minSize, maxSize);
+            AlignObjects_Editor.Init(typeof(AlignObjects_Editor), EditorWindowData.EditorWindowInformations["Object Aligner"]);
         }
 
         #endregion

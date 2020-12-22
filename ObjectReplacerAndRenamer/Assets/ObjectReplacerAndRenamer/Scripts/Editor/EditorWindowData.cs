@@ -3,11 +3,8 @@ using UnityEngine;
 
 namespace GursaanjTools
 {
-    public struct EditorWindowInformation
+    public readonly struct EditorWindowInformation
     {
-        // private Vector2 _minSize;
-        // private Vector2 _maxSize;
-
         public GUIContent Title { get; }
         public Vector2 MinSize { get; }
         public Vector2 MaxSize { get; }
@@ -22,18 +19,13 @@ namespace GursaanjTools
     
     public static class EditorWindowData
     {
-        public static Dictionary<string, EditorWindowInformation> EditorWindowDictionary =
-            new Dictionary<string, EditorWindowInformation>
-            {
-                {"Object Replcer", new EditorWindowInformation(new GUIContent("Replace Selected Objects"),new Vector2(300,100), new Vector2(300,175))}
-            };
-        
-        #region Object Windows
-
-        // public static readonly GUIContent ObjectReplacer_Name = new GUIContent("Replace Selected Objects");
-        // public static readonly Vector2 ObjectReplace_MinSize = new Vector2(300, 100);
-        // public static readonly Vector2 ObjectReplace_MaxSize = new Vector2(300, 175);
-
-        #endregion
+        public static Dictionary<string, EditorWindowInformation> EditorWindowInformations { get; } = new Dictionary<string, EditorWindowInformation>
+        {
+            {"Object Replacer", new EditorWindowInformation(new GUIContent("Replace Selected Objects"),new Vector2(300,100), new Vector2(300,175))},
+            {"Object Renamer", new EditorWindowInformation(new GUIContent("Rename Selected Objects"), new Vector2(300,140), new Vector2(300, 180))},
+            {"Object Grouper", new EditorWindowInformation(new GUIContent("Group Selected Objects"),new Vector2(300, 140), new Vector2(300, 140))},
+            {"Object Aligner", new EditorWindowInformation(new GUIContent("Align Selected Objects"), new Vector2(320, 230), new Vector2(320, 230))}
+            
+        };
     }
 }

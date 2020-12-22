@@ -45,6 +45,17 @@ namespace GursaanjTools
             _window.Show();
         }
 
+        public static void Init(Type type, EditorWindowInformation windowInformation)
+        {
+            _window = (GuiControlEditorWindow) GetWindow(type);
+            SetWindowInformation(windowInformation);
+            _window.titleContent = windowInformation.Title;
+            _window.minSize = windowInformation.MinSize;
+            _window.maxSize = windowInformation.MaxSize;
+            _window.Focus();
+            _window.Show();
+        }
+
         protected void OnGUI()
         {
             CreateGUI(PrimaryControlName);
@@ -103,6 +114,13 @@ namespace GursaanjTools
             TitleContent = content;
             MinSize = minimumSize;
             MaxSize = maximumSize;
+        }
+
+        private static void SetWindowInformation(EditorWindowInformation information)
+        {
+            TitleContent = information.Title;
+            MinSize = information.MinSize;
+            MaxSize = information.MaxSize;
         }
 
         #endregion

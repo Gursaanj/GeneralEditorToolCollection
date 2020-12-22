@@ -24,7 +24,7 @@ namespace GursaanjTools
             {"Object Replacer", new EditorWindowInformation(new GUIContent("Replace Selected Objects"),new Vector2(300,100), new Vector2(300,175))},
             {"Object Renamer", new EditorWindowInformation(new GUIContent("Rename Selected Objects"), new Vector2(300,140), new Vector2(300, 180))},
             {"Object Grouper", new EditorWindowInformation(new GUIContent("Group Selected Objects"),new Vector2(300, 140), new Vector2(300, 140))},
-            {"Object Aligner", new EditorWindowInformation(new GUIContent("Align Selected Objects"), new Vector2(320, 230), new Vector2(320, 230))}
+            {"Object Aligner", new EditorWindowInformation(new GUIContent("Align Selected Objects"), new Vector2(330, 260), new Vector2(330, 260))}
             
         };
     }

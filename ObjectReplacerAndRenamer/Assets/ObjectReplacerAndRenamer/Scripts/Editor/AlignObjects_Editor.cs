@@ -3,11 +3,18 @@ using UnityEngine;
 
 namespace GursaanjTools
 {
+    public enum COORDINATES
+    {
+        WORLD = 0,
+        LOCAL = 1
+    }
+
     public class AlignObjects_Editor : GuiControlEditorWindow
     {
         #region Variables
         
         //GUI Labels
+        private const string CoordinateSpaceLabel = "Coordinate Space";
         private const string ReferenceObjectLabel = "Object to Align to";
         private const string AlignLabel = "Align Selected Objects";
         private const string PositionLabel = "Position";
@@ -17,6 +24,12 @@ namespace GursaanjTools
         private const string XValueLabel = "X";
         private const string YValueLabel = "Y";
         private const string ZValueLabel = "Z";
+        
+        //Tooltips
+        private const string CoordinateSpaceTooltip =
+            "Choose which coordinate system of the reference object's Transform you would like to align the selected objects to";
+        private const string ReferenceObjectTooltip =
+            "Choose which object the selected objects should align themselves to";
         
         private const float VerticalComponentPadding = 1f;
         private const float HorizontalBorderPadding = 5f;
@@ -40,14 +53,22 @@ namespace GursaanjTools
         private Rect _scaleRect;
         
         private GameObject _referenceObject;
-        private Transform _referenceTransform;
+        private bool _isThereRefObject;
+        private Vector3 _referencePosition;
+        private Vector3 _referenceRotation;
+        private Vector3 _referenceScale;
+        
         private bool[] _positionAligners = new bool[3] {true, true, true};
         private bool[] _rotationAligners = new bool[3] {true, true, true};
         private bool[] _scaleAligners = new bool[3] {true, true, true};
         private bool _isPositionGroupEnabled = true;
         private bool _isRotationGroupEnabled = true;
         private bool _isScaleGroupEnabled = true;
+        private COORDINATES _coordinateChoice;
         
+        //GUIContents and GUIStyles
+        private GUIContent _coordinateSystemGUIContent;
+        private GUIContent _referenceObjectGUIContent;
         private GUIStyle _referenceObjectLabelStyle;
         #endregion
         
@@ -55,6 +76,9 @@ namespace GursaanjTools
 
         private void OnEnable()
         {
+            _coordinateSystemGUIContent = new GUIContent(CoordinateSpaceLabel, CoordinateSpaceTooltip);
+            _referenceObjectGUIContent = new GUIContent(ReferenceObjectLabel, ReferenceObjectTooltip);
+            
             _referenceObjectLabelStyle = new GUIStyle
             {
                 alignment = TextAnchor.MiddleCenter,
@@ -73,18 +97,24 @@ namespace GursaanjTools
                 {
                     using (new EditorGUILayout.HorizontalScope())
                     {
-                        using (new EditorGUILayout.HorizontalScope())
+                        EditorGUILayout.Space(HorizontalBorderPadding);
+                        using (new EditorGUILayout.VerticalScope())
                         {
-                            GUILayout.Label($"{SelectionCountString} {_selectedGameObjects.Length.ToString(CastedCountFormat)}");
+                            GUILayout.Label(_coordinateSystemGUIContent, _referenceObjectLabelStyle);
+                            GUILayout.FlexibleSpace();
+                            _coordinateChoice = (COORDINATES)EditorGUILayout.EnumPopup(_coordinateChoice);
+                            GUILayout.FlexibleSpace();
                         }
                         
                         GUILayout.FlexibleSpace();
 
                         using (new EditorGUILayout.VerticalScope())
                         {
-                            GUILayout.Label(ReferenceObjectLabel, _referenceObjectLabelStyle);
+                            GUILayout.Label(_referenceObjectGUIContent, _referenceObjectLabelStyle);
                             GUILayout.FlexibleSpace();
+                            EditorGUILayout.Space(VerticalComponentPadding);
                             _referenceObject = (GameObject) EditorGUILayout.ObjectField(_referenceObject, typeof(GameObject), true, GUILayout.ExpandWidth(true));
+                            _isThereRefObject = _referenceObject != null;
                             GUILayout.FlexibleSpace();
                         }
                         
@@ -92,20 +122,27 @@ namespace GursaanjTools
                     }
                 }
 
-                if (_referenceObject != null)
+                if (_isThereRefObject)
                 {
-                    _referenceTransform = _referenceObject.transform;
+                    GetAppropriateTransformComponents(_referenceObject.transform);
+                }
 
-                    GUILayout.FlexibleSpace();
+                GUILayout.FlexibleSpace();
                 
-                    CreateComponentScope(_positionRect, ref _isPositionGroupEnabled, ref _positionAligners, PositionLabel, _referenceTransform.position);
-                    CreateComponentScope(_rotationRect, ref _isRotationGroupEnabled, ref _rotationAligners, RotationLabel, _referenceTransform.rotation.eulerAngles);
-                    CreateComponentScope(_scaleRect, ref _isScaleGroupEnabled, ref _scaleAligners, ScaleLabel, _referenceTransform.lossyScale);
+                CreateComponentScope(_positionRect, ref _isPositionGroupEnabled, ref _positionAligners, PositionLabel, _referencePosition);
+                CreateComponentScope(_rotationRect, ref _isRotationGroupEnabled, ref _rotationAligners, RotationLabel, _referenceRotation);
+                CreateComponentScope(_scaleRect, ref _isScaleGroupEnabled, ref _scaleAligners, ScaleLabel, _referenceScale);
 
-                    if (GUILayout.Button(AlignLabel, GUILayout.ExpandHeight(true)) || IsReturnPressed())
-                    {
-                        AlignObjects();
-                    } 
+                using (new EditorGUILayout.HorizontalScope()) 
+                {
+                    GUILayout.FlexibleSpace(); 
+                    EditorGUILayout.LabelField($"{SelectionCountString} {_selectedGameObjects.Length.ToString(CastedCountFormat)}", new GUIStyle{alignment = TextAnchor.MiddleCenter}); 
+                    GUILayout.FlexibleSpace();
+                }
+
+                if (GUILayout.Button(AlignLabel, GUILayout.ExpandHeight(true)) || IsReturnPressed()) 
+                { 
+                    AlignObjects();
                 }
             }
         }
@@ -126,8 +163,6 @@ namespace GursaanjTools
                 DisplayDialogue(ErrorTitle, NoReferenceObjectWarning, false);
                 return;
             }
-
-            Transform referenceTransform = _referenceObject.transform;
             
             foreach (GameObject obj in _selectedGameObjects)
             {
@@ -139,13 +174,13 @@ namespace GursaanjTools
                 Undo.RecordObject(obj.transform, UndoAlignLabel);
                 
                 obj.transform.position = GetAlignedVector(_isPositionGroupEnabled, _positionAligners,
-                    obj.transform.position, referenceTransform.position);
+                    obj.transform.position, _referencePosition);
                 
                 obj.transform.rotation = Quaternion.Euler(GetAlignedVector(_isRotationGroupEnabled, _rotationAligners,
-                    obj.transform.rotation.eulerAngles, referenceTransform.rotation.eulerAngles));
+                    obj.transform.rotation.eulerAngles, _referenceRotation));
 
                 obj.transform.localScale = GetAlignedVector(_isScaleGroupEnabled, _scaleAligners,
-                    obj.transform.localScale, referenceTransform.transform.localScale);
+                    obj.transform.localScale, _referenceScale);
             }
             
         }
@@ -216,6 +251,27 @@ namespace GursaanjTools
                 EditorGUILayout.LabelField($"{YValueLabel}: {componentVector.y.ToString(FloatLimitCast)}", GUILayout.Width(ComponentValuePadding));
                 EditorGUILayout.LabelField($"{ZValueLabel}: {componentVector.z.ToString(FloatLimitCast)}", GUILayout.Width(ComponentValuePadding));
                 GUILayout.FlexibleSpace();
+            }
+        }
+
+        private void GetAppropriateTransformComponents(Transform referenceTransform)
+        {
+            switch (_coordinateChoice)
+            {
+                case COORDINATES.WORLD:
+                {
+                    _referencePosition = referenceTransform.position;
+                    _referenceRotation = referenceTransform.rotation.eulerAngles;
+                    _referenceScale = referenceTransform.lossyScale;
+                    break;
+                }
+                case COORDINATES.LOCAL:
+                {
+                    _referencePosition = referenceTransform.localPosition;
+                    _referenceRotation = referenceTransform.localRotation.eulerAngles;
+                    _referenceScale = referenceTransform.localScale;
+                    break;
+                }
             }
         }
 

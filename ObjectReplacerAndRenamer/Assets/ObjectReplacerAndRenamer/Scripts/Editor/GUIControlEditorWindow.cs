@@ -33,18 +33,7 @@ namespace GursaanjTools
         #endregion
 
         #region Builtin Methods
-
-        public static void Init(Type type, GUIContent content, Vector2 minSize, Vector2 maxSize)
-        {
-            _window = (GuiControlEditorWindow)GetWindow(type);
-            SetWindowInformation(content, minSize, maxSize);
-            _window.titleContent = content;
-            _window.minSize = minSize;
-            _window.maxSize = maxSize;
-            _window.Focus();
-            _window.Show();
-        }
-
+        
         public static void Init(Type type, EditorWindowInformation windowInformation)
         {
             _window = (GuiControlEditorWindow) GetWindow(type);
@@ -108,14 +97,7 @@ namespace GursaanjTools
                 _shouldFocusOnField = false;
             }
         }
-
-        private static void SetWindowInformation(GUIContent content, Vector2 minimumSize, Vector2 maximumSize)
-        {
-            TitleContent = content;
-            MinSize = minimumSize;
-            MaxSize = maximumSize;
-        }
-
+        
         private static void SetWindowInformation(EditorWindowInformation information)
         {
             TitleContent = information.Title;

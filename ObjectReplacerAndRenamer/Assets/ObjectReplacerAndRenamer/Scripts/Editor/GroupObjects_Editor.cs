@@ -27,7 +27,7 @@ namespace GursaanjTools
         protected override void CreateGUI(string controlName)
         {
             _selectedGameObjects = Selection.gameObjects;
-            EditorGUILayout.LabelField($"{SelectionCountString}{_selectedGameObjects.Length.ToString(CastedCountFormat)}");
+            EditorGUILayout.LabelField($"{SelectionCountString}{_selectedGameObjects.Length.ToString(CastedCountFormat)}", EditorStyles.boldLabel);
             
             using (new EditorGUILayout.HorizontalScope())
             {

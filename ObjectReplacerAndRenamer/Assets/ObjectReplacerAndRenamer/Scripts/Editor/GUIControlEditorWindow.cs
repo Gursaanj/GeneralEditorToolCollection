@@ -10,7 +10,7 @@ namespace GursaanjTools
         protected static GuiControlEditorWindow _window;
         
         //GUI Labels
-        protected const string SelectionCountString = "Selection Count: ";
+        protected const string SelectionCountString = "Number of Selected Objects: ";
         protected const string CastedCountFormat = "000";
         
         //Warning Messages

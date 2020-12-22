@@ -53,7 +53,6 @@ namespace GursaanjTools
         private Rect _scaleRect;
         
         private GameObject _referenceObject;
-        private bool _isThereRefObject;
         private Vector3 _referencePosition;
         private Vector3 _referenceRotation;
         private Vector3 _referenceScale;
@@ -114,7 +113,6 @@ namespace GursaanjTools
                             GUILayout.FlexibleSpace();
                             EditorGUILayout.Space(VerticalComponentPadding);
                             _referenceObject = (GameObject) EditorGUILayout.ObjectField(_referenceObject, typeof(GameObject), true, GUILayout.ExpandWidth(true));
-                            _isThereRefObject = _referenceObject != null;
                             GUILayout.FlexibleSpace();
                         }
                         
@@ -122,7 +120,7 @@ namespace GursaanjTools
                     }
                 }
 
-                if (_isThereRefObject)
+                if (_referenceObject != null)
                 {
                     GetAppropriateTransformComponents(_referenceObject.transform);
                 }
@@ -136,7 +134,7 @@ namespace GursaanjTools
                 using (new EditorGUILayout.HorizontalScope()) 
                 {
                     GUILayout.FlexibleSpace(); 
-                    EditorGUILayout.LabelField($"{SelectionCountString} {_selectedGameObjects.Length.ToString(CastedCountFormat)}", new GUIStyle{alignment = TextAnchor.MiddleCenter}); 
+                    EditorGUILayout.LabelField($"{SelectionCountString} {_selectedGameObjects.Length.ToString(CastedCountFormat)}", new GUIStyle{alignment = TextAnchor.MiddleCenter, fontStyle = FontStyle.Bold}); 
                     GUILayout.FlexibleSpace();
                 }
 

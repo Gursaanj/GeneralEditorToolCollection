@@ -40,6 +40,7 @@ namespace GursaanjTools
         private Rect _scaleRect;
         
         private GameObject _referenceObject;
+        private Transform _referenceTransform;
         private bool[] _positionAligners = new bool[3] {true, true, true};
         private bool[] _rotationAligners = new bool[3] {true, true, true};
         private bool[] _scaleAligners = new bool[3] {true, true, true};
@@ -90,83 +91,22 @@ namespace GursaanjTools
                         GUILayout.FlexibleSpace();
                     }
                 }
-                
-                GUILayout.FlexibleSpace();
-                
-                using (new GUILayout.AreaScope(_positionRect))
+
+                if (_referenceObject != null)
                 {
-                    using (new EditorGUILayout.HorizontalScope())
+                    _referenceTransform = _referenceObject.transform;
+
+                    GUILayout.FlexibleSpace();
+                
+                    CreateComponentScope(_positionRect, ref _isPositionGroupEnabled, ref _positionAligners, PositionLabel, _referenceTransform.position);
+                    CreateComponentScope(_rotationRect, ref _isRotationGroupEnabled, ref _rotationAligners, RotationLabel, _referenceTransform.rotation.eulerAngles);
+                    CreateComponentScope(_scaleRect, ref _isScaleGroupEnabled, ref _scaleAligners, ScaleLabel, _referenceTransform.lossyScale);
+
+                    if (GUILayout.Button(AlignLabel, GUILayout.ExpandHeight(true)) || IsReturnPressed())
                     {
-                        EditorGUILayout.Space(HorizontalBorderPadding);
-                        using (new EditorGUILayout.VerticalScope())
-                        {
-                            CreateToggleGroup(ref _isPositionGroupEnabled, ref _positionAligners, PositionLabel);
-                        }
-                        
-                        using (new EditorGUILayout.VerticalScope())
-                        {
-                            if (_referenceObject != null)
-                            {
-                                EditorGUILayout.Space(VerticalComponentPadding);
-                                CreateTransformComponentLabels(_referenceObject.transform.position);
-                            }
-                        }
-                    }
+                        AlignObjects();
+                    } 
                 }
-                
-                GUILayout.FlexibleSpace();
-                
-                using (new GUILayout.AreaScope(_rotationRect))
-                {
-                    using (new EditorGUILayout.HorizontalScope())
-                    {
-                        EditorGUILayout.Space(HorizontalBorderPadding);
-                        using (new EditorGUILayout.VerticalScope())
-                        {
-                            CreateToggleGroup(ref _isRotationGroupEnabled, ref _rotationAligners, RotationLabel);
-                        }
-                        
-                        using (new EditorGUILayout.VerticalScope())
-                        {
-                            if (_referenceObject != null)
-                            {
-                                EditorGUILayout.Space(VerticalComponentPadding);
-                                CreateTransformComponentLabels(_referenceObject.transform.rotation.eulerAngles);
-                            }
-                        }
-                    }
-                }
-                
-                GUILayout.FlexibleSpace();
-                
-                using (new GUILayout.AreaScope(_scaleRect))
-                {
-                    using (new EditorGUILayout.HorizontalScope())
-                    {
-                        EditorGUILayout.Space(HorizontalBorderPadding);
-                        using (new EditorGUILayout.VerticalScope())
-                        {
-                            CreateToggleGroup(ref _isScaleGroupEnabled, ref _scaleAligners, ScaleLabel);
-                        }
-                        
-                        using (new EditorGUILayout.VerticalScope())
-                        {
-                            if (_referenceObject != null)
-                            {
-                                EditorGUILayout.Space(VerticalComponentPadding);
-                                CreateTransformComponentLabels(_referenceObject.transform.localScale);
-                            }
-                        }
-                    }
-                }
-                
-                GUILayout.FlexibleSpace();
-                
-                if (GUILayout.Button(AlignLabel, GUILayout.ExpandHeight(true)) || IsReturnPressed())
-                {
-                    AlignObjects();
-                } 
-                
             }
         }
         #endregion
@@ -216,6 +156,32 @@ namespace GursaanjTools
             _positionRect = new Rect(0, 50, position.width, position.height);
             _rotationRect = new Rect(0, 100, position.width, position.height);
             _scaleRect = new Rect(0, 150, position.width, position.height);
+        }
+
+        private void CreateComponentScope(Rect areaRect, ref bool parentToggle, ref bool[] toggleArray, string parentLabel, Vector3 referenceVector)
+        {
+            using (new GUILayout.AreaScope(areaRect))
+            {
+                using (new EditorGUILayout.HorizontalScope())
+                {
+                    EditorGUILayout.Space(HorizontalBorderPadding);
+                    using (new EditorGUILayout.VerticalScope())
+                    {
+                        CreateToggleGroup(ref parentToggle, ref toggleArray, parentLabel);
+                    }
+                        
+                    using (new EditorGUILayout.VerticalScope())
+                    {
+                        if (_referenceObject != null)
+                        {
+                            EditorGUILayout.Space(VerticalComponentPadding);
+                            CreateTransformComponentLabels(referenceVector);
+                        }
+                    }
+                }
+            }
+                
+            GUILayout.FlexibleSpace();
         }
 
         // Didn't use BeginToggleGroup as it can display grouping vertically (not the desired Horizontally)

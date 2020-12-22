@@ -15,14 +15,14 @@ namespace GursaanjTools
         
         //Warning Messages
         protected const string ErrorTitle = "Error";
-        protected const string ConfirmationMessage = "Sounds good";
-        protected const string CancellationMessage = "Actually, no!";
         
         //Window Content
         protected static GUIContent TitleContent = new GUIContent();
         protected static Vector2 MinSize = new Vector2(300, 140);
         protected static Vector2 MaxSize = new Vector2(300, 180);
         
+        private const string ConfirmationMessage = "Sounds good";
+        private const string CancellationMessage = "Actually, no!";
         
         //Control Name
         private const string PrimaryControlName = "Control";

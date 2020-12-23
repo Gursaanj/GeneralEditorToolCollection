@@ -14,16 +14,24 @@ namespace GursaanjTools
         #region Variables
         
         //GUI Labels
-        private const string ReferenceObjectLabel = "Reference Object:";
+        private const string ReferenceObjectLabel = "Object to find:";
         private const string NumberOfFoundReferencesLabel = "Number of Found References:";
+        private const string FindReferencesLabel = "Find References";
+        private const string ClearListLabel = "Clear List";
         private const string RightArrowLabel = "\u25B6";
+        private const string RightArrowTooltip = "Get Further Dependencies";
+        private const string NoGameObjectsFoundLabel = "No GameObjects found";
 
         private const string ProgressBarTitle = "Searching";
         private const string ProgressBarInitialMessage = "Getting all file paths";
         private const string ProgressBarDependencyMessage = "Searching Dependancies";
         private const string ProgressBarRemovalMessage = "Removing redundant messages";
 
+        private const float VerticalPadding = 5f;
+        private const float RightButtonMaxWidth = 20f;
+        
         //Warning Labels
+        private const string ErrorMessage = "Something Went Wrong with the search, try again!";
         
         //Data
         private const string AssetDirectory = "Assets";
@@ -36,10 +44,19 @@ namespace GursaanjTools
         private List<string> _paths = null;
         private Object _objectToFind;
         private Object _referenceObjAfterLayout = null;
+
+        private GUIContent _rightArrowContent;
+        private GUIStyle _overflowGUIStyle;
         
         #endregion
-
+        
         #region BuiltIn Methods
+
+        private void OnEnable()
+        {
+            _rightArrowContent = new GUIContent(RightArrowLabel, RightArrowTooltip);
+            _overflowGUIStyle = new GUIStyle{clipping = TextClipping.Overflow, alignment = TextAnchor.MiddleCenter};
+        }
 
         protected override void CreateGUI(string controlName)
         {
@@ -50,13 +67,13 @@ namespace GursaanjTools
                     GUILayout.Label(ReferenceObjectLabel);
                     _objectToFind = EditorGUILayout.ObjectField(_objectToFind, typeof(Object), false);
 
-                    if (GUILayout.Button("Find References", EditorStyles.miniButtonRight) && _objectToFind != null)
+                    if (GUILayout.Button(FindReferencesLabel, EditorStyles.miniButtonRight) && _objectToFind != null)
                     {
                         FindObjectReferences(_objectToFind);
                     }
                 }
 
-                EditorGUILayout.Space(5f);
+                EditorGUILayout.Space(VerticalPadding);
 
                 if (_objectToFind == null)
                 {
@@ -71,17 +88,17 @@ namespace GursaanjTools
                     {
                         GUILayout.Label($"{NumberOfFoundReferencesLabel} {_referenceObjects.Count}", EditorStyles.boldLabel);
 
-                        if (GUILayout.Button("Clear List", EditorStyles.miniButton))
+                        if (GUILayout.Button(ClearListLabel, EditorStyles.miniButton))
                         {
                             Clear();
                         }
                     }
                     
-                    EditorGUILayout.Space(5f);
+                    EditorGUILayout.Space(VerticalPadding);
 
-                    if (_referenceObjects == null || _referenceObjects.Count == 0)
+                    if (_referenceObjects.Count == 0)
                     {
-                        EditorGUILayout.LabelField("No GameObjects found containing desired reference");
+                        GUILayout.Label(NoGameObjectsFoundLabel, _overflowGUIStyle);
                     }
                     else
                     {
@@ -123,7 +140,7 @@ namespace GursaanjTools
 
             if (string.IsNullOrEmpty(nameOfObject))
             {
-                DisplayDialogue(ErrorTitle, "Something Went Wrong with the search, try again!", false);
+                DisplayDialogue(ErrorTitle, ErrorMessage, false);
             }
 
             nameOfObject = Path.GetFileNameWithoutExtension(nameOfObject);
@@ -226,7 +243,7 @@ namespace GursaanjTools
                     EditorGUIUtility.PingObject(obj);
                 }
 
-                if (GUILayout.Button(RightArrowLabel, EditorStyles.miniButtonRight, GUILayout.MaxWidth(20f)))
+                if (GUILayout.Button(_rightArrowContent, EditorStyles.miniButtonRight, GUILayout.MaxWidth(RightButtonMaxWidth)))
                 {
                     _referenceObjAfterLayout = obj;
                 }

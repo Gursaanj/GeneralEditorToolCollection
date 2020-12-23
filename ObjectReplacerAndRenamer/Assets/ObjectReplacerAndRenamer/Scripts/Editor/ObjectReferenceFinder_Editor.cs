@@ -35,7 +35,7 @@ namespace GursaanjTools
         private List<GameObject> _referenceObjects = new List<GameObject>();
         private List<string> _paths = null;
         private Object _objectToFind;
-        private Object _queueOfReferences = null;
+        private Object _referenceObjAfterLayout = null;
         
         #endregion
 
@@ -92,9 +92,10 @@ namespace GursaanjTools
                     }
                 }
 
-                if (_queueOfReferences != null)
+                if (_referenceObjAfterLayout != null)
                 {
-                    FindObjectReferences(_queueOfReferences);
+                    FindObjectReferences(_referenceObjAfterLayout);
+                    _referenceObjAfterLayout = null;
                 }
             }
         }
@@ -116,7 +117,6 @@ namespace GursaanjTools
 
             float progresspercentage = 0;
             int prefabCount = _paths.Count;
-            Debug.Log(prefabCount);
             int iteration = Mathf.Max(1, prefabCount / (IterationConstant == 0 ? 1 : IterationConstant));
 
             string nameOfObject = AssetDatabase.GetAssetPath(objectToFind);
@@ -228,14 +228,14 @@ namespace GursaanjTools
 
                 if (GUILayout.Button(RightArrowLabel, EditorStyles.miniButtonRight, GUILayout.MaxWidth(20f)))
                 {
-                    _queueOfReferences = obj;
+                    _referenceObjAfterLayout = obj;
                 }
             }
         }
 
         private void Clear()
         {
-            //Clear References here
+            _referenceObjects.Clear();
         }
 
         #endregion

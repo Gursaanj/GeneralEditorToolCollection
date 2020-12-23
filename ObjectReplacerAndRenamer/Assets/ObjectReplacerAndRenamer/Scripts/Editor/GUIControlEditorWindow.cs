@@ -57,7 +57,7 @@ namespace GursaanjTools
 
         protected abstract void CreateGUI(string controlName);
         
-        protected void FinishGUICycle()
+        private void FinishGUICycle()
         {
             FocusOnTextField();
 
@@ -85,7 +85,7 @@ namespace GursaanjTools
             return EditorUtility.DisplayDialog(subject, message, ConfirmationMessage);
         }
         
-        protected void FocusOnTextField()
+        private void FocusOnTextField()
         {
             if (_shouldFocusOnField && _window != null) 
             { 

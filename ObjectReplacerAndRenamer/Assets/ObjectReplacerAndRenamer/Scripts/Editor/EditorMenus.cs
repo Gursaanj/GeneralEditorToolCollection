@@ -4,11 +4,11 @@ namespace GursaanjTools
 {
     public static class EditorMenus
     {
-        #region Object EditorWindows
+        #region Scene Object EditorWindows
 
         #region Object Replacer Tool
         
-        [MenuItem("GursaanjTools/GameObject Tools/Replace Selected Objects")]
+        [MenuItem("GursaanjTools/Level Tools/Replace Selected Objects")]
         public static void ReplaceObjectsTool()
         {
             ReplaceObjects_Editor.Init(typeof(ReplaceObjects_Editor), EditorWindowData.EditorWindowInformations["Object Replacer"]);
@@ -18,7 +18,7 @@ namespace GursaanjTools
 
         #region Object Renamer
 
-        [MenuItem("GursaanjTools/GameObject Tools/Rename Selected Objects")]
+        [MenuItem("GursaanjTools/Level Tools/Rename Selected Objects")]
         public static void RenameObjectsTool()
         {
             RenameObjects_Editor.Init(typeof(RenameObjects_Editor), EditorWindowData.EditorWindowInformations["Object Renamer"]);
@@ -28,7 +28,7 @@ namespace GursaanjTools
 
         #region Object Grouper
 
-        [MenuItem("GursaanjTools/GameObject Tools/Group Selected Objects %#z")]
+        [MenuItem("GursaanjTools/Level Tools/Group Selected Objects %#z")]
         public static void GroupObjectsTool()
         {
             GroupObjects_Editor.Init(typeof(GroupObjects_Editor), EditorWindowData.EditorWindowInformations["Object Grouper"]);
@@ -38,7 +38,7 @@ namespace GursaanjTools
 
         #region Object Ungrouper
         
-        [MenuItem("GursaanjTools/GameObject Tools/Ungroup Selected Objects %#q")]
+        [MenuItem("GursaanjTools/Level Tools/Ungroup Selected Objects %#q")]
         public static void UngroupObjectsTool()
         {
             UngroupObjects_Editor.Init();
@@ -48,11 +48,25 @@ namespace GursaanjTools
 
         #region Object Aligner
 
-        [MenuItem("GursaanjTools/GameObject Tools/Align Selected Objects")]
+        [MenuItem("GursaanjTools/Level Tools/Align Selected Objects")]
         public static void AlignObjectsTool()
         {
             AlignObjects_Editor.Init(typeof(AlignObjects_Editor), EditorWindowData.EditorWindowInformations["Object Aligner"]);
         }
+
+        #endregion
+
+        #endregion
+
+        #region Prefab Object EditorWindws
+
+        #region Find Reference GameObjects
+        [MenuItem("GursaanjTools/GameObject Tools/Find References")]
+        public static void FindReferencesTool()
+        {
+            ObjectReferenceFinder_Editor.Init(typeof(ObjectReferenceFinder_Editor), EditorWindowData.EditorWindowInformations["GameObject Finder"]);
+        }
+
 
         #endregion
 

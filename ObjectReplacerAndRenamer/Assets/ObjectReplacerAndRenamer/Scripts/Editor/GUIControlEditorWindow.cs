@@ -98,7 +98,7 @@ namespace GursaanjTools
             }
         }
         
-        private static void SetWindowInformation(EditorWindowInformation information)
+        protected static void SetWindowInformation(EditorWindowInformation information)
         {
             TitleContent = information.Title;
             MinSize = information.MinSize;

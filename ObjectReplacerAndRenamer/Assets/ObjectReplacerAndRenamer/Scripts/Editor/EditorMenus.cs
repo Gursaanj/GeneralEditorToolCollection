@@ -71,6 +71,16 @@ namespace GursaanjTools
         #endregion
 
         #endregion
+
+        #region AssetMenuItem based EditorWindows
+        
+        [MenuItem("Assets/Find References", false, 1)]
+        public static void FindReferences_AssetMenu_Tool()
+        {
+            ObjectReferenceFinder_Editor.AssetInit(EditorWindowData.EditorWindowInformations["GameObject Finder"]);
+        }
+
+        #endregion
     }
 }
 

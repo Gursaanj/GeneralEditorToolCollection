@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
@@ -31,7 +30,8 @@ namespace GursaanjTools
         private const float RightButtonMaxWidth = 20f;
         
         //Warning Labels
-        private const string ErrorMessage = "Something Went Wrong with the search, try again!";
+        private const string GeneralErrorMessage = "Something Went Wrong with the search, try again!";
+        private const string NoReferenceObjectWarning = "No Object To Find References for!";
         
         //Data
         private const string AssetDirectory = "Assets";
@@ -39,18 +39,33 @@ namespace GursaanjTools
         private const int IterationConstant = 5;
         private const float ProgressIncrement = 0.01f;
 
+        private static Object _objectToFind;
+        private static bool _enableAutoFind = false;
+
         private Vector2 _scrollPosition = Vector2.zero;
         private List<GameObject> _referenceObjects = new List<GameObject>();
         private List<string> _paths = null;
-        private Object _objectToFind;
         private Object _referenceObjAfterLayout = null;
-
         private GUIContent _rightArrowContent;
         private GUIStyle _overflowGUIStyle;
         
         #endregion
         
         #region BuiltIn Methods
+
+        public static void AssetInit(EditorWindowInformation windowInformation)
+        {
+            _window = GetWindow<ObjectReferenceFinder_Editor>();
+            SetWindowInformation(windowInformation);
+            _window.titleContent = windowInformation.Title;
+            _window.minSize = windowInformation.MinSize;
+            _window.maxSize = windowInformation.MaxSize;
+            _window.Focus();
+            _window.Show();
+
+            _objectToFind = Selection.activeObject;
+            _enableAutoFind = true;
+        }
 
         private void OnEnable()
         {
@@ -67,8 +82,9 @@ namespace GursaanjTools
                     GUILayout.Label(ReferenceObjectLabel);
                     _objectToFind = EditorGUILayout.ObjectField(_objectToFind, typeof(Object), false);
 
-                    if (GUILayout.Button(FindReferencesLabel, EditorStyles.miniButtonRight) && _objectToFind != null)
+                    if (GUILayout.Button(FindReferencesLabel, EditorStyles.miniButtonRight) || _enableAutoFind)
                     {
+                        _enableAutoFind = false;
                         FindObjectReferences(_objectToFind);
                     }
                 }
@@ -123,6 +139,12 @@ namespace GursaanjTools
 
         private void FindObjectReferences(Object objectToFind)
         {
+            if (objectToFind == null)
+            {
+                DisplayDialogue(ErrorTitle, NoReferenceObjectWarning, false);
+                return;
+            }
+
             EditorUtility.DisplayProgressBar(ProgressBarTitle, ProgressBarInitialMessage, 0.0f);
             
             //Get All Prefabs
@@ -140,7 +162,7 @@ namespace GursaanjTools
 
             if (string.IsNullOrEmpty(nameOfObject))
             {
-                DisplayDialogue(ErrorTitle, ErrorMessage, false);
+                DisplayDialogue(ErrorTitle, GeneralErrorMessage, false);
             }
 
             nameOfObject = Path.GetFileNameWithoutExtension(nameOfObject);

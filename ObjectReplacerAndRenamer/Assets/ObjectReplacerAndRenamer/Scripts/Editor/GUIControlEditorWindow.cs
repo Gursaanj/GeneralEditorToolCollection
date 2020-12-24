@@ -15,6 +15,7 @@ namespace GursaanjTools
         
         //Warning Messages
         protected const string ErrorTitle = "Error";
+        protected const string AreYouSureTitle = "Are you sure";
         
         //Window Content
         protected static GUIContent TitleContent = new GUIContent();

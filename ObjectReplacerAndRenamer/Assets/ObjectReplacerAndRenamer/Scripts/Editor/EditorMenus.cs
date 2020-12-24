@@ -72,13 +72,32 @@ namespace GursaanjTools
 
         #endregion
 
+        #region Debugging and Logging EditorWindows
+
+        #region Selection Log
+        [MenuItem("GursaanjTools/Logging Tools/Get Selection Log")]
+        public static void GetSelectionLogTool()
+        {
+            SelectionLog_Editor.Init(typeof(SelectionLog_Editor), EditorWindowData.EditorWindowInformations["Selection Log"]);
+        }
+
+
+        #endregion
+
+
+        #endregion
+
         #region AssetMenuItem based EditorWindows
-        
+
+        #region Reference Finder
+
         [MenuItem("Assets/Find References", false, 1)]
         public static void FindReferences_AssetMenu_Tool()
         {
             ObjectReferenceFinder_Editor.AssetInit(EditorWindowData.EditorWindowInformations["GameObject Finder"]);
         }
+
+        #endregion
 
         #endregion
     }

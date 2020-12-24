@@ -23,13 +23,15 @@ namespace GursaanjTools
         #region Variables
 
         //GUI Labels
+        private const string ClearLabel = "Clear";
+
+        private const float VerticalPadding = 5f;
+        private const int MaxAmountOfObjects = 100;
+        private const string SceneViewIdentifier = "**";
 
         //Warning Labels
-
-        //UndoLabels
-
-        private const int MaxAmountOfObjects = 100;
-        private const string SceneViewIdentifier = "^^";
+        private const string ClearListMessage = "Are you sure you would like to clear the current list";
+        private const string NoObjectToInsertMessage = "No object to insert into the list, Please try again!";
 
         [SerializeField] private ObjectInformation _selectedObject = null;
         [SerializeField] private List<ObjectInformation> _listOfSelectables = new List<ObjectInformation>();
@@ -54,7 +56,7 @@ namespace GursaanjTools
             _selectObjectGUIStyle = EditorStyles.miniButtonLeft;
             _selectObjectGUIStyle.alignment = TextAnchor.MiddleCenter;
             
-            _searchButtonGUIContent = EditorGUIUtility.IconContent("d_ViewToolZoom");
+            _searchButtonGUIContent = EditorGUIUtility.IconContent("d_ViewToolZoom", "Ping Object");
         }
 
         // Called when a selection changes in the list
@@ -105,7 +107,7 @@ namespace GursaanjTools
             using (var scrollView = new EditorGUILayout.ScrollViewScope(_scrollPosition))
             {
                 _scrollPosition = scrollView.scrollPosition;
-                EditorGUILayout.Space(5f);
+                EditorGUILayout.Space(VerticalPadding);
 
                 if (_listOfSelectables == null)
                 {
@@ -137,7 +139,7 @@ namespace GursaanjTools
                         processingLocked = true;
                     }
 
-                    LayoutItem(i, objectOfInterest);
+                    LayoutItem(objectOfInterest);
                 }
                 
                 //If Clear button hasnt shown, thus no lockled buttons existing, show it at the end
@@ -156,7 +158,7 @@ namespace GursaanjTools
         {
             if (objectToInsert == null || _listOfSelectables == null)
             {
-                Debug.Log("Uhoh");
+                DisplayDialogue(ErrorTitle, NoObjectToInsertMessage, false);
                 return;
             }
 
@@ -174,25 +176,40 @@ namespace GursaanjTools
 
         private bool ClearButtonLayout()
         {
-            EditorGUILayout.Space(5f);
+            EditorGUILayout.Space(VerticalPadding);
 
-            bool wasListCleared = GUILayout.Button("Clear", EditorStyles.miniButton);
+            bool wasListCleared = GUILayout.Button(ClearLabel, EditorStyles.miniButton);
             if (wasListCleared)
             {
-                for (int i = _listOfSelectables.Count - 1; i >= 0; i--)
+                if (DisplayDialogue(AreYouSureTitle, ClearListMessage, true))
                 {
-                    if (!_listOfSelectables[i].IsObjectLocked)
+                    for (int i = _listOfSelectables.Count - 1; i >= 0; i--)
                     {
-                        _listOfSelectables.RemoveAt(i);
+                        if (!_listOfSelectables[i].IsObjectLocked)
+                        {
+                            _listOfSelectables.RemoveAt(i);
+                        }
                     }
                 }
+                else
+                {
+                    wasListCleared = false;
+                }
+
+                // for (int i = _listOfSelectables.Count - 1; i >= 0; i--)
+                // {
+                //     if (!_listOfSelectables[i].IsObjectLocked)
+                //     {
+                //         _listOfSelectables.RemoveAt(i);
+                //     }
+                // }
             }
             
-            EditorGUILayout.Space(5f);
+            EditorGUILayout.Space(VerticalPadding);
             return wasListCleared;
         }
 
-        private void LayoutItem(int index, ObjectInformation information)
+        private void LayoutItem(ObjectInformation information)
         {
             if (information != null && information.Object != null)
             {

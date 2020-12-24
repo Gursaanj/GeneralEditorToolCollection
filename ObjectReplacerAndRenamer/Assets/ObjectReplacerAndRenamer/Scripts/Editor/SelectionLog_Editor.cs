@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 namespace GursaanjTools
@@ -35,6 +37,7 @@ namespace GursaanjTools
         private Vector2 _scrollPosition = Vector2.zero;
 
         private GUIStyle _lockedButtonGUIStyle;
+        private GUIStyle _selectObjectGUIStyle;
         private GUIContent _searchButtonGUIContent;
 
         #endregion
@@ -48,6 +51,10 @@ namespace GursaanjTools
             _lockedButtonGUIStyle.margin.right = 10;
             _lockedButtonGUIStyle.margin.left = 10;
 
+            _selectObjectGUIStyle = EditorStyles.miniButtonLeft;
+            _selectObjectGUIStyle.alignment = TextAnchor.MiddleCenter;
+            
+            _searchButtonGUIContent = EditorGUIUtility.IconContent("d_ViewToolZoom");
         }
 
         // Called when a selection changes in the list
@@ -204,6 +211,40 @@ namespace GursaanjTools
                     if (information == _selectedObject)
                     {
                         GUI.enabled = false;
+                    }
+
+                    string objName = information.Object.name;
+
+                    if (information.IsObjectInScene)
+                    {
+                        // Set name on Object to identify if in scene
+                        objName = $"{objName}{SceneViewIdentifier}";
+                    }
+
+                    if (GUILayout.Button(objName, _selectObjectGUIStyle))
+                    {
+                        _selectedObject = information;
+
+                        //if object is a scene, load the scene
+                        if (information.Object is SceneAsset)
+                        {
+                            Scene[] currentScene = new Scene[1];
+                            currentScene[0] = EditorSceneManager.GetActiveScene();
+                            EditorSceneManager.SaveModifiedScenesIfUserWantsTo(currentScene);
+                            EditorSceneManager.OpenScene(AssetDatabase.GetAssetPath(information.Object));
+                        }
+                        else
+                        {
+                            Selection.activeObject = information.Object;
+                        }
+                    }
+
+                    GUI.enabled = true;
+
+                    if (GUILayout.Button(_searchButtonGUIContent, EditorStyles.miniButtonRight, GUILayout.MaxWidth(25),
+                        GUILayout.MaxHeight(15)))
+                    {
+                        EditorGUIUtility.PingObject(information.Object);
                     }
                 }
             }

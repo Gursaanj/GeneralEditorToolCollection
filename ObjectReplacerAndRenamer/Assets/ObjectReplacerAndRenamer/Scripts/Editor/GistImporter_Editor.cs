@@ -8,6 +8,9 @@ using UnityEngine;
 
 namespace GursaanjTools
 {
+    //Let Users Choose Where to import
+    //Create warning messages to let users know that an Editor Folder is being made
+    //Create a shortCutMenu Option to use EditorUtility.SystemCopyBuffer \\ Use Static class to collect shortcut Data
     public class GistImporter_Editor : GuiControlEditorWindow
     {
         #region Variables
@@ -41,9 +44,9 @@ namespace GursaanjTools
         {
             using (new EditorGUILayout.HorizontalScope())
             {
+                GUILayout.Label(GistURLLabel, EditorStyles.boldLabel, GUILayout.Width(30f));
                 GUI.SetNextControlName(controlName);
-                _gistURL = GUILayout.TextField(_gistURL, GUILayout.ExpandWidth(true));
-
+                _gistURL = GUILayout.TextField(_gistURL, GUILayout.ExpandWidth(false));
                 if (GUILayout.Button(ImportGistLabel, EditorStyles.miniButtonMid) || IsReturnPressed())
                 {
                     ImportGist(_gistURL);
@@ -176,9 +179,8 @@ namespace GursaanjTools
             var readMeObject = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>($"Assets{readMePath.Replace(Application.dataPath, string.Empty)}");
             Selection.activeObject = readMeObject;
             EditorGUIUtility.PingObject(readMeObject);
-            
         }
-
+        
         #endregion
     }
 }

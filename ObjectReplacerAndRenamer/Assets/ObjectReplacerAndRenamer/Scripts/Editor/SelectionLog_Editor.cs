@@ -7,6 +7,7 @@ using Object = UnityEngine.Object;
 
 namespace GursaanjTools
 {
+    //TODO: Add Undo Support for the locking of objects in the list
     public class SelectionLog_Editor : GuiControlEditorWindow
     {
 
@@ -28,7 +29,7 @@ namespace GursaanjTools
 
         private const float VerticalPadding = 5f;
         private const int MaxAmountOfObjects = 100;
-        private const string SceneViewIdentifier = "**";
+        private const string SceneViewIdentifier = "[In Scene]";
         private const float SearchButtonMaxWidth = 25f;
         private const float SearchButtonMaxHeight = 15f;
 
@@ -84,7 +85,7 @@ namespace GursaanjTools
                     _selectedObject = new ObjectInformation()
                     {
                         Object = currentlySelected,
-                        // will return true if object is not registered in assetDatabase
+                        // will return true if object is not registered in assetDatabase, thus confirming it as a scene object
                         IsObjectInScene = AssetDatabase.Contains(Selection.activeInstanceID) == false
                     };
 
@@ -145,7 +146,7 @@ namespace GursaanjTools
                     LayoutItem(objectOfInterest);
                 }
                 
-                //If Clear button hasnt shown, thus no lockled buttons existing, show it at the end
+                //If Clear button hasn't shown, thus no locked buttons existing, show it at the end
                 if (!shownClear)
                 {
                     ClearButtonLayout();

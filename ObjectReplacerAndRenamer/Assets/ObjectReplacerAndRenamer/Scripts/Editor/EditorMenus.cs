@@ -87,6 +87,21 @@ namespace GursaanjTools
 
         #endregion
 
+        #region Import EditorWindows
+
+        #region Gist Importer
+        
+        [MenuItem("GursaanjTools/Import/Gist Importer")]
+        public static void GistImporterTool()
+        {
+            GistImporter_Editor.Init(typeof(GistImporter_Editor), EditorWindowData.EditorWindowInformations["Gist Importer"]);
+        }
+
+        #endregion
+
+
+        #endregion
+
         #region AssetMenuItem based EditorWindows
 
         #region Reference Finder

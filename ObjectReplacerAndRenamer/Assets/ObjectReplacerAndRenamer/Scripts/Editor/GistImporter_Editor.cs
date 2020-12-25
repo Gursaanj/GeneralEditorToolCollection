@@ -41,9 +41,10 @@ namespace GursaanjTools
         {
             using (new EditorGUILayout.HorizontalScope())
             {
-                _gistURL = EditorGUILayout.TextField(GistURLLabel, _gistURL, EditorStyles.boldLabel, GUILayout.ExpandWidth(true));
+                GUI.SetNextControlName(controlName);
+                _gistURL = GUILayout.TextField(_gistURL, GUILayout.ExpandWidth(true));
 
-                if (GUILayout.Button(ImportGistLabel, EditorStyles.miniButtonMid))
+                if (GUILayout.Button(ImportGistLabel, EditorStyles.miniButtonMid) || IsReturnPressed())
                 {
                     ImportGist(_gistURL);
                 }

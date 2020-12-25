@@ -26,7 +26,8 @@ namespace GursaanjTools
             {"Object Grouper", new EditorWindowInformation(new GUIContent("Group Selected Objects"),new Vector2(300, 140), new Vector2(300, 140))},
             {"Object Aligner", new EditorWindowInformation(new GUIContent("Align Selected Objects"), new Vector2(330, 260), new Vector2(330, 260))},
             {"GameObject Finder", new EditorWindowInformation(new GUIContent("Find References"), new Vector2(300, 400), new Vector2(300, 400))},
-            {"Selection Log", new EditorWindowInformation(new GUIContent("View Selection Log"), new Vector2(300,200), new Vector2(300,200))}
+            {"Selection Log", new EditorWindowInformation(new GUIContent("View Selection Log"), new Vector2(300,200), new Vector2(300,200))},
+            {"Gist Importer", new EditorWindowInformation(new GUIContent("Import Gist File"), new Vector2(300, 50), new Vector2(300, 50))}
         };
     }
 }

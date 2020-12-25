@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace GursaanjTools
 {
+    //Todo: Pressing Enter on DisplayDialogue presses Enter on main window as well, potentially creating infinite loop, Fix with Bool
     public abstract class GuiControlEditorWindow : EditorWindow
     {
         #region Variables

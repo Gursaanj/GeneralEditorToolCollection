@@ -24,10 +24,15 @@ namespace GursaanjTools
 
         //GUI Labels
         private const string ClearLabel = "Clear";
+        private const string LockButtonLabel = "IN LockButton";
+        private const string PingObjectLabel = "d_ViewToolZoom";
+        private const string PingObjectTooltip = "Ping Object";
 
         private const float VerticalPadding = 5f;
         private const int MaxAmountOfObjects = 100;
         private const string SceneViewIdentifier = "**";
+        private const float SearchButtonMaxWidth = 25f;
+        private const float SearchButtonMaxHeight = 15f;
 
         //Warning Labels
         private const string ClearListMessage = "Are you sure you would like to clear the current list";
@@ -48,7 +53,7 @@ namespace GursaanjTools
 
         private void OnEnable()
         {
-            _lockedButtonGUIStyle = new GUIStyle("IN LockButton");
+            _lockedButtonGUIStyle = new GUIStyle(LockButtonLabel);
             _lockedButtonGUIStyle.margin.top = 3;
             _lockedButtonGUIStyle.margin.right = 10;
             _lockedButtonGUIStyle.margin.left = 10;
@@ -56,7 +61,7 @@ namespace GursaanjTools
             _selectObjectGUIStyle = EditorStyles.miniButtonLeft;
             _selectObjectGUIStyle.alignment = TextAnchor.MiddleCenter;
             
-            _searchButtonGUIContent = EditorGUIUtility.IconContent("d_ViewToolZoom", "Ping Object");
+            _searchButtonGUIContent = EditorGUIUtility.IconContent(PingObjectLabel, PingObjectTooltip);
         }
 
         // Called when a selection changes in the list
@@ -195,14 +200,6 @@ namespace GursaanjTools
                 {
                     wasListCleared = false;
                 }
-
-                // for (int i = _listOfSelectables.Count - 1; i >= 0; i--)
-                // {
-                //     if (!_listOfSelectables[i].IsObjectLocked)
-                //     {
-                //         _listOfSelectables.RemoveAt(i);
-                //     }
-                // }
             }
             
             EditorGUILayout.Space(VerticalPadding);
@@ -258,8 +255,8 @@ namespace GursaanjTools
 
                     GUI.enabled = true;
 
-                    if (GUILayout.Button(_searchButtonGUIContent, EditorStyles.miniButtonRight, GUILayout.MaxWidth(25),
-                        GUILayout.MaxHeight(15)))
+                    if (GUILayout.Button(_searchButtonGUIContent, EditorStyles.miniButtonRight, GUILayout.MaxWidth(SearchButtonMaxWidth),
+                        GUILayout.MaxHeight(SearchButtonMaxHeight)))
                     {
                         EditorGUIUtility.PingObject(information.Object);
                     }

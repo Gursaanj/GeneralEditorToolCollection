@@ -9,8 +9,6 @@ using UnityEngine;
 namespace GursaanjTools
 {
     //Let Users Choose Where to import
-    //Create warning messages to let users know that an Editor Folder is being made
-    //Create a shortCutMenu Option to use EditorUtility.SystemCopyBuffer \\ Use Static class to collect shortcut Data
     public class GistImporter_Editor : GuiControlEditorWindow
     {
         #region Variables
@@ -24,12 +22,25 @@ namespace GursaanjTools
         //Warning Labels
         private const string WrongURLWarning = "Not the appropriate URL for importing";
         private const string UnableToImportWarning = "Sorry, was unable to import the Gist!";
+        private const string AddedEditorFolderMessage =
+            "Usage of the UnityEditor package was detected within the source file, Creating an Editor sub-folder to place this file within!";
         
-        private const string TempFolderName = "Gists";
+        private const string MainFolderName = "Gists";
         private const string ReadMeFile = "readme.txt";
         private const string UsingEditorImport = "using UnityEditor;";
         private const string EditorFolderName = "Editor";
+        private const string AssetsFolderName = "Assets";
         
+        //Regex valueIds
+        private const string regexURL = "url";
+        private const string regexOwner = "owner";
+        private const string regexGistId = "gistId";
+        private const string regesxDescription = "description";
+
+        private const string GithubMainURL = "https://gist.github.com";
+        private const string ProperFileEnding = ".cs";
+        private const string ImportMessage = "Imported using Gist Importer from the GursaanjTools Toolset";
+
         private readonly Regex GistURLInfo = new Regex("https://gist.github.com/(?<owner>.+)/(?<gistId>[a-z0-9]+)", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private readonly Regex GistDescription = new Regex(@"\<title\>(?<description>.+)\</title\>", RegexOptions.IgnoreCase | RegexOptions.Compiled);
         private readonly Regex FileURL = new Regex("href=\"(?<url>.+/raw/[a-z0-9\\./\\-]+)\"", RegexOptions.IgnoreCase | RegexOptions.Compiled);
@@ -52,7 +63,6 @@ namespace GursaanjTools
                     ImportGist(_gistURL);
                 }
             }
-
         }
 
         #endregion
@@ -93,12 +103,12 @@ namespace GursaanjTools
                     }
 
                     GroupCollection infoMatch = GistURLInfo.Match(url).Groups;
-                    string gistOwner = infoMatch["owner"].Value;
-                    string gistId = infoMatch["gistId"].Value;
+                    string gistOwner = infoMatch[regexOwner].Value;
+                    string gistId = infoMatch[regexGistId].Value;
 
                     string[] rawUrls = fileMatches.OfType<Match>()
-                        .Select(match => $"https://gist.github.com{match.Groups["url"].Value}")
-                        .OrderByDescending(info => info.EndsWith(".cs", StringComparison.OrdinalIgnoreCase)).ToArray();
+                        .Select(match => $"{GithubMainURL}{match.Groups[regexURL].Value}")
+                        .OrderByDescending(info => info.EndsWith(ProperFileEnding, StringComparison.OrdinalIgnoreCase)).ToArray();
 
                     if (rawUrls == null || rawUrls.Length == 0)
                     {
@@ -106,7 +116,7 @@ namespace GursaanjTools
                         return;
                     }
 
-                    string destinationFolder = Path.Combine(Application.dataPath, TempFolderName, gistOwner,
+                    string destinationFolder = Path.Combine(Application.dataPath, MainFolderName, gistOwner,
                         $"{Path.GetFileNameWithoutExtension(rawUrls.First())} ({gistId})");
 
                     for (int i = 0; i < rawUrls.Length; i++)
@@ -114,8 +124,8 @@ namespace GursaanjTools
                         string rawUrl = rawUrls[i];
                         if (string.IsNullOrEmpty(rawUrl))
                         {
-                            Debug.LogError("Was unable to read a raw URL, please try again or manually import GIST!");
-                            continue;
+                            DisplayDialogue(ErrorTitle, UnableToImportWarning, false);
+                            return;
                         }
 
                         string fileName = Path.GetFileName(rawUrl);
@@ -130,6 +140,7 @@ namespace GursaanjTools
             }
             catch (Exception e)
             {
+                Debug.LogError(e);
                 DisplayDialogue(ErrorTitle, UnableToImportWarning, false);
                 throw;
             }
@@ -148,17 +159,16 @@ namespace GursaanjTools
                 DisplayDialogue(ErrorTitle, UnableToImportWarning, false);
                 return;
             }
-
-            //Create Editor Folder If Needed: In reality only do this if Editor folder not already in destination folder
+            
             if (content.IndexOf(UsingEditorImport, StringComparison.Ordinal) >= 0)
             {
+                DisplayDialogue(UpdateTitle, AddedEditorFolderMessage, false);
                 destinationFolder = Path.Combine(destinationFolder, EditorFolderName);
             }
 
             Directory.CreateDirectory(destinationFolder);
             File.WriteAllText(Path.Combine(destinationFolder, fileName), content);
             AssetDatabase.Refresh();
-
         }
 
         private void CreateReadMe(string url, string pageContent, string folder)
@@ -169,14 +179,14 @@ namespace GursaanjTools
                 return;
             }
 
-            string description = GistDescription.Match(pageContent).Groups["description"].Value;
+            string description = GistDescription.Match(pageContent).Groups[regesxDescription].Value;
             string readMePath = Path.Combine(folder, ReadMeFile);
             
-            File.WriteAllText(readMePath, $"{description}\n\nUrl: {url}\nDate: {DateTime.Now:dd/MM/yyyy HH:mm}\n\nImported using Gist Importer");
+            File.WriteAllText(readMePath, $"{description}\n\nUrl: {url}\nDate: {DateTime.Now:dd/MM/yyyy HH:mm}\n\n{ImportMessage}");
             AssetDatabase.Refresh();
             
             //Ping the ReadMe after Completion
-            var readMeObject = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>($"Assets{readMePath.Replace(Application.dataPath, string.Empty)}");
+            var readMeObject = AssetDatabase.LoadAssetAtPath<UnityEngine.Object>($"{AssetsFolderName}{readMePath.Replace(Application.dataPath, string.Empty)}");
             Selection.activeObject = readMeObject;
             EditorGUIUtility.PingObject(readMeObject);
         }

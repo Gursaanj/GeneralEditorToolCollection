@@ -63,7 +63,7 @@ namespace GursaanjTools
         /// retrieve data from URL and download appropriate files
         /// </summary>
         /// <param name="url"></param>
-        private void ImportGist(string url)
+        public void ImportGist(string url)
         {
             if (!GistURLInfo.IsMatch(url))
             {

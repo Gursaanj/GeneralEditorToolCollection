@@ -16,7 +16,8 @@ namespace GursaanjTools
         //GUI labels
         private const string GistURLLabel = "Gist URL";
         private const string ImportGistLabel = "Import Gist";
-
+        private const string ForExampleLabel = "For example: https://gist.github.com/.....";
+        
         private const string ImportGistProgressBar = "Importing Gist...";
         
         //Warning Labels
@@ -62,6 +63,13 @@ namespace GursaanjTools
                 {
                     ImportGist(_gistURL);
                 }
+            }
+
+            EditorGUILayout.Space(5f);
+            
+            using (new EditorGUILayout.VerticalScope())
+            {
+                GUILayout.Label(ForExampleLabel, EditorStyles.helpBox);
             }
         }
 

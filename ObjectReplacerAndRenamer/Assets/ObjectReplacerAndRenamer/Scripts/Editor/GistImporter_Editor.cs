@@ -19,6 +19,9 @@ namespace GursaanjTools
         private const string ForExampleLabel = "For example: https://gist.github.com/.....";
         
         private const string ImportGistProgressBar = "Importing Gist...";
+
+        private const float GistURLLabelWidth = 30f;
+        private const float VerticalPadding = 5f;
         
         //Warning Labels
         private const string WrongURLWarning = "Not the appropriate URL for importing";
@@ -56,7 +59,7 @@ namespace GursaanjTools
         {
             using (new EditorGUILayout.HorizontalScope())
             {
-                GUILayout.Label(GistURLLabel, EditorStyles.boldLabel, GUILayout.Width(30f));
+                GUILayout.Label(GistURLLabel, EditorStyles.boldLabel, GUILayout.Width(GistURLLabelWidth));
                 GUI.SetNextControlName(controlName);
                 _gistURL = GUILayout.TextField(_gistURL, GUILayout.ExpandWidth(false));
                 if (GUILayout.Button(ImportGistLabel, EditorStyles.miniButtonMid) || IsReturnPressed())
@@ -65,7 +68,7 @@ namespace GursaanjTools
                 }
             }
 
-            EditorGUILayout.Space(5f);
+            EditorGUILayout.Space(VerticalPadding);
             
             using (new EditorGUILayout.VerticalScope())
             {

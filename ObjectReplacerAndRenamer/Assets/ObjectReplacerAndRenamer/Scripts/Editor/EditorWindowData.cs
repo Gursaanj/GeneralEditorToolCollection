@@ -28,7 +28,7 @@ namespace GursaanjTools
             {"GameObject Finder", new EditorWindowInformation(new GUIContent("Find References"), new Vector2(300, 400), new Vector2(300, 400))},
             {"Selection Log", new EditorWindowInformation(new GUIContent("View Selection Log"), new Vector2(300,200), new Vector2(300,200))},
             {"Gist Importer", new EditorWindowInformation(new GUIContent("Import Gist File"), new Vector2(300, 50), new Vector2(300, 50))},
-            {"ScreenShot Capture", new EditorWindowInformation(new GUIContent("Take Screenshot"), new Vector2(500, 400), new Vector2(800, 500))}
+            {"Screenshot Capture", new EditorWindowInformation(new GUIContent("Take Screenshot"), new Vector2(500, 400), new Vector2(800, 500))}
         };
     }
 }

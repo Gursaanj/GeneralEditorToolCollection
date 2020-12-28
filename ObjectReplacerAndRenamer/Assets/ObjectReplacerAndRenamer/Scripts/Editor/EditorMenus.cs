@@ -120,10 +120,10 @@ namespace GursaanjTools
 
         #region ScreenShot Capturer
         
-        [MenuItem("GursaanjTools/CaptureScreenShot")]
+        [MenuItem("GursaanjTools/Screen Capture/From a camera")]
         public static void TakeScreenShot_Tool()
         {
-            ScreenShotCapture_Editor.Init(typeof(ScreenShotCapture_Editor) ,EditorWindowData.EditorWindowInformations["ScreenShot Capture"]);
+            Screenshot_Camera_Editor.Init(typeof(Screenshot_Camera_Editor) ,EditorWindowData.EditorWindowInformations["Screenshot Capture"]);
         }
 
         #endregion

@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
-using UnityEngine.TestTools.Utils;
 
 namespace GursaanjTools
 {
@@ -69,15 +65,12 @@ namespace GursaanjTools
                     }
                     
                     EditorGUILayout.Space(VerticalPadding);
-
-                    // if (GUILayout.Button("DrawTexture"))
-                    // {
-                    //     Texture image = GetTexture();
-                    //     EditorGUI.DrawPreviewTexture(new Rect(Vector2.zero, new Vector2(100,100)), image);
-                    // }
-
+                    
                     Texture image = GetTexture();
-                    EditorGUI.DrawPreviewTexture(new Rect(new Vector2(150,150), new Vector2(100, 100)), image);
+                    if (image != null)
+                    {
+                        EditorGUI.DrawPreviewTexture(new Rect(0,0,100,100), image);
+                    }
 
                 }
             }
@@ -97,10 +90,10 @@ namespace GursaanjTools
                 Close();
             }
 
-            _cameraObjectNames = GetNames(_cameras);
+            _cameraObjectNames = GetCameraNames(_cameras);
         }
 
-        private string[] GetNames(Camera[] cameras)
+        private string[] GetCameraNames(Camera[] cameras)
         {
             string[] cameraNames = new string[cameras.Length];
 
@@ -115,8 +108,7 @@ namespace GursaanjTools
         private Texture2D GetTexture()
         {
             Camera camera = _cameras[_chosenCameraIndex];
-            
-            //Most Likely, impossible to reach
+
             if (camera == null)
             {
                 return null;
@@ -124,20 +116,36 @@ namespace GursaanjTools
 
             int width = _dimensions.x;
             int height = _dimensions.y;
-            
-            // camera.targetTexture = new RenderTexture(width, height, 0, _renderTextureFormat);
-            // RenderTexture renderTexture = camera.targetTexture;
-            
+
             RenderTexture renderTexture = new RenderTexture(width, height, 0, _renderTextureFormat);
+            camera.targetTexture = renderTexture;
+
+            // CameraClearFlags clearFlags = camera.clearFlags;
+            // Color bgColor = new Color(); //0 alpha
 
             camera.Render();
-
-            Texture2D outputTexture = new Texture2D(width, height, _textureFormat, false);
-            RenderTexture.active = renderTexture;
-            outputTexture.ReadPixels(new Rect(0,0,width,height),0,0);
-            outputTexture.Apply();
             
-            return outputTexture;
+            RenderTexture currentRT = RenderTexture.active;
+            RenderTexture.active = camera.targetTexture;
+            
+            Texture2D screenshot = new Texture2D(width, height, _textureFormat,false);
+            screenshot.ReadPixels(new Rect(0,0,width,height),0,0,false );
+            
+            //Add Quality Settings here
+            // if(QualitySettings.activeColorSpace == ColorSpace.Linear) {
+            //     Color[] pixels = screenshot.GetPixels();
+            //     for(int p = 0; p < pixels.Length; p++) {
+            //         pixels[p] = pixels[p].gamma;
+            //     }
+            //     screenshot.SetPixels(pixels);
+            // }
+            
+            screenshot.Apply(false);
+
+            camera.targetTexture = null;
+            RenderTexture.active = currentRT;
+
+            return screenshot;
         }
 
         #endregion

@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿using System;
+using UnityEditor;
 using UnityEngine;
 
 namespace GursaanjTools
@@ -28,9 +29,15 @@ namespace GursaanjTools
         private string[] _cameraObjectNames;
         private int _chosenCameraIndex;
         private Camera _chosenCamera;
-        private Vector2Int _dimensions = new Vector2Int(1024, 512);
+        private Texture _texture = null;
+        private Vector2Int _dimensions = new Vector2Int(1024, 1024);
         private RenderTextureFormat _renderTextureFormat = RenderTextureFormat.Default;
         private TextureFormat _textureFormat = TextureFormat.RGB565;
+
+        private bool _canDrawTexture = true;
+
+        private Func<Enum, bool> _doesTextureFormatWork;
+        private Func<Enum, bool> _doesRenderTextureFormatWork;
         
         #endregion
 
@@ -39,17 +46,21 @@ namespace GursaanjTools
         private void OnEnable()
         {
             GetAllCameras();
+            _doesTextureFormatWork = DoesTextureFormatWork;
+            _doesRenderTextureFormatWork = DoesRenderTextureFormatWork;
         }
 
         protected override void CreateGUI(string controlName)
         {
-            using (var check = new EditorGUI.ChangeCheckScope())
+            using (new EditorGUILayout.VerticalScope())
             {
-                using (new EditorGUILayout.VerticalScope())
+                using (var check = new EditorGUI.ChangeCheckScope())
                 {
                     GUI.SetNextControlName(controlName);
                     _chosenCameraIndex = EditorGUILayout.Popup(new GUIContent(CameraLabel, CameraTooltip), _chosenCameraIndex, _cameraObjectNames);
-                    
+                    _chosenCamera = _cameras[_chosenCameraIndex];
+                    DoStuffWithCamera(_chosenCamera);
+
                     EditorGUILayout.Space(VerticalPadding);
                     
                     _dimensions = EditorGUILayout.Vector2IntField(new GUIContent(ResolutionLabel, ResolutionTooltip), _dimensions);
@@ -58,21 +69,40 @@ namespace GursaanjTools
                     
                     using (new EditorGUILayout.HorizontalScope())
                     {
-                        //_dimensions = EditorGUILayout.Vector2IntField(new GUIContent(ResolutionLabel, ResolutionTooltip), _dimensions);
-                        _textureFormat = (TextureFormat)EditorGUILayout.EnumPopup(new GUIContent(TextureFormatLabel, TextureFormatTooltip), _textureFormat);
+                        _textureFormat = (TextureFormat)EditorGUILayout.EnumPopup(new GUIContent(TextureFormatLabel, TextureFormatTooltip), _textureFormat, _doesTextureFormatWork, false);
                         EditorGUILayout.Space();
-                        _renderTextureFormat = (RenderTextureFormat)EditorGUILayout.EnumPopup(new GUIContent(RenderTextureLabel, RenderTextureTooltip), _renderTextureFormat);
+                        _renderTextureFormat = (RenderTextureFormat)EditorGUILayout.EnumPopup(new GUIContent(RenderTextureLabel, RenderTextureTooltip), _renderTextureFormat, _doesRenderTextureFormatWork, false);
                     }
-                    
-                    EditorGUILayout.Space(VerticalPadding);
-                    
-                    Texture image = GetTexture();
-                    if (image != null)
+
+                    if (check.changed)
                     {
-                        EditorGUI.DrawPreviewTexture(new Rect(0,0,100,100), image);
+                        _canDrawTexture = true;
                     }
 
                 }
+                
+                EditorGUILayout.Space(VerticalPadding);
+
+                if (_canDrawTexture)
+                {
+                    _texture = GetTexture(_chosenCamera);
+                    _canDrawTexture = false;
+                }
+
+                if (_texture != null)
+                {
+                    EditorGUI.DrawPreviewTexture(new Rect(new Vector2(20, 125), new Vector2(position.width-40, position.height - 200)), _texture, null, ScaleMode.ScaleToFit);
+                }
+
+            }
+        }
+
+        private void Update()
+        {
+            if (_chosenCamera != null && _chosenCamera.transform.hasChanged)
+            {
+                _canDrawTexture = true;
+                _chosenCamera.transform.hasChanged = false;
             }
         }
 
@@ -105,9 +135,11 @@ namespace GursaanjTools
             return cameraNames;
         }
 
-        private Texture2D GetTexture()
+        private Texture2D GetTexture(Camera camera)
         {
-            Camera camera = _cameras[_chosenCameraIndex];
+            Debug.Log("In Use");
+            
+            //Camera camera = _cameras[_chosenCameraIndex];
 
             if (camera == null)
             {
@@ -140,12 +172,42 @@ namespace GursaanjTools
             //     screenshot.SetPixels(pixels);
             // }
             
+            //RenderTexture Is too large, RenderTexture.Create, requested size is too large
+            //SystemInfo.GetLargestTexture or something
+            
             screenshot.Apply(false);
 
             camera.targetTexture = null;
             RenderTexture.active = currentRT;
 
             return screenshot;
+        }
+
+        private bool DoesTextureFormatWork(Enum textureFormat)
+        {
+            TextureFormat tf = (TextureFormat) textureFormat;
+            return SystemInfo.SupportsTextureFormat(tf);
+        }
+
+        private bool DoesRenderTextureFormatWork(Enum renderTextureFormat)
+        {
+            RenderTextureFormat rtf = (RenderTextureFormat) renderTextureFormat;
+            return SystemInfo.SupportsRenderTextureFormat(rtf);
+        }
+
+        private void DoStuffWithCamera(Camera camera)
+        {
+            if (camera == null)
+            {
+                return;
+            }
+            
+            SerializedObject a = new SerializedObject(camera);
+
+            if (a.hasModifiedProperties)
+            {
+                Debug.Log("Hey");
+            }
         }
 
         #endregion

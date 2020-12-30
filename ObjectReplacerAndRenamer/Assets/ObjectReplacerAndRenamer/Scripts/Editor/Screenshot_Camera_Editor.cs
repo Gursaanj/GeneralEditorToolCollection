@@ -4,6 +4,8 @@ using UnityEngine;
 
 namespace GursaanjTools
 {
+    //Todo: Options needed : Include Transparent background, Do you just want just the green/blue/red, so on. Place Texture Format, RenderTexture Format in advanced options
+    //Todo: Change entire guilayout to use scopes if possible
     public class Screenshot_Camera_Editor : GuiControlEditorWindow
     {
         #region Variables
@@ -36,9 +38,6 @@ namespace GursaanjTools
 
         private bool _canDrawTexture = true;
 
-        private Func<Enum, bool> _doesTextureFormatWork;
-        private Func<Enum, bool> _doesRenderTextureFormatWork;
-        
         #endregion
 
         #region BuiltIn Methods
@@ -46,8 +45,6 @@ namespace GursaanjTools
         private void OnEnable()
         {
             GetAllCameras();
-            _doesTextureFormatWork = DoesTextureFormatWork;
-            _doesRenderTextureFormatWork = DoesRenderTextureFormatWork;
         }
 
         protected override void CreateGUI(string controlName)
@@ -69,9 +66,9 @@ namespace GursaanjTools
                     
                     using (new EditorGUILayout.HorizontalScope())
                     {
-                        _textureFormat = (TextureFormat)EditorGUILayout.EnumPopup(new GUIContent(TextureFormatLabel, TextureFormatTooltip), _textureFormat, _doesTextureFormatWork, false);
+                        _textureFormat = (TextureFormat)EditorGUILayout.EnumPopup(new GUIContent(TextureFormatLabel, TextureFormatTooltip), _textureFormat, x => SystemInfo.SupportsTextureFormat((TextureFormat)x), false);
                         EditorGUILayout.Space();
-                        _renderTextureFormat = (RenderTextureFormat)EditorGUILayout.EnumPopup(new GUIContent(RenderTextureLabel, RenderTextureTooltip), _renderTextureFormat, _doesRenderTextureFormatWork, false);
+                        _renderTextureFormat = (RenderTextureFormat)EditorGUILayout.EnumPopup(new GUIContent(RenderTextureLabel, RenderTextureTooltip), _renderTextureFormat, x => SystemInfo.SupportsRenderTextureFormat((RenderTextureFormat)x), false);
                     }
 
                     if (check.changed)
@@ -93,6 +90,8 @@ namespace GursaanjTools
                 {
                     EditorGUI.DrawPreviewTexture(new Rect(new Vector2(20, 125), new Vector2(position.width-40, position.height - 200)), _texture, null, ScaleMode.ScaleToFit);
                 }
+                //Todo : Add bold label at bottom of image stating the the image scene might not accurately depict the image and extreme resolutions
+                //Todo : Add Manual Refresh Button
 
             }
         }
@@ -182,19 +181,7 @@ namespace GursaanjTools
 
             return screenshot;
         }
-
-        private bool DoesTextureFormatWork(Enum textureFormat)
-        {
-            TextureFormat tf = (TextureFormat) textureFormat;
-            return SystemInfo.SupportsTextureFormat(tf);
-        }
-
-        private bool DoesRenderTextureFormatWork(Enum renderTextureFormat)
-        {
-            RenderTextureFormat rtf = (RenderTextureFormat) renderTextureFormat;
-            return SystemInfo.SupportsRenderTextureFormat(rtf);
-        }
-
+        
         private void DoStuffWithCamera(Camera camera)
         {
             if (camera == null)

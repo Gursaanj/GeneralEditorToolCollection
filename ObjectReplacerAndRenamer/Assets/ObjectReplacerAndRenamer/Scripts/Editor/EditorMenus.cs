@@ -58,30 +58,33 @@ namespace GursaanjTools
 
         #endregion
 
-        #region Prefab Object EditorWindws
-
+        #region Selection EditorWindows
+        
         #region Find Reference GameObjects
-        [MenuItem("GursaanjTools/GameObject Tools/Find References")]
+        [MenuItem("GursaanjTools/Selection Tools/Find References")]
         public static void FindReferencesTool()
         {
             ObjectReferenceFinder_Editor.Init(typeof(ObjectReferenceFinder_Editor), EditorWindowData.EditorWindowInformations["GameObject Finder"]);
         }
-
-
+        
         #endregion
-
-        #endregion
-
-        #region Debugging and Logging EditorWindows
-
+        
         #region Selection Log
-        [MenuItem("GursaanjTools/Logging Tools/Get Selection Log")]
+        [MenuItem("GursaanjTools/Selection Tools/Get Selection Log")]
         public static void GetSelectionLogTool()
         {
             SelectionLog_Editor.Init(typeof(SelectionLog_Editor), EditorWindowData.EditorWindowInformations["Selection Log"]);
         }
-
-
+        #endregion
+        
+        #region Quick Search
+        
+        [MenuItem("GursaanjTools/Selection Tools/QuickSearch for Object %q")]
+        public static void QuickSearchTool()
+        {
+            SpotlightSearch_Editor.Init(typeof(SpotlightSearch_Editor), EditorWindowData.EditorWindowInformations["Spotlight Searcher"]);
+        }
+        
         #endregion
 
 
@@ -116,14 +119,14 @@ namespace GursaanjTools
 
         #endregion
 
-        #region Other EditorWindows
+        #region ScreenCapture EditorWindows
 
-        #region ScreenShot Capturer
+        #region Camera ScreenCapture EditorWindow
         
         [MenuItem("GursaanjTools/Screen Capture/From a camera")]
         public static void TakeScreenShot_Tool()
         {
-            Screenshot_Camera_Editor.Init(typeof(Screenshot_Camera_Editor) ,EditorWindowData.EditorWindowInformations["Screenshot Capture"]);
+            Screenshot_Camera_Editor.Init(typeof(Screenshot_Camera_Editor) ,EditorWindowData.EditorWindowInformations["Camera Capture"]);
         }
 
         #endregion

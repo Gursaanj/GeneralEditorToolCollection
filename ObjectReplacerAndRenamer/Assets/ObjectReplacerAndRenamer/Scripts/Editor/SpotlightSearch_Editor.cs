@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using UnityEditor;
 using UnityEngine;
 using Object = UnityEngine.Object;
@@ -211,7 +212,124 @@ namespace GursaanjTools
         private void HandleEvents()
         {
             Event currentEvent = Event.current;
+
+            if (!currentEvent.isKey)
+            {
+                return;
+            }
+
+            KeyCode currentKeyCode = currentEvent.keyCode;
+
+            if (currentKeyCode == KeyCode.UpArrow)
+            {
+                currentEvent.Use();
+                _selectedResultIndex--;
+            }
+            else if (currentKeyCode == KeyCode.DownArrow)
+            {
+                currentEvent.Use();
+                _selectedResultIndex++;
+            }
+            else if (currentKeyCode == KeyCode.Return)
+            {
+                OpenAsset();
+                currentEvent.Use();
+            }
+            else if (currentKeyCode == KeyCode.Escape)
+            {
+                Close();
+            }
+        }
+
+        //Change to use EditorGuiLayout Scopes
+        private void VisualizeResults()
+        {
+            Event currentEvent = Event.current;
+            Rect currentRect = position;
+            currentRect.height = 90;
             
+            using (new GUILayout.VerticalScope())
+            {
+                GUILayout.Space(5f);
+                int numberOfResults = _results.Count;
+
+                if (numberOfResults == 0)
+                {
+                    currentRect.height += EditorGUIUtility.singleLineHeight;
+                    GUILayout.Label("No Results");
+                }
+
+                for (int i = 0; i < numberOfResults; i++)
+                {
+                    GUIStyle style = i % 2 == 0 ? _evenEntryStyle : _oddEntryStyle;
+                    
+                    GUILayout.BeginHorizontal(GUILayout.Height(EditorGUIUtility.singleLineHeight * 2),GUILayout.ExpandWidth(true)); 
+                    Rect resultRect = GUILayoutUtility.GetRect(0,0, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true)); 
+                    GUILayout.EndHorizontal();
+                    
+                    currentRect.height += EditorGUIUtility.singleLineHeight * 2;
+
+                    if (currentEvent.type == EventType.Repaint)
+                    {
+                        style.Draw(resultRect, false, false, i == _selectedResultIndex, false);
+                        string assetPath = AssetDatabase.GUIDToAssetPath(_results[i]);
+                        Texture icon = AssetDatabase.GetCachedIcon(assetPath);
+
+                        Rect iconRect = resultRect;
+                        iconRect.x = 30;
+                        iconRect.width = 25;
+                        GUI.DrawTexture(iconRect, icon, ScaleMode.ScaleToFit);
+
+                        string assetName = Path.GetFileName(assetPath);
+                        
+                        StringBuilder fullAssetName = new StringBuilder();
+                        int startOfName = assetName.ToLower().IndexOf(_input);
+                        int endOfName = startOfName + _input.Length;
+                        
+                        // Sometimes the AssetDatabase finds assets without the search input in it.
+                        if (startOfName == -1)
+                        {
+                            fullAssetName.Append(string.Format("<color=#{0}>{1}</color>", SkinNormalColor, assetName));
+                        }
+                        else
+                        {
+                            if (startOfName != 0)
+                            {
+                                fullAssetName.Append($"<color=#{SkinNormalColor}>{assetName.Substring(0, startOfName)}</color>");
+                            }
+                            
+                            fullAssetName.Append($"<color=#{SkinHighlightColor}><b>{assetName.Substring(startOfName, endOfName - startOfName)}</b></color>");
+
+                            if (endOfName != assetName.Length - endOfName)
+                            {
+                                fullAssetName.Append($"<color=#{SkinNormalColor}>{assetName.Substring(endOfName, assetName.Length - endOfName)}</color>");
+                            }
+                        }
+
+                        Rect labelRect = resultRect;
+                        labelRect.x = 60;
+                        GUI.Label(labelRect, fullAssetName.ToString(), _resultLabelStyle);
+                    }
+
+                    if (currentEvent.type == EventType.MouseDown && resultRect.Contains(currentEvent.mousePosition))
+                    {
+                        _selectedResultIndex = i;
+                        
+                        //open asset on multiClick
+                        if (currentEvent.clickCount >= 2)
+                        {
+                            OpenAsset();
+                        }
+                        else
+                        {
+                            Selection.activeObject = GetSelectedAsset();
+                            EditorGUIUtility.PingObject(Selection.activeObject);
+                        }
+                        
+                        Repaint();
+                    }
+                }
+            }
         }
 
         #endregion

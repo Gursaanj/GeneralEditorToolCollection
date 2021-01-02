@@ -35,12 +35,15 @@ namespace GursaanjTools
         private const string SkinHighlightColor = "eeeeee";
         private const string SkinNormalColor = "222222";
         private const string SearchTimelineKey = "SearchTimeline";
-        private const int NumberOfResultsToShow = 10;
+        private const int NumberOfResultsToShow = 15;
 
+        private const string ParsePackageLabel = "Parse Through Packages Folder";
         private const string ClearHistoryLabel = "Clear History";
         private const string DebugHistoryLabel = "Debug History";
         private const string DebugHistoryTooltip = "Log current history within the console";
 
+        private const string AssetsFolderName = "Assets";
+        
         //GUI Styles And Content
         private GUIStyle _inputFieldStyle;
         private GUIStyle _initialInputStyle;
@@ -52,6 +55,7 @@ namespace GursaanjTools
         private string _input;
         private int _selectedResultIndex;
         private List<string> _results = new List<string>();
+        private bool _searchPackageFolder = false;
         
         #endregion
         
@@ -150,6 +154,14 @@ namespace GursaanjTools
 
         public void AddItemsToMenu(GenericMenu menu)
         {
+            menu.AddItem(new GUIContent(ParsePackageLabel), _searchPackageFolder, () =>
+            {
+                _searchPackageFolder = !_searchPackageFolder;
+                Process();
+            });
+            
+            menu.AddSeparator(string.Empty);
+            
             menu.AddItem(new GUIContent(ClearHistoryLabel), false, () =>
             {
                 EditorPrefs.SetString(SearchTimelineKey, JsonUtility.ToJson(new SearchTimeline()));
@@ -261,8 +273,9 @@ namespace GursaanjTools
         private void Process()
         {
             _input = _input.ToLower();
-            string[] hits = AssetDatabase.FindAssets(_input) ?? new string[0];
-            _results = hits.ToList();
+            string[] hits = _searchPackageFolder ? AssetDatabase.FindAssets(_input) : AssetDatabase.FindAssets(_input, new []{AssetsFolderName});
+
+            _results = hits == null ? new List<string>() : hits.ToList();
 
             //Sort for better selection visibility
             _results.Sort((first, second) =>

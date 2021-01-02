@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -49,9 +48,58 @@ namespace GursaanjTools
 
         protected override void CreateGUI(string controlName)
         {
-            
-            
-            
+            EnforceSize();
+            HandleEvents();
+
+            using (new GUILayout.HorizontalScope())
+            {
+                GUILayout.Space(15);
+
+                using (new GUILayout.VerticalScope())
+                {
+                    GUILayout.Space(15);
+                    
+                    GUI.SetNextControlName(controlName);
+                    string previousInput = _input;
+                    _input = GUILayout.TextField(_input, _inputFieldStyle, GUILayout.Height(60));
+                    GUI.FocusControl(controlName);
+
+                    if (_input != previousInput) //string.CompareOrdinal(_input, previousInput) != 0
+                    {
+                        Process();
+                    }
+
+                    if (_selectedResultIndex >= _results.Count)
+                    {
+                        _selectedResultIndex = _results.Count - 1;
+                    }
+                    else if (_selectedResultIndex < 0)
+                    {
+                        _selectedResultIndex = 0;
+                    }
+
+                    if (string.IsNullOrEmpty(_input))
+                    {
+                        GUI.Label(GUILayoutUtility.GetLastRect(), InitialInput, _initialInputStyle);
+                    }
+
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        GUILayout.Space(6);
+
+                        if (!string.IsNullOrEmpty(_input))
+                        {
+                            VisualizeResults();
+                        }
+                        
+                        GUILayout.Space(6);
+                    }
+                    
+                    GUILayout.Space(15);
+                }
+                
+                GUILayout.Space(15);
+            }
         }
         
         #endregion
@@ -106,7 +154,7 @@ namespace GursaanjTools
             };
             
             _evenEntryStyle = new GUIStyle("CN EntryBackEven");
-            _oddEntryStyle = new GUIStyle("CN EntryBackOdd");
+            _oddEntryStyle = new GUIStyle("CN EntryBackodd");
         }
 
         private void EnforceSize()
@@ -207,37 +255,47 @@ namespace GursaanjTools
                 return secondScore - firstScore;
             });
 
+            _results = _results.Take(10).ToList();
         }
 
         private void HandleEvents()
         {
             Event currentEvent = Event.current;
-
-            if (!currentEvent.isKey)
+            bool acceptInput = true;
+            
+            if (currentEvent.type == EventType.KeyUp)
             {
-                return;
+                acceptInput = true;
             }
 
-            KeyCode currentKeyCode = currentEvent.keyCode;
+            if (currentEvent.type == EventType.KeyDown && acceptInput)
+            {
+                KeyCode currentKeyCode = currentEvent.keyCode;
+                
+                switch (currentKeyCode)
+                {
+                    case KeyCode.UpArrow:
+                        currentEvent.Use();
+                        _selectedResultIndex--;
+                        break;
+                    case KeyCode.DownArrow:
+                        currentEvent.Use();
+                        _selectedResultIndex++;
+                        break;
+                    case KeyCode.Return:
+                        OpenAsset();
+                        currentEvent.Use();
+                        break;
+                    case KeyCode.Tab:
+                        currentEvent.Use();
+                        _selectedResultIndex++;
+                        break;
+                    case KeyCode.Escape:
+                        Close();
+                        break;
+                }
 
-            if (currentKeyCode == KeyCode.UpArrow)
-            {
-                currentEvent.Use();
-                _selectedResultIndex--;
-            }
-            else if (currentKeyCode == KeyCode.DownArrow)
-            {
-                currentEvent.Use();
-                _selectedResultIndex++;
-            }
-            else if (currentKeyCode == KeyCode.Return)
-            {
-                OpenAsset();
-                currentEvent.Use();
-            }
-            else if (currentKeyCode == KeyCode.Escape)
-            {
-                Close();
+                acceptInput = false;
             }
         }
 
@@ -283,13 +341,13 @@ namespace GursaanjTools
                         string assetName = Path.GetFileName(assetPath);
                         
                         StringBuilder fullAssetName = new StringBuilder();
-                        int startOfName = assetName.ToLower().IndexOf(_input);
+                        int startOfName = assetName.ToLower().IndexOf(_input, StringComparison.Ordinal);
                         int endOfName = startOfName + _input.Length;
                         
                         // Sometimes the AssetDatabase finds assets without the search input in it.
                         if (startOfName == -1)
                         {
-                            fullAssetName.Append(string.Format("<color=#{0}>{1}</color>", SkinNormalColor, assetName));
+                            fullAssetName.Append($"<color=#{SkinNormalColor}>{assetName}</color>");
                         }
                         else
                         {
@@ -329,6 +387,9 @@ namespace GursaanjTools
                         Repaint();
                     }
                 }
+
+                currentRect.height += 5;
+                position = currentRect;
             }
         }
 

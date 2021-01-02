@@ -14,13 +14,26 @@ namespace GursaanjTools
         #region Variables
 
         //GUI Labels
+        private const string NoResultsLabel = "No Results";
+        private const string InitialInput = "Open Asset...";
 
-        //Warning Labels
+        private const int MainVerticalPadding = 15;
+        private const int InputLabelHeight = 60;
+        private const int LayoutPadding = 6;
+        private const int ResultPadding = 5;
+        private const int BaseWidth = 500;
+        private const int BaseHeight = 90;
+        private const int IconXPosition = 30;
+        private const int IconWidth = 25;
         
+        //Warning Labels
+        private const string NoAssetPathMessage = "No Asset Path Found!!";
+        private const string NoAssetNameMessage = "No Asset Name!!";
+
         private const string SkinHighlightColor = "eeeeee";
         private const string SkinNormalColor = "222222";
-        private const string InitialInput = "Open Asset...";
         private const string SearchTimelineKey = "SearchTimeline";
+        private const int NumberOfResultsToShow = 10;
         
         //GUI Styles And Content
         private GUIStyle _inputFieldStyle;
@@ -53,15 +66,15 @@ namespace GursaanjTools
 
             using (new GUILayout.HorizontalScope())
             {
-                GUILayout.Space(15);
+                GUILayout.Space(MainVerticalPadding);
 
                 using (new GUILayout.VerticalScope())
                 {
-                    GUILayout.Space(15);
+                    GUILayout.Space(MainVerticalPadding);
                     
                     GUI.SetNextControlName(controlName);
                     string previousInput = _input;
-                    _input = GUILayout.TextField(_input, _inputFieldStyle, GUILayout.Height(60));
+                    _input = GUILayout.TextField(_input, _inputFieldStyle, GUILayout.Height(InputLabelHeight));
                     GUI.FocusControl(controlName);
 
                     if (_input != previousInput) //string.CompareOrdinal(_input, previousInput) != 0
@@ -85,20 +98,20 @@ namespace GursaanjTools
 
                     using (new GUILayout.HorizontalScope())
                     {
-                        GUILayout.Space(6);
+                        GUILayout.Space(LayoutPadding);
 
                         if (!string.IsNullOrEmpty(_input))
                         {
                             VisualizeResults();
                         }
                         
-                        GUILayout.Space(6);
+                        GUILayout.Space(LayoutPadding);
                     }
                     
-                    GUILayout.Space(15);
+                    GUILayout.Space(MainVerticalPadding);
                 }
                 
-                GUILayout.Space(15);
+                GUILayout.Space(MainVerticalPadding);
             }
         }
         
@@ -160,8 +173,8 @@ namespace GursaanjTools
         private void EnforceSize()
         {
             Rect currentPosition = position;
-            currentPosition.width = 500;
-            currentPosition.height = 90;
+            currentPosition.width = BaseWidth;
+            currentPosition.height = BaseHeight;
             position = currentPosition;
         }
 
@@ -200,7 +213,7 @@ namespace GursaanjTools
 
             if (!couldOpen)
             {
-                DisplayDialogue(ErrorTitle, "No Asset Path Found!!", false);
+                DisplayDialogue(ErrorTitle, NoAssetPathMessage, false);
                 return;
             }
 
@@ -208,7 +221,7 @@ namespace GursaanjTools
 
             if (currentGuid == null)
             {
-                DisplayDialogue(ErrorTitle, "No Asset Name!!", false);
+                DisplayDialogue(ErrorTitle, NoAssetNameMessage, false);
                 return;
             }
 
@@ -255,7 +268,7 @@ namespace GursaanjTools
                 return secondScore - firstScore;
             });
 
-            _results = _results.Take(10).ToList();
+            _results = _results.Take(NumberOfResultsToShow).ToList();
         }
 
         private void HandleEvents()
@@ -289,6 +302,10 @@ namespace GursaanjTools
                     case KeyCode.Tab:
                         currentEvent.Use();
                         _selectedResultIndex++;
+                        if (_selectedResultIndex >= _results.Count)
+                        {
+                            _selectedResultIndex = 0;
+                        }
                         break;
                     case KeyCode.Escape:
                         Close();
@@ -304,17 +321,17 @@ namespace GursaanjTools
         {
             Event currentEvent = Event.current;
             Rect currentRect = position;
-            currentRect.height = 90;
+            currentRect.height = BaseHeight;
             
             using (new GUILayout.VerticalScope())
             {
-                GUILayout.Space(5f);
+                GUILayout.Space(ResultPadding);
                 int numberOfResults = _results.Count;
 
                 if (numberOfResults == 0)
                 {
                     currentRect.height += EditorGUIUtility.singleLineHeight;
-                    GUILayout.Label("No Results");
+                    GUILayout.Label(NoResultsLabel);
                 }
 
                 for (int i = 0; i < numberOfResults; i++)
@@ -334,8 +351,8 @@ namespace GursaanjTools
                         Texture icon = AssetDatabase.GetCachedIcon(assetPath);
 
                         Rect iconRect = resultRect;
-                        iconRect.x = 30;
-                        iconRect.width = 25;
+                        iconRect.x = IconXPosition;
+                        iconRect.width = IconWidth;
                         GUI.DrawTexture(iconRect, icon, ScaleMode.ScaleToFit);
 
                         string assetName = Path.GetFileName(assetPath);
@@ -365,7 +382,7 @@ namespace GursaanjTools
                         }
 
                         Rect labelRect = resultRect;
-                        labelRect.x = 60;
+                        labelRect.x = InputLabelHeight;
                         GUI.Label(labelRect, fullAssetName.ToString(), _resultLabelStyle);
                     }
 
@@ -388,7 +405,7 @@ namespace GursaanjTools
                     }
                 }
 
-                currentRect.height += 5;
+                currentRect.height += ResultPadding;
                 position = currentRect;
             }
         }

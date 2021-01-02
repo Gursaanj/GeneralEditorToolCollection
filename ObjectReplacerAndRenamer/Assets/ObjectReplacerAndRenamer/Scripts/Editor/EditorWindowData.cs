@@ -29,7 +29,7 @@ namespace GursaanjTools
             {"Selection Log", new EditorWindowInformation(new GUIContent("View Selection Log"), new Vector2(300,200), new Vector2(300,200))},
             {"Gist Importer", new EditorWindowInformation(new GUIContent("Import Gist File"), new Vector2(300, 50), new Vector2(300, 50))},
             {"Camera Capture", new EditorWindowInformation(new GUIContent("Take Screenshot"), new Vector2(500, 400), new Vector2(800, 500))},
-            {"Spotlight Searcher", new EditorWindowInformation(new GUIContent("Search through project"), new Vector2(200, 500), new Vector2(300, 600))}
+            {"Spotlight Searcher", new EditorWindowInformation(new GUIContent("Search through project"), new Vector2(300, 500), new Vector2(300, 500))}
         };
     }
 }

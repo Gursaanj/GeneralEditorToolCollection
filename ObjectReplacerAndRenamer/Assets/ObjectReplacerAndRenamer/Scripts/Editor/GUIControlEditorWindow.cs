@@ -45,7 +45,15 @@ namespace GursaanjTools
             _window.minSize = windowInformation.MinSize;
             _window.maxSize = windowInformation.MaxSize;
             _window.Focus();
-            _window.Show();
+
+            if (windowInformation.ShowUtility)
+            {
+                _window.ShowUtility();
+            }
+            else
+            {
+                _window.Show();
+            }
         }
 
         protected void OnGUI()

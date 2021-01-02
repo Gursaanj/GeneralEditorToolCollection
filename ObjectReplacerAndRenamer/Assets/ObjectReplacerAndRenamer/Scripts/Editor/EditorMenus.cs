@@ -82,7 +82,7 @@ namespace GursaanjTools
         [MenuItem("GursaanjTools/Selection Tools/QuickSearch for Object %q")]
         public static void QuickSearchTool()
         {
-            SpotlightSearch_Editor.Init(typeof(SpotlightSearch_Editor), EditorWindowData.EditorWindowInformations["Spotlight Searcher"]);
+            SpotlightSearch_Editor.Init(EditorWindowData.EditorWindowInformations["Spotlight Searcher"]);
         }
         
         #endregion

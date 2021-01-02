@@ -8,12 +8,14 @@ namespace GursaanjTools
         public GUIContent Title { get; }
         public Vector2 MinSize { get; }
         public Vector2 MaxSize { get; }
+        public bool ShowUtility { get; }
 
-        public EditorWindowInformation(GUIContent title, Vector2 minSize, Vector2 maxSize)
+        public EditorWindowInformation(GUIContent title, Vector2 minSize, Vector2 maxSize, bool showUtility = false)
         {
             Title = title;
             MinSize = minSize;
             MaxSize = maxSize;
+            ShowUtility = showUtility;
         }
     }
     
@@ -29,7 +31,7 @@ namespace GursaanjTools
             {"Selection Log", new EditorWindowInformation(new GUIContent("View Selection Log"), new Vector2(300,200), new Vector2(300,200))},
             {"Gist Importer", new EditorWindowInformation(new GUIContent("Import Gist File"), new Vector2(300, 50), new Vector2(300, 50))},
             {"Camera Capture", new EditorWindowInformation(new GUIContent("Take Screenshot"), new Vector2(500, 400), new Vector2(800, 500))},
-            {"Spotlight Searcher", new EditorWindowInformation(new GUIContent("Search through project"), new Vector2(300, 500), new Vector2(300, 500))}
+            {"Spotlight Searcher", new EditorWindowInformation(new GUIContent("Asset Search"), new Vector2(500, 500), new Vector2(500, 500))}
         };
     }
 }

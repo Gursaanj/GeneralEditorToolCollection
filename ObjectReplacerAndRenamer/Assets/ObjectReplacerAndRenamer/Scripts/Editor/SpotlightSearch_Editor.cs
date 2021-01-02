@@ -12,16 +12,18 @@ namespace GursaanjTools
     public class SpotlightSearch_Editor : GuiControlEditorWindow, IHasCustomMenu
     {
         #region Variables
-
+        
+        private static float _xPosition;
+        private static float _yPosition;
+        
         //GUI Labels
         private const string NoResultsLabel = "No Results";
-        private const string InitialInput = "Open Asset...";
+        private const string InitialInput = "Search For Asset...";
 
         private const int MainVerticalPadding = 15;
         private const int InputLabelHeight = 60;
         private const int LayoutPadding = 6;
         private const int ResultPadding = 5;
-        private const int BaseWidth = 500;
         private const int BaseHeight = 90;
         private const int IconXPosition = 30;
         private const int IconWidth = 25;
@@ -34,7 +36,11 @@ namespace GursaanjTools
         private const string SkinNormalColor = "222222";
         private const string SearchTimelineKey = "SearchTimeline";
         private const int NumberOfResultsToShow = 10;
-        
+
+        private const string ClearHistoryLabel = "Clear History";
+        private const string DebugHistoryLabel = "Debug History";
+        private const string DebugHistoryTooltip = "Log current history within the console";
+
         //GUI Styles And Content
         private GUIStyle _inputFieldStyle;
         private GUIStyle _initialInputStyle;
@@ -48,22 +54,41 @@ namespace GursaanjTools
         private List<string> _results = new List<string>();
         
         #endregion
-
-
+        
         #region BuiltIn Methods
-        
-        //Create On Init Function
-        
+
+        public static void Init(EditorWindowInformation windowInformation)
+        {
+            _window = GetWindow<SpotlightSearch_Editor>();
+            _window.titleContent = windowInformation.Title;
+            SetWindowInformation(windowInformation);
+            
+            _window.minSize = windowInformation.MinSize;
+            _window.maxSize = windowInformation.MaxSize;
+            
+            _xPosition = (Screen.currentResolution.width / 2) - windowInformation.MaxSize.x;
+            _yPosition = (Screen.currentResolution.height * 0.3f) - (windowInformation.MaxSize.y/2);
+            
+            Rect windowPosition = _window.position;
+            windowPosition.x = _xPosition;
+            windowPosition.y = _yPosition;
+            _window.position = windowPosition; 
+            
+            EnforceSize();
+            _window.ShowUtility();
+        }
+
         private void OnEnable()
         {
             CreateGUIStyles();
+            Reset();
         }
 
         protected override void CreateGUI(string controlName)
         {
             EnforceSize();
             HandleEvents();
-
+            
             using (new GUILayout.HorizontalScope())
             {
                 GUILayout.Space(MainVerticalPadding);
@@ -75,9 +100,8 @@ namespace GursaanjTools
                     GUI.SetNextControlName(controlName);
                     string previousInput = _input;
                     _input = GUILayout.TextField(_input, _inputFieldStyle, GUILayout.Height(InputLabelHeight));
-                    GUI.FocusControl(controlName);
 
-                    if (_input != previousInput) //string.CompareOrdinal(_input, previousInput) != 0
+                    if (string.CompareOrdinal(_input, previousInput) != 0)
                     {
                         Process();
                     }
@@ -126,13 +150,13 @@ namespace GursaanjTools
 
         public void AddItemsToMenu(GenericMenu menu)
         {
-            menu.AddItem(new GUIContent("Clear History"), false, () =>
+            menu.AddItem(new GUIContent(ClearHistoryLabel), false, () =>
             {
                 EditorPrefs.SetString(SearchTimelineKey, JsonUtility.ToJson(new SearchTimeline()));
                 Reset();
             });
             
-            menu.AddItem(new GUIContent("Debug History", "Log current history within the console"), false, () =>
+            menu.AddItem(new GUIContent(DebugHistoryLabel, DebugHistoryTooltip), false, () =>
             {
                 string currentHistory = EditorPrefs.GetString(SearchTimelineKey, JsonUtility.ToJson(new SearchTimeline()));
                 Debug.Log(currentHistory);
@@ -170,12 +194,12 @@ namespace GursaanjTools
             _oddEntryStyle = new GUIStyle("CN EntryBackodd");
         }
 
-        private void EnforceSize()
+        private static void EnforceSize()
         {
-            Rect currentPosition = position;
-            currentPosition.width = BaseWidth;
-            currentPosition.height = BaseHeight;
-            position = currentPosition;
+            Rect currentPosition = _window.position;
+            currentPosition.x = _xPosition;
+            currentPosition.y = _yPosition;
+            _window.position = currentPosition;
         }
 
         private void Reset()
@@ -248,7 +272,7 @@ namespace GursaanjTools
                 int secondScore;
                 _timeline.ClickHistory.TryGetValue(second, out secondScore);
                 
-                //Sort files based on searched with higher scores (alphabetically) Taken from:
+                //Sort files based on searched with higher scores (based on Timeline Values). Taken from:
                 if (firstScore != 0 && secondScore != 0)
                 {
                     string firstAssetName = Path.GetFileName(AssetDatabase.GUIDToAssetPath(first).ToLower());
@@ -322,6 +346,7 @@ namespace GursaanjTools
             Event currentEvent = Event.current;
             Rect currentRect = position;
             currentRect.height = BaseHeight;
+            float rectHeight = EditorGUIUtility.singleLineHeight * 2;
             
             using (new GUILayout.VerticalScope())
             {
@@ -338,11 +363,11 @@ namespace GursaanjTools
                 {
                     GUIStyle style = i % 2 == 0 ? _evenEntryStyle : _oddEntryStyle;
                     
-                    GUILayout.BeginHorizontal(GUILayout.Height(EditorGUIUtility.singleLineHeight * 2),GUILayout.ExpandWidth(true)); 
+                    GUILayout.BeginHorizontal(GUILayout.Height(rectHeight),GUILayout.ExpandWidth(true)); 
                     Rect resultRect = GUILayoutUtility.GetRect(0,0, GUILayout.ExpandWidth(true), GUILayout.ExpandHeight(true)); 
                     GUILayout.EndHorizontal();
                     
-                    currentRect.height += EditorGUIUtility.singleLineHeight * 2;
+                    currentRect.height += rectHeight;
 
                     if (currentEvent.type == EventType.Repaint)
                     {

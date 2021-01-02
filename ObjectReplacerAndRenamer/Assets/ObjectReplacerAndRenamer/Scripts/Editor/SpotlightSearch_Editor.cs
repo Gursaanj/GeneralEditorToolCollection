@@ -138,13 +138,13 @@ namespace GursaanjTools
                 GUILayout.Space(MainVerticalPadding);
             }
         }
-        
-        #endregion
-
         private void OnLostFocus()
         {
             Close();
         }
+        
+        #endregion
+        
 
         #region IHasCustomMenu Interface
 
@@ -263,7 +263,7 @@ namespace GursaanjTools
             _input = _input.ToLower();
             string[] hits = AssetDatabase.FindAssets(_input) ?? new string[0];
             _results = hits.ToList();
-            
+
             //Sort for better selection visibility
             _results.Sort((first, second) =>
             {
@@ -330,6 +330,7 @@ namespace GursaanjTools
                         {
                             _selectedResultIndex = 0;
                         }
+                        _shouldFocusOnField = true;
                         break;
                     case KeyCode.Escape:
                         Close();

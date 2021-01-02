@@ -31,7 +31,7 @@ namespace GursaanjTools
         private const string PrimaryControlName = "Control";
         
         protected GameObject[] _selectedGameObjects;
-        private bool _shouldFocusOnField = true;
+        protected bool _shouldFocusOnField = true;
 
         #endregion
 

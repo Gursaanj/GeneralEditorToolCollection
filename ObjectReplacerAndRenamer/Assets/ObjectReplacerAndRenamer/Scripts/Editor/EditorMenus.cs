@@ -134,11 +134,11 @@ namespace GursaanjTools
 
         #region Reference EditorWindows
 
-        #region IconUtility
+        #region Icon Content
         [MenuItem("GursaanjTools/References/Icon Contents")]
         public static void IconUtilityReferenceTool()
         {
-            IconUtilityReference_Editor.Init(typeof(IconUtilityReference_Editor), EditorWindowData.EditorWindowInformations["IconUtility Reference"]);
+            IconContentReference_Editor.Init(typeof(IconContentReference_Editor), EditorWindowData.EditorWindowInformations["IconContent Reference"]);
         }
 
         #endregion

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace GursaanjTools
 {
-    public class IconUtilityReference_Editor : GuiControlEditorWindow
+    public class IconContentReference_Editor : GuiControlEditorWindow
     {
         #region Variables
         

@@ -31,7 +31,8 @@ namespace GursaanjTools
             {"Selection Log", new EditorWindowInformation(new GUIContent("View Selection Log"), new Vector2(300,200), new Vector2(300,200))},
             {"Gist Importer", new EditorWindowInformation(new GUIContent("Import Gist File"), new Vector2(300, 50), new Vector2(300, 50))},
             {"Camera Capture", new EditorWindowInformation(new GUIContent("Take Screenshot"), new Vector2(500, 400), new Vector2(800, 500))},
-            {"Spotlight Searcher", new EditorWindowInformation(new GUIContent("Asset Search"), new Vector2(500, 500), new Vector2(500, 500))}
+            {"Spotlight Searcher", new EditorWindowInformation(new GUIContent("Asset Search"), new Vector2(500, 500), new Vector2(500, 500))},
+            {"IconUtility Reference", new EditorWindowInformation(new GUIContent("Known Icon Utilities"), new Vector2(500, 300), new Vector2(500, 600))}
         };
     }
 }

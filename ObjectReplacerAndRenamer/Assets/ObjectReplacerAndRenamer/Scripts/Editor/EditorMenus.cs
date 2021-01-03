@@ -131,6 +131,19 @@ namespace GursaanjTools
         #endregion
 
         #endregion
+
+        #region Reference EditorWindows
+
+        #region IconUtility
+        [MenuItem("GursaanjTools/References/Icon Contents")]
+        public static void IconUtilityReferenceTool()
+        {
+            IconUtilityReference_Editor.Init(typeof(IconUtilityReference_Editor), EditorWindowData.EditorWindowInformations["IconUtility Reference"]);
+        }
+
+        #endregion
+        
+        #endregion
     }
 }
 

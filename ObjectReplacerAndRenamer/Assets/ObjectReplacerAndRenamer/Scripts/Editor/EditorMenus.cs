@@ -100,8 +100,7 @@ namespace GursaanjTools
         }
 
         #endregion
-
-
+        
         #endregion
 
         #region AssetMenuItem based EditorWindows

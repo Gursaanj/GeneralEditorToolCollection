@@ -6,13 +6,13 @@ namespace GursaanjTools
     [InitializeOnLoad]
     public class GistImporter_Shortcut
     {
-        static GistImporter_Editor window = ScriptableObject.CreateInstance<GistImporter_Editor>();
+        private static readonly GistImporter_Editor Window = ScriptableObject.CreateInstance<GistImporter_Editor>();
         
         static GistImporter_Shortcut()
         {
             SceneView.duringSceneGui += CheckIfShortCutWasPressed;
         }
-
+        
         ~GistImporter_Shortcut()
         {
             SceneView.duringSceneGui -= CheckIfShortCutWasPressed;
@@ -26,7 +26,7 @@ namespace GursaanjTools
             
             if (current.isKey && correctModifiersPressed && current.keyCode == KeyCode.G)
             {
-                window.ImportGist(EditorGUIUtility.systemCopyBuffer);
+                Window.ImportGist(EditorGUIUtility.systemCopyBuffer);
             }
         }
     }

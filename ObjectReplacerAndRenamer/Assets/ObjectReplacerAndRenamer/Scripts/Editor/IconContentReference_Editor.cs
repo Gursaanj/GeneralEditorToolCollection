@@ -426,16 +426,10 @@ namespace GursaanjTools
             Texture2D texture = new Texture2D(icon.width, icon.height, icon.format, icon.mipmapCount > 1);
             Graphics.CopyTexture(icon, texture);
             
-            string folderPath = Path.GetDirectoryName(Path.Combine("UnityInternal Icons/", $"{_selectedSize.ToString()}/"));
-
-            if (!Directory.Exists(folderPath))
-            {
-                //TODO: Deal with Null Exception
-                Directory.CreateDirectory(folderPath);
-            }
-
-            string iconPath = Path.Combine(folderPath, $"{iconName}{PngFileExtension}");
-            File.WriteAllBytes(iconPath, texture.EncodeToPNG());
+            string folderPath = $"Assets/UnityInternal Icons/{_selectedSize.ToString()}";
+            Directory.CreateDirectory(folderPath);
+            
+            File.WriteAllBytes(Path.Combine(folderPath, $"{iconName}{PngFileExtension}"), texture.EncodeToPNG());
             
             AssetDatabase.Refresh();
         }

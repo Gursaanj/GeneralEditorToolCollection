@@ -19,6 +19,14 @@ namespace GursaanjTools
         #region Variables
         
         //GUI Labels
+        private const string IconSizesLabel = "Filter icons by size";
+        private const string ClearIcon = "winbtn_win_close";
+        
+        private const float IconSizeLabelWidth = 120f;
+        private const float IconSizesWidth = 180f;
+        private const float ClearButtonWidth = 20f;
+
+        private const float ScrollBarWidth = 13f;
         
         //Warning Labels
         private const string NoIconsFoundLabel = "No Icons Found!!";
@@ -28,17 +36,15 @@ namespace GursaanjTools
         private const string EditorResourceUtility = "UnityEditorInternal.EditorResourcesUtility";
         private const string IconsPath = "iconsPath";
 
-        private const string IconSizesLabel = "Filter icons By size";
-        private const string ClearIcon = "winbtn_win_close";
-        private const int IconSizeLabelWidth = 120;
-        private const int IconSizesWidth = 180;
-        private const int ClearButtonWidth = 20;
-        
         private const string PngFileExtension = ".png";
         private const string AssetFileExtension = ".asset";
 
         private const int SmallToMediumLimit = 36;
         private const int MediumToLargeLimit = 72;
+
+        private const float SmallButtonSize = 40f;
+        private const float MediumButtonSize = 70f;
+        private const float LargeButtonSize = 100f;
 
         private readonly string[] IconSizes = Enum.GetNames(typeof(IconSize));
         
@@ -46,12 +52,16 @@ namespace GursaanjTools
         private List<GUIContent> _smallIcons = new List<GUIContent>();
         private List<GUIContent> _mediumIcons = new List<GUIContent>();
         private List<GUIContent> _largeIcons = new List<GUIContent>();
-        private List<GUIContent> _currentlySelectedIcons = new List<GUIContent>();
+        private List<GUIContent> _currentSelectionOfIcons = new List<GUIContent>();
+        private GUIContent _currentlySelectedIcon = GUIContent.none;
         private Vector2 _scrollPosition = Vector2.zero;
-        
+        private float _buttonSize = SmallButtonSize;
+
         //GUI Fields
         private string _searchField = string.Empty;
         private IconSize _selectedSize = 0;
+
+        private GUIStyle _iconButtonStyle;
         
         #endregion
 
@@ -60,6 +70,10 @@ namespace GursaanjTools
         private void OnEnable()
         {
             _iconNames = GetAppropriateIconNames(GetEditorAssetBundle(), GetIconPath());
+            
+            _iconButtonStyle = new GUIStyle(EditorStyles.miniButton);
+            _iconButtonStyle.margin = new RectOffset(0, 0, 0, 0);
+            _iconButtonStyle.fixedHeight = 0;
 
             if (_iconNames == null || _iconNames.Count == 0)
             {
@@ -75,19 +89,9 @@ namespace GursaanjTools
 
         protected override void CreateGUI(string controlName)
         {
-            using (new GUILayout.HorizontalScope(EditorStyles.toolbar))
-            {
-                GUILayout.Label(IconSizesLabel, EditorStyles.boldLabel, GUILayout.Width(IconSizeLabelWidth));
-                _selectedSize = (IconSize)GUILayout.SelectionGrid((int)_selectedSize, IconSizes, IconSizes.Length, EditorStyles.toolbarButton, GUILayout.Width(IconSizesWidth));
-                GUI.SetNextControlName(controlName);
-                _searchField = GUILayout.TextField(_searchField, EditorStyles.toolbarSearchField);
-                if (GUILayout.Button(EditorGUIUtility.IconContent(ClearIcon), EditorStyles.toolbarButton, GUILayout.Width(ClearButtonWidth)))
-                {
-                    _searchField = string.Empty;
-                }
-            }
+            CreateToolbar(controlName);
 
-            _currentlySelectedIcons = GetSizeAppropriateIcons(_selectedSize);
+            _currentSelectionOfIcons = GetSizeAppropriateIcons(_selectedSize);
 
             using (var scrollScope = new GUILayout.ScrollViewScope(_scrollPosition))
             {
@@ -110,24 +114,89 @@ namespace GursaanjTools
                 //     }
                 // }
 
-                foreach (GUIContent icon in _currentlySelectedIcons)
-                {
-                    if (icon == null || icon.image == null)
-                    {
-                        continue;
-                    }
+                float renderWidth = Screen.width / pixelsPerPoint - ScrollBarWidth;
+                int gridWidth = Mathf.FloorToInt(renderWidth / _buttonSize);
+                float marginPadding = (renderWidth - _buttonSize * gridWidth) / 2;
 
+                int currentRow = 0;
+                int iconIndex = 0;
+                int totalIconCount = _currentSelectionOfIcons.Count;
+
+                while (iconIndex < totalIconCount)
+                {
                     using (new GUILayout.HorizontalScope())
                     {
-                        GUILayout.Box(icon);
+                        GUILayout.Space(marginPadding);
+
+                        for (int i = 0; i < gridWidth; i++)
+                        {
+                            int currentIconIndex = i + currentRow * gridWidth;
+                            GUIContent currentIcon = _currentSelectionOfIcons[currentIconIndex];
+
+                            if (GUILayout.Button(currentIcon, _iconButtonStyle, GUILayout.Width(_buttonSize),
+                                GUILayout.Height(_buttonSize)))
+                            {
+                                _currentlySelectedIcon = currentIcon;
+                            }
+
+                            iconIndex++;
+
+                            if (iconIndex == totalIconCount)
+                            {
+                                break;
+                            }
+                        }
                     }
+
+                    currentRow++;
                 }
+                
+                GUILayout.Space(10f);
+
+                // foreach (GUIContent icon in _currentSelectionOfIcons)
+                // {
+                //     if (icon == null || icon.image == null)
+                //     {
+                //         continue;
+                //     }
+                //
+                //     using (new GUILayout.HorizontalScope())
+                //     {
+                //         if (GUILayout.Button(icon.image, EditorStyles.miniButtonMid, GUILayout.Width(icon.image.width + 2f), GUILayout.Height(icon.image.height)))
+                //         {
+                //             _currentlySelectedIcon = icon;
+                //         }
+                //     }
+                // }
             }
+
+            if (_currentlySelectedIcon.Equals(GUIContent.none))
+            {
+                return;
+            }
+
+            GUILayout.FlexibleSpace();
         }
 
         #endregion
 
         #region Custom Methods
+
+        private void CreateToolbar(string controlName)
+        {
+            using (new GUILayout.HorizontalScope(EditorStyles.toolbar))
+            {
+                GUILayout.Label(IconSizesLabel, EditorStyles.boldLabel, GUILayout.Width(IconSizeLabelWidth));
+                _selectedSize = (IconSize)GUILayout.SelectionGrid((int)_selectedSize, IconSizes, IconSizes.Length, EditorStyles.toolbarButton, GUILayout.Width(IconSizesWidth));
+                GUI.SetNextControlName(controlName);
+                _searchField = GUILayout.TextField(_searchField, EditorStyles.toolbarSearchField);
+                if (GUILayout.Button(EditorGUIUtility.IconContent(ClearIcon), EditorStyles.toolbarButton, GUILayout.Width(ClearButtonWidth)))
+                {
+                    _searchField = string.Empty;
+                }
+            }
+        }
+
         private AssetBundle GetEditorAssetBundle()
         {
             MethodInfo editorAssetBundle = typeof(EditorGUIUtility).GetMethod(EditorAssetBundleMethod, BindingFlags.NonPublic | BindingFlags.Static);
@@ -225,14 +294,18 @@ namespace GursaanjTools
         {
             switch (size)
             {
-                case IconSize.Small: 
+                case IconSize.Small:
+                    _buttonSize = SmallButtonSize;
                     return _smallIcons;
                 case IconSize.Medium:
+                    _buttonSize = MediumButtonSize;
                     return _mediumIcons;
                 case IconSize.Large:
+                    _buttonSize = LargeButtonSize;
                     return _largeIcons;
                 default:
                     Debug.LogWarning("Inappropriate Icon Size selected");
+                    _buttonSize = SmallButtonSize;
                     return _smallIcons;
             }
         }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
@@ -22,6 +21,11 @@ namespace GursaanjTools
         //GUI Labels
         private const string IconSizesLabel = "Filter icons by size";
         private const string ClearIcon = "winbtn_win_close";
+
+        private const string CopyIcon = "winbtn_win_restore@2x";
+        private const string CopyIconTooltip = "Copy to clipboard";
+        private const string YesLabel = "Yes";
+        private const string NoLabel = "No";
         
         private const float IconSizeLabelWidth = 120f;
         private const float IconSizesWidth = 180f;
@@ -39,6 +43,7 @@ namespace GursaanjTools
 
         private const string PngFileExtension = ".png";
         private const string AssetFileExtension = ".asset";
+        private const string ProOnlyIconIdentifier = "d_";
 
         private const int SmallToMediumLimit = 36;
         private const int MediumToLargeLimit = 72;
@@ -67,6 +72,8 @@ namespace GursaanjTools
         private GUIStyle _iconButtonStyle;
         private GUIStyle _previewStyle;
         private GUIStyle _previewLabel;
+
+        private GUIContent _copyContent;
         
         #endregion
 
@@ -101,21 +108,6 @@ namespace GursaanjTools
                 _scrollPosition = scrollScope.scrollPosition;
                 float pixelsPerPoint = EditorGUIUtility.pixelsPerPoint;
                 GUILayout.Space(10f);
-                
-                // foreach (string iconName in _iconNames)
-                // {
-                //     GUIContent content = GetIconContent(iconName);
-                //
-                //     if (content == null || content.image == null)
-                //     {
-                //         continue;
-                //     }
-                //
-                //     if (GUILayout.Button(content.image))
-                //     {
-                //         Debug.Log(iconName);
-                //     }
-                // }
 
                 float renderWidth = Screen.width / pixelsPerPoint - ScrollBarWidth;
                 int gridWidth = Mathf.FloorToInt(renderWidth / _buttonSize);
@@ -155,22 +147,7 @@ namespace GursaanjTools
                 }
                 
                 GUILayout.Space(10f);
-
-                // foreach (GUIContent icon in _currentSelectionOfIcons)
-                // {
-                //     if (icon == null || icon.image == null)
-                //     {
-                //         continue;
-                //     }
-                //
-                //     using (new GUILayout.HorizontalScope())
-                //     {
-                //         if (GUILayout.Button(icon.image, EditorStyles.miniButtonMid, GUILayout.Width(icon.image.width + 2f), GUILayout.Height(icon.image.height)))
-                //         {
-                //             _currentlySelectedIcon = icon;
-                //         }
-                //     }
-                // }
+                
             }
 
             if (_currentlySelectedIcon.Equals(GUIContent.none))
@@ -180,6 +157,7 @@ namespace GursaanjTools
 
             GUILayout.FlexibleSpace();
             float textureWidth = position.width / 2.5f;
+            float previewWidth = position.width - textureWidth - 30f;
 
             using (new GUILayout.HorizontalScope(EditorStyles.helpBox,GUILayout.MaxHeight(130)))
             {
@@ -198,11 +176,12 @@ namespace GursaanjTools
                 using (new GUILayout.VerticalScope())
                 {
                     GUILayout.Space(5f);
-                    using (new GUILayout.HorizontalScope())
+                    using (new GUILayout.HorizontalScope(GUILayout.Width(previewWidth)))
                     {
                         StringBuilder info = new StringBuilder();
                         info.AppendLine($"Size: {_currentlySelectedIcon.image.width} X {_currentlySelectedIcon.image.height}");
-                        info.Append($"Is ProSkin Icon? {"Does not contain d_"}");
+                        string proSkinLabel = IsIconProOnly(_currentlySelectedIcon.tooltip) ? YesLabel : NoLabel;
+                        info.Append($"Is ProSkin Icon? {proSkinLabel}");
                         EditorGUILayout.HelpBox(info.ToString(), MessageType.None);
                         GUILayout.Space(15f);
                         if (GUILayout.Button("Download Image"))
@@ -212,9 +191,9 @@ namespace GursaanjTools
                     }
 
                     GUILayout.Space(5f);
-                    CreatePreviewLabel("Name of Icon Content", "Name of Content");
+                    CreatePreviewLabel(previewWidth,"Name of Icon Content", $"\"{_currentlySelectedIcon.tooltip}\"");
                     GUILayout.Space(5f);
-                    CreatePreviewLabel("Full Method", $"EditorGUIUtility.IconContent({"Name of Content"})");
+                    CreatePreviewLabel(previewWidth,"Full Method", $"EditorGUIUtility.IconContent(\"{_currentlySelectedIcon.tooltip}\")");
                     GUILayout.FlexibleSpace();
                 }
             }
@@ -250,8 +229,12 @@ namespace GursaanjTools
                     _previewStyle.onActive.scaledBackgrounds = _previewStyle.normal.scaledBackgrounds =
                         _previewStyle.onNormal.scaledBackgrounds = new Texture2D[] {backgroundTexture};
             
+            _copyContent = EditorGUIUtility.IconContent(CopyIcon);
+            _copyContent.tooltip = CopyIconTooltip;
+            
             _previewLabel = new GUIStyle(EditorStyles.boldLabel);
-            _previewLabel.padding = new RectOffset(4,0,0,-5);
+            _previewLabel.padding = new RectOffset(0,0,0,-5);
+
         }
 
         private void CreateToolbar(string controlName)
@@ -269,19 +252,22 @@ namespace GursaanjTools
             }
         }
 
-        private void CreatePreviewLabel(string label, string content)
+        private void CreatePreviewLabel(float layoutWidth, string label, string content)
         {
-            GUILayout.Label(label, _previewLabel);
-
-            using (new GUILayout.HorizontalScope())
+            using (new GUILayout.HorizontalScope(GUILayout.Width(layoutWidth)))
             {
-                GUILayout.Label(content);
+                GUILayout.Label(label, _previewLabel);
                 GUILayout.Space(3f);
-                if (GUILayout.Button("0", EditorStyles.miniButtonRight, GUILayout.Height(10f)))
+                if (GUILayout.Button(_copyContent, EditorStyles.miniButtonRight, GUILayout.Width(20f)))
                 {
                     EditorGUIUtility.systemCopyBuffer = content;
                 }
                 GUILayout.FlexibleSpace();
+            }
+            
+            using (new GUILayout.HorizontalScope(GUILayout.Width(layoutWidth)))
+            {
+                GUILayout.Label(content, GUILayout.MaxWidth(layoutWidth));
             }
         }
 
@@ -357,6 +343,8 @@ namespace GursaanjTools
                     continue;
                 }
 
+                iconContent.tooltip = icon.name;
+
                 if (icon.width <= SmallToMediumLimit || icon.height <= SmallToMediumLimit)
                 {
                     _smallIcons.Add(iconContent);
@@ -377,7 +365,7 @@ namespace GursaanjTools
             if (string.IsNullOrEmpty(iconName))
             {
                 return null;
-            } 
+            }
             
             return EditorGUIUtility.IconContent(iconName);
         }
@@ -400,6 +388,11 @@ namespace GursaanjTools
                     _buttonSize = SmallButtonSize;
                     return _smallIcons;
             }
+        }
+
+        private bool IsIconProOnly(string name)
+        {
+            return name.IndexOf(ProOnlyIconIdentifier, StringComparison.Ordinal) == 0;
         }
 
         #endregion

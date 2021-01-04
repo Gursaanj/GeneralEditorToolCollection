@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEditor;
@@ -103,6 +104,12 @@ namespace GursaanjTools
 
             _currentSelectionOfIcons = GetSizeAppropriateIcons(_selectedSize);
 
+            if (!string.IsNullOrEmpty(_searchField))
+            {
+                _currentSelectionOfIcons = _currentSelectionOfIcons
+                    .Where(icon => icon.tooltip.ToLower().Contains(_searchField.ToLower())).ToList();
+            }
+            
             using (var scrollScope = new GUILayout.ScrollViewScope(_scrollPosition))
             {
                 _scrollPosition = scrollScope.scrollPosition;

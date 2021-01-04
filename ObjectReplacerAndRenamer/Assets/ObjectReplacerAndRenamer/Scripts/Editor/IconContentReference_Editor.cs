@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -27,6 +28,8 @@ namespace GursaanjTools
         private const string CopyIconTooltip = "Copy to clipboard";
         private const string YesLabel = "Yes";
         private const string NoLabel = "No";
+
+        private const string DownloadLabel = "Download Image";
         
         private const float IconSizeLabelWidth = 120f;
         private const float IconSizesWidth = 180f;
@@ -191,9 +194,10 @@ namespace GursaanjTools
                         info.Append($"Is ProSkin Icon? {proSkinLabel}");
                         EditorGUILayout.HelpBox(info.ToString(), MessageType.None);
                         GUILayout.Space(15f);
-                        if (GUILayout.Button("Download Image"))
+                        if (GUILayout.Button(DownloadLabel))
                         {
-                            Debug.Log("Add Download Functionality");
+                            //Debug.Log("Add Download Functionality");
+                            DownloadIcon(_currentlySelectedIcon);
                         }
                     }
 
@@ -400,6 +404,40 @@ namespace GursaanjTools
         private bool IsIconProOnly(string name)
         {
             return name.IndexOf(ProOnlyIconIdentifier, StringComparison.Ordinal) == 0;
+        }
+
+        private void DownloadIcon(GUIContent iconContent)
+        {
+            Texture2D icon = (Texture2D)iconContent.image;
+            string iconName = iconContent.tooltip;
+
+            if (string.IsNullOrEmpty(iconName))
+            {
+                DisplayDialogue(ErrorTitle, "Unable to Download: No associated Name", false);
+                return;
+            }
+
+            if (icon == null)
+            {
+                DisplayDialogue(ErrorTitle, "Unable to Download: No image to load", false);
+                return;
+            }
+            
+            Texture2D texture = new Texture2D(icon.width, icon.height, icon.format, icon.mipmapCount > 1);
+            Graphics.CopyTexture(icon, texture);
+            
+            string folderPath = Path.GetDirectoryName(Path.Combine("UnityInternal Icons/", $"{_selectedSize.ToString()}/"));
+
+            if (!Directory.Exists(folderPath))
+            {
+                //TODO: Deal with Null Exception
+                Directory.CreateDirectory(folderPath);
+            }
+
+            string iconPath = Path.Combine(folderPath, $"{iconName}{PngFileExtension}");
+            File.WriteAllBytes(iconPath, texture.EncodeToPNG());
+            
+            AssetDatabase.Refresh();
         }
 
         #endregion

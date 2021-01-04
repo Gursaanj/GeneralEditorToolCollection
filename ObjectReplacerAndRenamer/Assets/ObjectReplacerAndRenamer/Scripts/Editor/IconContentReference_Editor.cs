@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Text;
 using UnityEditor;
 using UnityEngine;
 
@@ -45,6 +46,8 @@ namespace GursaanjTools
         private const float SmallButtonSize = 40f;
         private const float MediumButtonSize = 70f;
         private const float LargeButtonSize = 100f;
+        
+        
 
         private readonly string[] IconSizes = Enum.GetNames(typeof(IconSize));
         
@@ -62,6 +65,8 @@ namespace GursaanjTools
         private IconSize _selectedSize = 0;
 
         private GUIStyle _iconButtonStyle;
+        private GUIStyle _previewStyle;
+        private GUIStyle _previewLabel;
         
         #endregion
 
@@ -70,10 +75,8 @@ namespace GursaanjTools
         private void OnEnable()
         {
             _iconNames = GetAppropriateIconNames(GetEditorAssetBundle(), GetIconPath());
-            
-            _iconButtonStyle = new GUIStyle(EditorStyles.miniButton);
-            _iconButtonStyle.margin = new RectOffset(0, 0, 0, 0);
-            _iconButtonStyle.fixedHeight = 0;
+
+            CreateGUIStyles();
 
             if (_iconNames == null || _iconNames.Count == 0)
             {
@@ -176,11 +179,80 @@ namespace GursaanjTools
             }
 
             GUILayout.FlexibleSpace();
+            float textureWidth = position.width / 2.5f;
+
+            using (new GUILayout.HorizontalScope(EditorStyles.helpBox,GUILayout.MaxHeight(130)))
+            {
+                using (new GUILayout.VerticalScope(GUILayout.Width(textureWidth)))
+                {
+                    GUILayout.Space(2f);
+
+                    GUILayout.Button(_currentlySelectedIcon, _previewStyle, GUILayout.Width(textureWidth - 2f),
+                        GUILayout.Height(128));
+                    
+                    GUILayout.FlexibleSpace();
+                }
+
+                GUILayout.Space(10f);
+
+                using (new GUILayout.VerticalScope())
+                {
+                    GUILayout.Space(5f);
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        StringBuilder info = new StringBuilder();
+                        info.AppendLine($"Size: {_currentlySelectedIcon.image.width} X {_currentlySelectedIcon.image.height}");
+                        info.Append($"Is ProSkin Icon? {"Does not contain d_"}");
+                        EditorGUILayout.HelpBox(info.ToString(), MessageType.None);
+                        GUILayout.Space(15f);
+                        if (GUILayout.Button("Download Image"))
+                        {
+                            Debug.Log("Add Download Functionality");
+                        }
+                    }
+
+                    GUILayout.Space(5f);
+                    CreatePreviewLabel("Name of Icon Content", "Name of Content");
+                    GUILayout.Space(5f);
+                    CreatePreviewLabel("Full Method", $"EditorGUIUtility.IconContent({"Name of Content"})");
+                    GUILayout.FlexibleSpace();
+                }
+            }
+
+            if (Event.current.isKey && Event.current.keyCode == KeyCode.Escape)
+            {
+                _currentlySelectedIcon = GUIContent.none;
+            }
         }
 
         #endregion
 
         #region Custom Methods
+
+        private void CreateGUIStyles()
+        {
+            _iconButtonStyle = new GUIStyle(EditorStyles.miniButton);
+            _iconButtonStyle.margin = new RectOffset(0, 0, 0, 0);
+            _iconButtonStyle.fixedHeight = 0;
+            
+            Texture2D backgroundTexture = new Texture2D(1,1);
+            backgroundTexture.SetPixel(0,0,new Color(0.15f,0.15f,0.15f));
+            backgroundTexture.Apply();
+
+            _previewStyle = new GUIStyle(_iconButtonStyle);
+            
+            _previewStyle.hover.background = _previewStyle.onHover.background = _previewStyle.focused.background =
+                _previewStyle.active.background = _previewStyle.onActive.background = _previewStyle.normal.background =
+                    _previewStyle.onNormal.background = backgroundTexture;
+
+            _previewStyle.hover.scaledBackgrounds = _previewStyle.onHover.scaledBackgrounds =
+                _previewStyle.focused.scaledBackgrounds = _previewStyle.active.scaledBackgrounds =
+                    _previewStyle.onActive.scaledBackgrounds = _previewStyle.normal.scaledBackgrounds =
+                        _previewStyle.onNormal.scaledBackgrounds = new Texture2D[] {backgroundTexture};
+            
+            _previewLabel = new GUIStyle(EditorStyles.boldLabel);
+            _previewLabel.padding = new RectOffset(4,0,0,-5);
+        }
 
         private void CreateToolbar(string controlName)
         {
@@ -194,6 +266,22 @@ namespace GursaanjTools
                 {
                     _searchField = string.Empty;
                 }
+            }
+        }
+
+        private void CreatePreviewLabel(string label, string content)
+        {
+            GUILayout.Label(label, _previewLabel);
+
+            using (new GUILayout.HorizontalScope())
+            {
+                GUILayout.Label(content);
+                GUILayout.Space(3f);
+                if (GUILayout.Button("0", EditorStyles.miniButtonRight, GUILayout.Height(10f)))
+                {
+                    EditorGUIUtility.systemCopyBuffer = content;
+                }
+                GUILayout.FlexibleSpace();
             }
         }
 
@@ -273,9 +361,13 @@ namespace GursaanjTools
                 {
                     _smallIcons.Add(iconContent);
                 }
-                else
+                else if (icon.width <= MediumToLargeLimit || icon.height <= MediumToLargeLimit)
                 {
                     _mediumIcons.Add(iconContent);
+                }
+                else
+                {
+                    _largeIcons.Add(iconContent);
                 }
             }
         }

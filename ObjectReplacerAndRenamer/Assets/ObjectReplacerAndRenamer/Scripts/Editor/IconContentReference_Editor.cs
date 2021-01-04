@@ -7,7 +7,13 @@ using UnityEngine;
 
 namespace GursaanjTools
 {
-    
+    public enum IconSize
+    {
+        Small,
+        Medium,
+        Large
+    }
+
     public class IconContentReference_Editor : GuiControlEditorWindow
     {
         #region Variables
@@ -22,17 +28,30 @@ namespace GursaanjTools
         private const string EditorResourceUtility = "UnityEditorInternal.EditorResourcesUtility";
         private const string IconsPath = "iconsPath";
 
+        private const string IconSizesLabel = "Filter icons By size";
+        private const string ClearIcon = "winbtn_win_close";
+        private const int IconSizeLabelWidth = 120;
+        private const int IconSizesWidth = 180;
+        private const int ClearButtonWidth = 20;
+        
         private const string PngFileExtension = ".png";
         private const string AssetFileExtension = ".asset";
 
         private const int SmallToMediumLimit = 36;
         private const int MediumToLargeLimit = 72;
+
+        private readonly string[] IconSizes = Enum.GetNames(typeof(IconSize));
         
         private List<string> _iconNames = new List<string>();
         private List<GUIContent> _smallIcons = new List<GUIContent>();
         private List<GUIContent> _mediumIcons = new List<GUIContent>();
         private List<GUIContent> _largeIcons = new List<GUIContent>();
+        private List<GUIContent> _currentlySelectedIcons = new List<GUIContent>();
         private Vector2 _scrollPosition = Vector2.zero;
+        
+        //GUI Fields
+        private string _searchField = string.Empty;
+        private IconSize _selectedSize = 0;
         
         #endregion
 
@@ -49,36 +68,58 @@ namespace GursaanjTools
             }
             
             SortIconsBySizes();
-            Debug.Log(_smallIcons.Count);
-            Debug.Log(_mediumIcons.Count);
+            Debug.Log($"Number of Small Icons {_smallIcons.Count}");
+            Debug.Log($"Number of Medium Icons {_mediumIcons.Count}");
+            Debug.Log($"Number of Large Icons {_largeIcons.Count}");
         }
 
         protected override void CreateGUI(string controlName)
         {
+            using (new GUILayout.HorizontalScope(EditorStyles.toolbar))
+            {
+                GUILayout.Label(IconSizesLabel, EditorStyles.boldLabel, GUILayout.Width(IconSizeLabelWidth));
+                _selectedSize = (IconSize)GUILayout.SelectionGrid((int)_selectedSize, IconSizes, IconSizes.Length, EditorStyles.toolbarButton, GUILayout.Width(IconSizesWidth));
+                GUI.SetNextControlName(controlName);
+                _searchField = GUILayout.TextField(_searchField, EditorStyles.toolbarSearchField);
+                if (GUILayout.Button(EditorGUIUtility.IconContent(ClearIcon), EditorStyles.toolbarButton, GUILayout.Width(ClearButtonWidth)))
+                {
+                    _searchField = string.Empty;
+                }
+            }
+
+            _currentlySelectedIcons = GetSizeAppropriateIcons(_selectedSize);
+
             using (var scrollScope = new GUILayout.ScrollViewScope(_scrollPosition))
             {
                 _scrollPosition = scrollScope.scrollPosition;
-
+                float pixelsPerPoint = EditorGUIUtility.pixelsPerPoint;
+                GUILayout.Space(10f);
+                
                 // foreach (string iconName in _iconNames)
                 // {
-                //     GUIContent iconContent = EditorGUIUtility.IconContent(iconName);
+                //     GUIContent content = GetIconContent(iconName);
                 //
-                //     if (iconContent == null)
+                //     if (content == null || content.image == null)
                 //     {
                 //         continue;
                 //     }
                 //
-                //     using (new GUILayout.HorizontalScope(GUILayout.Height(30f)))
+                //     if (GUILayout.Button(content.image))
                 //     {
-                //         GUILayout.Label(iconContent);
+                //         Debug.Log(iconName);
                 //     }
                 // }
 
-                foreach (GUIContent smallIcon in _smallIcons)
+                foreach (GUIContent icon in _currentlySelectedIcons)
                 {
+                    if (icon == null || icon.image == null)
+                    {
+                        continue;
+                    }
+
                     using (new GUILayout.HorizontalScope())
                     {
-                        GUILayout.Box(smallIcon);
+                        GUILayout.Box(icon);
                     }
                 }
             }
@@ -178,6 +219,22 @@ namespace GursaanjTools
             } 
             
             return EditorGUIUtility.IconContent(iconName);
+        }
+
+        private List<GUIContent> GetSizeAppropriateIcons(IconSize size)
+        {
+            switch (size)
+            {
+                case IconSize.Small: 
+                    return _smallIcons;
+                case IconSize.Medium:
+                    return _mediumIcons;
+                case IconSize.Large:
+                    return _largeIcons;
+                default:
+                    Debug.LogWarning("Inappropriate Icon Size selected");
+                    return _smallIcons;
+            }
         }
 
         #endregion

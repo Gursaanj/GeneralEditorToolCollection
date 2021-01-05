@@ -18,6 +18,8 @@
       <Path>Library</Path>
       <Path>Logs</Path>
       <Path>Temp</Path>
+      <Path>Unity Icons</Path>
+      <Path>UnityInternal Icons</Path>
       <Path>obj</Path>
     </explicitExcludes>
   </component>

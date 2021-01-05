@@ -43,6 +43,7 @@ namespace GursaanjTools
         private const float IconSizesWidth = 180f;
         private const float PreviewSectionMaxHeight = 130f;
         private const float ClearButtonWidth = 20f;
+        private const float CopyButtonWidth = 20f;
 
         private const float PrimaryPadding = 10f;
         private const float TextureHeight = 115f;
@@ -108,19 +109,15 @@ namespace GursaanjTools
         private void OnEnable()
         {
             _iconNames = GetAppropriateIconNames(GetEditorAssetBundle(), GetIconPath());
-
-            CreateGUIStyles();
-
+            
             if (_iconNames == null || _iconNames.Count == 0)
             {
                 DisplayDialogue(ErrorTitle, NoIconsFoundWarning, false);
                 Close();
             }
             
+            CreateGUIStyles();
             SortIconsBySizes();
-            Debug.Log($"Number of Small Icons {_smallIcons.Count}");
-            Debug.Log($"Number of Medium Icons {_mediumIcons.Count}");
-            Debug.Log($"Number of Large Icons {_largeIcons.Count}");
         }
 
         protected override void CreateGUI(string controlName)
@@ -188,7 +185,7 @@ namespace GursaanjTools
             }
 
             GUILayout.FlexibleSpace();
-            float textureWidth = position.width / TextureWidthRatio;
+            float textureWidth = position.width * TextureWidthRatio;
             float previewStyleWidth = textureWidth / 2;
             float previewWidth = position.width - textureWidth - PreviewWidthPadding;
 
@@ -323,7 +320,7 @@ namespace GursaanjTools
             {
                 GUILayout.Label(label, _previewLabel);
                 GUILayout.Space(PreviewLabelVerticalOffset);
-                if (GUILayout.Button(_copyContent, EditorStyles.miniButtonRight, GUILayout.Width(20f)))
+                if (GUILayout.Button(_copyContent, EditorStyles.miniButtonRight, GUILayout.Width(CopyButtonWidth)))
                 {
                     EditorGUIUtility.systemCopyBuffer = content;
                 }
@@ -339,7 +336,7 @@ namespace GursaanjTools
         private AssetBundle GetEditorAssetBundle()
         {
             MethodInfo editorAssetBundle = typeof(EditorGUIUtility).GetMethod(EditorAssetBundleMethod, BindingFlags.NonPublic | BindingFlags.Static);
-            return (AssetBundle) editorAssetBundle.Invoke(null, new object[] { });
+            return editorAssetBundle == null ? null : (AssetBundle) editorAssetBundle.Invoke(null, new object[] { });
         }
 
         private string GetIconPath()
@@ -397,7 +394,6 @@ namespace GursaanjTools
 
                 if (iconContent == null)
                 {
-                    //TODO: Add Debug message
                     continue;
                 }
 

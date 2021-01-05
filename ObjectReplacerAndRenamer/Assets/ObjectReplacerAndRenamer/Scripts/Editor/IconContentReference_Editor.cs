@@ -78,15 +78,16 @@ namespace GursaanjTools
         private GUIContent _currentlySelectedIcon = GUIContent.none;
         private Vector2 _scrollPosition = Vector2.zero;
         private float _buttonSize = SmallButtonSize;
+        private bool _isLightBackdrop = false;
 
         //GUI Fields
         private string _searchField = string.Empty;
         private IconSize _selectedSize = IconSize.Small;
 
         private GUIStyle _iconButtonStyle;
-        private GUIStyle _previewStyle;
+        private GUIStyle _blackPreviewStyle;
+        private GUIStyle _whitePreviewStyle;
         private GUIStyle _previewLabel;
-
         private GUIContent _copyContent;
         
         #endregion
@@ -177,6 +178,7 @@ namespace GursaanjTools
 
             GUILayout.FlexibleSpace();
             float textureWidth = position.width / 2.5f;
+            float previewStyleWidth = textureWidth / 2;
             float previewWidth = position.width - textureWidth - 30f;
 
             using (new GUILayout.HorizontalScope(EditorStyles.helpBox,GUILayout.MaxHeight(130)))
@@ -185,10 +187,25 @@ namespace GursaanjTools
                 {
                     GUILayout.Space(2f);
 
-                    GUILayout.Button(_currentlySelectedIcon, _previewStyle, GUILayout.Width(textureWidth - 2f),
-                        GUILayout.Height(128));
+                    GUILayout.Button(_currentlySelectedIcon, _isLightBackdrop ? _whitePreviewStyle : _blackPreviewStyle, GUILayout.Width(textureWidth - 2f),
+                        GUILayout.Height(115f));
                     
                     GUILayout.FlexibleSpace();
+
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        if (GUILayout.Button("Light", EditorStyles.miniButton, GUILayout.Width(previewStyleWidth)))
+                        {
+                            _isLightBackdrop = true;
+                        }
+                        
+                        GUILayout.FlexibleSpace();
+
+                        if (GUILayout.Button("Dark", EditorStyles.miniButton, GUILayout.Width(previewStyleWidth)))
+                        {
+                            _isLightBackdrop = false;
+                        }
+                    }
                 }
 
                 GUILayout.Space(10f);
@@ -243,27 +260,35 @@ namespace GursaanjTools
             _iconButtonStyle.margin = new RectOffset(0, 0, 0, 0);
             _iconButtonStyle.fixedHeight = 0;
             
-            Texture2D backgroundTexture = new Texture2D(1,1);
-            backgroundTexture.SetPixel(0,0,new Color(0.15f,0.15f,0.15f));
-            backgroundTexture.Apply();
-
-            _previewStyle = new GUIStyle(_iconButtonStyle);
+            Texture2D blackBackground = new Texture2D(1,1);
+            blackBackground.SetPixel(0,0,new Color(0.15f,0.15f,0.15f));
+            blackBackground.Apply();
             
-            _previewStyle.hover.background = _previewStyle.onHover.background = _previewStyle.focused.background =
-                _previewStyle.active.background = _previewStyle.onActive.background = _previewStyle.normal.background =
-                    _previewStyle.onNormal.background = backgroundTexture;
+            Texture2D whiteBackground = new Texture2D(1,1);
+            whiteBackground.SetPixel(0,0,new Color(0.85f,0.85f,0.85f));
+            whiteBackground.Apply();
 
-            _previewStyle.hover.scaledBackgrounds = _previewStyle.onHover.scaledBackgrounds =
-                _previewStyle.focused.scaledBackgrounds = _previewStyle.active.scaledBackgrounds =
-                    _previewStyle.onActive.scaledBackgrounds = _previewStyle.normal.scaledBackgrounds =
-                        _previewStyle.onNormal.scaledBackgrounds = new Texture2D[] {backgroundTexture};
+            _blackPreviewStyle = new GUIStyle(_iconButtonStyle);
+            SetPreviewBackgrounds(ref _blackPreviewStyle, blackBackground);
+
+            _whitePreviewStyle = new GUIStyle(_iconButtonStyle);
+            SetPreviewBackgrounds(ref _whitePreviewStyle, whiteBackground);
             
             _copyContent = EditorGUIUtility.IconContent(CopyIcon);
             _copyContent.tooltip = CopyIconTooltip;
             
             _previewLabel = new GUIStyle(EditorStyles.boldLabel);
             _previewLabel.padding = new RectOffset(0,0,0,-5);
+        }
 
+        private void SetPreviewBackgrounds(ref GUIStyle style, Texture2D backgroundTexture)
+        {
+            style.hover.background = style.onHover.background = style.focused.background = style.active.background =
+                style.onActive.background = style.normal.background = style.onNormal.background = backgroundTexture;
+
+            style.hover.scaledBackgrounds = style.onHover.scaledBackgrounds = style.focused.scaledBackgrounds =
+                style.active.scaledBackgrounds = style.onActive.scaledBackgrounds = style.normal.scaledBackgrounds =
+                    style.onNormal.scaledBackgrounds = new Texture2D[] {backgroundTexture};
         }
 
         private void CreateToolbar(string controlName)
@@ -446,6 +471,7 @@ namespace GursaanjTools
                 if (EditorUtility.DisplayCancelableProgressBar(progressTitle,
                     string.Format(DownloadingMessage, content.tooltip), (float) i / totalCount))
                 {
+                    EditorUtility.ClearProgressBar();
                     return;
                 }
                 

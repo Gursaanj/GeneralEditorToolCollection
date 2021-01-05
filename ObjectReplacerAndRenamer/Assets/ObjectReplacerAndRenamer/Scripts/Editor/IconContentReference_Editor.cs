@@ -30,6 +30,8 @@ namespace GursaanjTools
         private const string CopyIconTooltip = "Copy to clipboard";
         private const string YesLabel = "Yes";
         private const string NoLabel = "No";
+        private const string LightThemeLabel = "Light";
+        private const string DarkThemeLabel = "Dark";
 
         private const string DownloadAllOfSizeLabel = "Download the presented {0} sized Icons";
         private const string DownloadProgressTitle = "Downloading presented {0} sized Icons";
@@ -39,8 +41,17 @@ namespace GursaanjTools
         
         private const float IconSizeLabelWidth = 120f;
         private const float IconSizesWidth = 180f;
+        private const float PreviewSectionMaxHeight = 130f;
         private const float ClearButtonWidth = 20f;
 
+        private const float PrimaryPadding = 10f;
+        private const float TextureHeight = 115f;
+        private const float TextureWidthRatio = 0.4f;
+        private const float TextureBorderOffset = 2f;
+        private const float PreviewWidthPadding = 30f;
+        private const float PreviewHeightPadding = 5f;
+        private const float PreviewLabelVerticalOffset = 3f;
+        private const float DownloadButtonOffset = 15f;
         private const float ScrollBarWidth = 13f;
         
         //Warning Labels
@@ -128,7 +139,7 @@ namespace GursaanjTools
             {
                 _scrollPosition = scrollScope.scrollPosition;
                 float pixelsPerPoint = EditorGUIUtility.pixelsPerPoint;
-                GUILayout.Space(10f);
+                GUILayout.Space(PrimaryPadding);
 
                 float renderWidth = Screen.width / pixelsPerPoint - ScrollBarWidth;
                 int gridWidth = Mathf.FloorToInt(renderWidth / _buttonSize);
@@ -167,7 +178,7 @@ namespace GursaanjTools
                     currentRow++;
                 }
                 
-                GUILayout.Space(10f);
+                GUILayout.Space(PrimaryPadding);
                 
             }
 
@@ -177,59 +188,59 @@ namespace GursaanjTools
             }
 
             GUILayout.FlexibleSpace();
-            float textureWidth = position.width / 2.5f;
+            float textureWidth = position.width / TextureWidthRatio;
             float previewStyleWidth = textureWidth / 2;
-            float previewWidth = position.width - textureWidth - 30f;
+            float previewWidth = position.width - textureWidth - PreviewWidthPadding;
 
-            using (new GUILayout.HorizontalScope(EditorStyles.helpBox,GUILayout.MaxHeight(130)))
+            using (new GUILayout.HorizontalScope(EditorStyles.helpBox,GUILayout.MaxHeight(PreviewSectionMaxHeight)))
             {
                 using (new GUILayout.VerticalScope(GUILayout.Width(textureWidth)))
                 {
-                    GUILayout.Space(2f);
+                    GUILayout.Space(TextureBorderOffset);
 
-                    GUILayout.Button(_currentlySelectedIcon, _isLightBackdrop ? _whitePreviewStyle : _blackPreviewStyle, GUILayout.Width(textureWidth - 2f),
-                        GUILayout.Height(115f));
+                    GUILayout.Button(_currentlySelectedIcon, _isLightBackdrop ? _whitePreviewStyle : _blackPreviewStyle, GUILayout.Width(textureWidth - TextureBorderOffset),
+                        GUILayout.Height(TextureHeight));
                     
                     GUILayout.FlexibleSpace();
 
                     using (new GUILayout.HorizontalScope())
                     {
-                        if (GUILayout.Button("Light", EditorStyles.miniButton, GUILayout.Width(previewStyleWidth)))
+                        if (GUILayout.Button(LightThemeLabel, EditorStyles.miniButton, GUILayout.Width(previewStyleWidth)))
                         {
                             _isLightBackdrop = true;
                         }
                         
                         GUILayout.FlexibleSpace();
 
-                        if (GUILayout.Button("Dark", EditorStyles.miniButton, GUILayout.Width(previewStyleWidth)))
+                        if (GUILayout.Button(DarkThemeLabel, EditorStyles.miniButton, GUILayout.Width(previewStyleWidth)))
                         {
                             _isLightBackdrop = false;
                         }
                     }
                 }
 
-                GUILayout.Space(10f);
+                GUILayout.Space(PrimaryPadding);
 
                 using (new GUILayout.VerticalScope())
                 {
-                    GUILayout.Space(5f);
+                    GUILayout.Space(PreviewHeightPadding);
                     using (new GUILayout.HorizontalScope(GUILayout.Width(previewWidth)))
                     {
                         StringBuilder info = new StringBuilder();
-                        info.AppendLine($"Size: {_currentlySelectedIcon.image.width} X {_currentlySelectedIcon.image.height}");
+                        info.AppendLine($"Width : {_currentlySelectedIcon.image.width} Height : {_currentlySelectedIcon.image.height}");
                         string proSkinLabel = IsIconProOnly(_currentlySelectedIcon.tooltip) ? YesLabel : NoLabel;
                         info.Append($"Is ProSkin Icon? {proSkinLabel}");
                         EditorGUILayout.HelpBox(info.ToString(), MessageType.None);
-                        GUILayout.Space(15f);
+                        GUILayout.Space(DownloadButtonOffset);
                         if (GUILayout.Button(DownloadLabel))
                         {
                             DownloadIcon(_currentlySelectedIcon, true);
                         }
                     }
 
-                    GUILayout.Space(5f);
+                    GUILayout.Space(PreviewHeightPadding);
                     CreatePreviewLabel(previewWidth,IconNameLabel, $"\"{_currentlySelectedIcon.tooltip}\"");
-                    GUILayout.Space(5f);
+                    GUILayout.Space(PreviewHeightPadding);
                     CreatePreviewLabel(previewWidth,IconFullMethod, $"EditorGUIUtility.IconContent(\"{_currentlySelectedIcon.tooltip}\")");
                     GUILayout.FlexibleSpace();
                 }
@@ -311,7 +322,7 @@ namespace GursaanjTools
             using (new GUILayout.HorizontalScope(GUILayout.Width(layoutWidth)))
             {
                 GUILayout.Label(label, _previewLabel);
-                GUILayout.Space(3f);
+                GUILayout.Space(PreviewLabelVerticalOffset);
                 if (GUILayout.Button(_copyContent, EditorStyles.miniButtonRight, GUILayout.Width(20f)))
                 {
                     EditorGUIUtility.systemCopyBuffer = content;

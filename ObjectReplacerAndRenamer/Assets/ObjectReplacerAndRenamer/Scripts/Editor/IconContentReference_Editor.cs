@@ -16,7 +16,7 @@ namespace GursaanjTools
         Large
     }
 
-    public class IconContentReference_Editor : GuiControlEditorWindow
+    public class IconContentReference_Editor : GuiControlEditorWindow, IHasCustomMenu
     {
         #region Variables
         
@@ -31,7 +31,11 @@ namespace GursaanjTools
         private const string YesLabel = "Yes";
         private const string NoLabel = "No";
 
+        private const string DownloadAllOfSizeLabel = "Download the presented {0} sized Icons";
+        private const string DownloadProgressTitle = "Downloading presented {0} sized Icons";
         private const string DownloadLabel = "Download Image";
+        private const string DownloadCountMessage = "Downloading {0} Icons";
+        private const string DownloadingMessage = "Downloading {0}";
         
         private const float IconSizeLabelWidth = 120f;
         private const float IconSizesWidth = 180f;
@@ -41,11 +45,12 @@ namespace GursaanjTools
         
         //Warning Labels
         private const string NoIconsFoundWarning = "No Icons Found!!";
-        private const string UnableToDownloadWarning = "Unable to Download: No associated Name";
-        private const string UnableToDownload2Warning = "Unable to Download the {0} icon";
         private const string IconDownloadedMessage = "{0} has been downloaded";
+        private const string NoIconsError = "No Icons to download";
+        private const string CantDownloadIconError = "Icon number {0} can't be downloaded";
 
         private const string InappropriateSizeWarning = "Inappropriate Icon Size selected";
+        private const string IconAlreadyExistsMessage = "{0} Already exists, not downloading";
         
         private const string EditorAssetBundleMethod = "GetEditorAssetBundle";
         private const string EditorResourceUtility = "UnityEditorInternal.EditorResourcesUtility";
@@ -62,8 +67,6 @@ namespace GursaanjTools
         private const float SmallButtonSize = 40f;
         private const float MediumButtonSize = 70f;
         private const float LargeButtonSize = 100f;
-        
-        
 
         private readonly string[] IconSizes = Enum.GetNames(typeof(IconSize));
         
@@ -219,6 +222,15 @@ namespace GursaanjTools
             {
                 _currentlySelectedIcon = GUIContent.none;
             }
+        }
+
+        #endregion
+
+        #region IHasCustomMenu Implementation
+
+        public void AddItemsToMenu(GenericMenu menu)
+        {
+            menu.AddItem(new GUIContent(string.Format(DownloadAllOfSizeLabel, _selectedSize.ToString())),false, DownloadAllIconsOfSameSize);
         }
 
         #endregion
@@ -379,12 +391,7 @@ namespace GursaanjTools
 
         private GUIContent GetIconContent(string iconName)
         {
-            if (string.IsNullOrEmpty(iconName))
-            {
-                return null;
-            }
-            
-            return EditorGUIUtility.IconContent(iconName);
+            return string.IsNullOrEmpty(iconName) ? null : EditorGUIUtility.IconContent(iconName);
         }
 
         private List<GUIContent> GetSizeAppropriateIcons(IconSize size)
@@ -407,35 +414,66 @@ namespace GursaanjTools
             }
         }
 
-        private bool IsIconProOnly(string name)
+        private bool IsIconProOnly(string iconName)
         {
-            return name.IndexOf(ProOnlyIconIdentifier, StringComparison.Ordinal) == 0;
+            return iconName.IndexOf(ProOnlyIconIdentifier, StringComparison.Ordinal) == 0;
+        }
+
+        private void DownloadAllIconsOfSameSize()
+        {
+            int totalCount = _currentSelectionOfIcons.Count;
+            
+            if (totalCount == 0)
+            {
+                DisplayDialogue(ErrorTitle, NoIconsError, false);
+                return;
+            }
+
+            string progressTitle = string.Format(DownloadProgressTitle, _selectedSize.ToString());
+
+            EditorUtility.DisplayProgressBar(progressTitle, string.Format(DownloadCountMessage, totalCount), 0.0f);
+
+            for (int i = 0; i < totalCount; i++)
+            {
+                GUIContent content = _currentSelectionOfIcons[i];
+
+                if (content.Equals(GUIContent.none) || content.image == null || string.IsNullOrEmpty(content.tooltip))
+                {
+                    Debug.LogError(string.Format(CantDownloadIconError, i));
+                    continue;
+                }
+
+                if (EditorUtility.DisplayCancelableProgressBar(progressTitle,
+                    string.Format(DownloadingMessage, content.tooltip), (float) i / totalCount))
+                {
+                    return;
+                }
+                
+                DownloadIcon(content);
+            }
+            
+            EditorUtility.ClearProgressBar();
         }
 
         private void DownloadIcon(GUIContent iconContent, bool displayConfirmation = false)
         {
-            Texture2D icon = (Texture2D)iconContent.image;
             string iconName = iconContent.tooltip;
-
-            if (string.IsNullOrEmpty(iconName))
-            {
-                DisplayDialogue(ErrorTitle, UnableToDownloadWarning, false);
-                return;
-            }
-
-            if (icon == null)
-            {
-                DisplayDialogue(ErrorTitle, string.Format(UnableToDownload2Warning, iconName), false);
-                return;
-            }
-            
-            Texture2D texture = new Texture2D(icon.width, icon.height, icon.format, icon.mipmapCount > 1);
-            Graphics.CopyTexture(icon, texture);
             
             string folderPath = $"{MainDirectory}/{_selectedSize.ToString()}";
             Directory.CreateDirectory(folderPath);
+            string completePath = Path.Combine(folderPath, $"{iconName}{PngFileExtension}");
+
+            if (File.Exists(completePath))
+            {
+                Debug.Log(string.Format(IconAlreadyExistsMessage, iconName));
+                return;
+            }
             
-            File.WriteAllBytes(Path.Combine(folderPath, $"{iconName}{PngFileExtension}"), texture.EncodeToPNG());
+            Texture2D icon = (Texture2D)iconContent.image;
+            Texture2D texture = new Texture2D(icon.width, icon.height, icon.format, icon.mipmapCount > 1);
+            Graphics.CopyTexture(icon, texture);
+            
+            File.WriteAllBytes(completePath, texture.EncodeToPNG());
             
             AssetDatabase.Refresh();
 
@@ -443,7 +481,6 @@ namespace GursaanjTools
             {
                 DisplayDialogue(UpdateTitle, string.Format(IconDownloadedMessage, iconName), false);
             }
-            
         }
 
         #endregion

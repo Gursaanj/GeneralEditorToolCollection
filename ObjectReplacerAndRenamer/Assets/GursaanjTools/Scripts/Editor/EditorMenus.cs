@@ -135,9 +135,19 @@ namespace GursaanjTools
 
         #region Icon Content
         [MenuItem("GursaanjTools/References/Icon Contents")]
-        public static void IconUtilityReferenceTool()
+        public static void IconContentReferenceTool()
         {
             IconContentReference_Editor.Init(typeof(IconContentReference_Editor), EditorWindowData.EditorWindowInformations["IconContent Reference"]);
+        }
+
+        #endregion
+
+        #region Fonts
+        
+        [MenuItem("GursaanjTools/References/Fonts")]
+        public static void FontReferenceTool()
+        {
+            FontReferences_Editor.Init(typeof(FontReferences_Editor), EditorWindowData.EditorWindowInformations["Font Reference"]);
         }
 
         #endregion

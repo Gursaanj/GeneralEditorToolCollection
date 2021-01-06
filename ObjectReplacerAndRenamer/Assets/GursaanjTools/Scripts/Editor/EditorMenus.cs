@@ -134,10 +134,18 @@ namespace GursaanjTools
         #region Reference EditorWindows
 
         #region Icon Content
-        [MenuItem("GursaanjTools/References/Icon Contents")]
+        [MenuItem("GursaanjTools/References/Internal Icons")]
         public static void IconUtilityReferenceTool()
         {
             IconContentReference_Editor.Init(typeof(IconContentReference_Editor), EditorWindowData.EditorWindowInformations["IconContent Reference"]);
+        }
+        #endregion
+
+        #region Cursors
+        [MenuItem("GursaanjTools/References/Internal Cursors")]
+        public static void CursorsReferenceTool()
+        {
+            CursorReference_Editor.Init(typeof(CursorReference_Editor), EditorWindowData.EditorWindowInformations["Cursor Reference"]);
         }
 
         #endregion

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
@@ -27,6 +29,8 @@ namespace GursaanjTools
         private const string EditorResourceUtility = "UnityEditorInternal.EditorResourcesUtility";
         private const string ProOnlyIconIdentifier = "d_";
         private const string MainDirectory = "Assets/UnityEditorResources";
+        
+        private const string PngFileExtension = ".png";
 
         private bool _isLightBackdrop = false;
         
@@ -91,6 +95,77 @@ namespace GursaanjTools
         {
             MethodInfo editorAssetBundle = typeof(EditorGUIUtility).GetMethod(EditorAssetBundleMethod, BindingFlags.NonPublic | BindingFlags.Static);
             return editorAssetBundle == null ? null : (AssetBundle) editorAssetBundle.Invoke(null, new object[] { });
+        }
+        
+        private List<string> GetAppropriateNames(AssetBundle bundle, string path, string[] extensions)
+        {
+            if (bundle == null || string.IsNullOrEmpty(path) || extensions == null)
+            {
+                return null;
+            }
+
+            string[] assetNames = bundle.GetAllAssetNames();
+
+            if (assetNames == null)
+            {
+                return null;
+            }
+            
+            List<string> appropriateNames = new List<string>();
+
+            foreach (string assetName in assetNames)
+            {
+                if (string.IsNullOrEmpty(assetName))
+                {
+                    continue;
+                }
+
+                if (!assetName.StartsWith(path, StringComparison.OrdinalIgnoreCase))
+                {
+                    continue;
+                }
+
+                foreach (string extension in extensions)
+                {
+                    if (string.IsNullOrEmpty(extension) || !assetName.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+                    
+                    appropriateNames.Add(assetName);
+                    break;
+                }
+            }
+
+            return appropriateNames;
+        }
+        
+        private void DownloadImageContent(GUIContent content, string subDirectory, bool displayConfirmation = false)
+        {
+            string contentName = content.tooltip;
+            
+            string folderPath = $"{MainDirectory}/{subDirectory}";
+            Directory.CreateDirectory(folderPath);
+            string completePath = Path.Combine(folderPath, $"{contentName}{PngFileExtension}");
+
+            if (File.Exists(completePath))
+            {
+                Debug.Log(string.Format(ImageAlreadyExistsMessage, contentName));
+                return;
+            }
+            
+            Texture2D image = (Texture2D)content.image;
+            Texture2D texture = new Texture2D(image.width, image.height, image.format, image.mipmapCount > 1);
+            Graphics.CopyTexture(image, texture);
+            
+            File.WriteAllBytes(completePath, texture.EncodeToPNG());
+            
+            AssetDatabase.Refresh();
+
+            if (displayConfirmation)
+            {
+                //DisplayDialogue(UpdateTitle, string.Format(DownloadedMessage, contentName), false);
+            }
         }
 
         #endregion

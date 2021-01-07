@@ -109,7 +109,8 @@ namespace GursaanjTools
 
         private void OnEnable()
         {
-            _iconNames = GetAppropriateIconNames(GetEditorAssetBundle(), GetIconPath());
+            string[] iconExtensions = new string[2] {PngFileExtension, AssetFileExtension};
+            _iconNames = GetAppropriateNames(GetEditorAssetBundle(), GetIconPath(), iconExtensions);
             
             if (_iconNames == null || _iconNames.Count == 0)
             {
@@ -352,9 +353,9 @@ namespace GursaanjTools
 #endif
         }
 
-        private List<string> GetAppropriateIconNames(AssetBundle bundle, string path)
+        private List<string> GetAppropriateNames(AssetBundle bundle, string path, string[] extensions)
         {
-            if (bundle == null || string.IsNullOrEmpty(path))
+            if (bundle == null || string.IsNullOrEmpty(path) || extensions == null)
             {
                 return null;
             }
@@ -366,25 +367,33 @@ namespace GursaanjTools
                 return null;
             }
             
-            List<string> appropriateIconNames = new List<string>();
+            List<string> appropriateNames = new List<string>();
 
             foreach (string assetName in assetNames)
             {
+                if (string.IsNullOrEmpty(assetName))
+                {
+                    continue;
+                }
+
                 if (!assetName.StartsWith(path, StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
 
-                if (!assetName.EndsWith(PngFileExtension, StringComparison.OrdinalIgnoreCase) &&
-                    !assetName.EndsWith(AssetFileExtension, StringComparison.OrdinalIgnoreCase))
+                foreach (string extension in extensions)
                 {
-                    continue;
+                    if (string.IsNullOrEmpty(extension) || !assetName.EndsWith(extension, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+                    
+                    appropriateNames.Add(assetName);
+                    break;
                 }
-                
-                appropriateIconNames.Add(assetName);
             }
 
-            return appropriateIconNames;
+            return appropriateNames;
         }
 
         private void SortIconsBySizes()

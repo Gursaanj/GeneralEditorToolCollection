@@ -57,12 +57,12 @@ namespace GursaanjTools
         
         //Warning Labels
         private const string NoIconsFoundWarning = "No Icons Found!!";
-        private const string IconDownloadedMessage = "{0} has been downloaded";
+        private const string DownloadedMessage = "{0} has been downloaded";
         private const string NoIconsError = "No Icons to download";
         private const string CantDownloadIconError = "Icon number {0} can't be downloaded";
 
         private const string InappropriateSizeWarning = "Inappropriate Icon Size selected";
-        private const string IconAlreadyExistsMessage = "{0} Already exists, not downloading";
+        private const string ImageAlreadyExistsMessage = "{0} Already exists within designated folder, unable to download";
         
         private const string EditorAssetBundleMethod = "GetEditorAssetBundle";
         private const string EditorResourceUtility = "UnityEditorInternal.EditorResourcesUtility";
@@ -71,7 +71,8 @@ namespace GursaanjTools
         private const string PngFileExtension = ".png";
         private const string AssetFileExtension = ".asset";
         private const string ProOnlyIconIdentifier = "d_";
-        private const string MainDirectory = "Assets/UnityInternal Icons";
+        private const string MainDirectory = "Assets/UnityEditorResources";
+        private const string SubDirectory = "Icons";
 
         private const int SmallToMediumLimit = 36;
         private const int MediumToLargeLimit = 72;
@@ -225,13 +226,13 @@ namespace GursaanjTools
                     {
                         StringBuilder info = new StringBuilder();
                         info.AppendLine($"Width : {_currentlySelectedIcon.image.width} Height : {_currentlySelectedIcon.image.height}");
-                        string proSkinLabel = IsIconProOnly(_currentlySelectedIcon.tooltip) ? YesLabel : NoLabel;
+                        string proSkinLabel = IsProOnly(_currentlySelectedIcon.tooltip) ? YesLabel : NoLabel;
                         info.Append($"Is ProSkin Icon? {proSkinLabel}");
                         EditorGUILayout.HelpBox(info.ToString(), MessageType.None);
                         GUILayout.Space(DownloadButtonOffset);
                         if (GUILayout.Button(DownloadLabel))
                         {
-                            DownloadIcon(_currentlySelectedIcon, true);
+                            DownloadImageContent(_currentlySelectedIcon, $"{SubDirectory}/{_selectedSize.ToString()}", true);
                         }
                     }
 
@@ -446,9 +447,9 @@ namespace GursaanjTools
             }
         }
 
-        private bool IsIconProOnly(string iconName)
+        private bool IsProOnly(string nameInQuestion)
         {
-            return iconName.IndexOf(ProOnlyIconIdentifier, StringComparison.Ordinal) == 0;
+            return nameInQuestion.IndexOf(ProOnlyIconIdentifier, StringComparison.Ordinal) == 0;
         }
 
         private void DownloadAllIconsOfSameSize()
@@ -461,7 +462,9 @@ namespace GursaanjTools
                 return;
             }
 
-            string progressTitle = string.Format(DownloadProgressTitle, _selectedSize.ToString());
+            string iconSizeName = _selectedSize.ToString();
+
+            string progressTitle = string.Format(DownloadProgressTitle, iconSizeName);
 
             EditorUtility.DisplayProgressBar(progressTitle, string.Format(DownloadCountMessage, totalCount), 0.0f);
 
@@ -482,29 +485,29 @@ namespace GursaanjTools
                     return;
                 }
                 
-                DownloadIcon(content);
+                DownloadImageContent(content, $"{SubDirectory}/{iconSizeName}");
             }
             
             EditorUtility.ClearProgressBar();
         }
 
-        private void DownloadIcon(GUIContent iconContent, bool displayConfirmation = false)
+        private void DownloadImageContent(GUIContent content, string subDirectory, bool displayConfirmation = false)
         {
-            string iconName = iconContent.tooltip;
+            string contentName = content.tooltip;
             
-            string folderPath = $"{MainDirectory}/{_selectedSize.ToString()}";
+            string folderPath = $"{MainDirectory}/{subDirectory}";
             Directory.CreateDirectory(folderPath);
-            string completePath = Path.Combine(folderPath, $"{iconName}{PngFileExtension}");
+            string completePath = Path.Combine(folderPath, $"{contentName}{PngFileExtension}");
 
             if (File.Exists(completePath))
             {
-                Debug.Log(string.Format(IconAlreadyExistsMessage, iconName));
+                Debug.Log(string.Format(ImageAlreadyExistsMessage, contentName));
                 return;
             }
             
-            Texture2D icon = (Texture2D)iconContent.image;
-            Texture2D texture = new Texture2D(icon.width, icon.height, icon.format, icon.mipmapCount > 1);
-            Graphics.CopyTexture(icon, texture);
+            Texture2D image = (Texture2D)content.image;
+            Texture2D texture = new Texture2D(image.width, image.height, image.format, image.mipmapCount > 1);
+            Graphics.CopyTexture(image, texture);
             
             File.WriteAllBytes(completePath, texture.EncodeToPNG());
             
@@ -512,7 +515,7 @@ namespace GursaanjTools
 
             if (displayConfirmation)
             {
-                DisplayDialogue(UpdateTitle, string.Format(IconDownloadedMessage, iconName), false);
+                DisplayDialogue(UpdateTitle, string.Format(DownloadedMessage, contentName), false);
             }
         }
 

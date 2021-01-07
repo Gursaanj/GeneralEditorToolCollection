@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
 namespace GursaanjTools
 {
-    public class CursorReference_Editor : GuiControlEditorWindow
+    public class CursorReference_Editor : GuiControlEditorWindow, IHasCustomMenu
     {
         #region Variables
 
@@ -30,6 +31,11 @@ namespace GursaanjTools
         #endregion
 
         #region IHasCustomMenu Implementation
+
+        public void AddItemsToMenu(GenericMenu menu)
+        {
+            
+        }
 
         #endregion
 

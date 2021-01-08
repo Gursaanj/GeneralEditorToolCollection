@@ -402,7 +402,7 @@ namespace GursaanjTools
             {
                 GUIContent iconContent = GetIconContent(iconName);
 
-                if (iconContent == null)
+                if (iconContent == null || iconContent.Equals(GUIContent.none))
                 {
                     continue;
                 }

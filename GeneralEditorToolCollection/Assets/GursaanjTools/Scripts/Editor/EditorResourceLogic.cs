@@ -48,9 +48,13 @@ namespace GursaanjTools
 
         public GUIStyle IconButtonStyle => _iconButtonStyle;
 
+        public bool IsLightPreview { get; set; } = false;
+
         public GUIStyle BlackPreviewStyle => _blackPreviewStyle;
 
         public GUIStyle WhitePreviewStyle => _whitePreviewStyle;
+        public string BlackPreviewLabel => DarkThemeLabel;
+        public string WhitePreviewLabel => LightThemeLabel;
 
         public GUIContent CopyContent => _copyContent;
 
@@ -151,6 +155,33 @@ namespace GursaanjTools
             if (displayConfirmation)
             {
                 //DisplayDialogue(UpdateTitle, string.Format(DownloadedMessage, contentName), false);
+            }
+        }
+        
+        public void CreatePreviewLabel(float layoutWidth, string label, string content, GUIStyle previewLabelStyle = null)
+        {
+            using (new GUILayout.HorizontalScope(GUILayout.Width(layoutWidth)))
+            {
+                if (previewLabelStyle == null)
+                {
+                    GUILayout.Label(label);
+                }
+                else
+                {
+                    GUILayout.Label(label, previewLabelStyle);
+                }
+
+                GUILayout.Space(3f);
+                if (GUILayout.Button(_copyContent, EditorStyles.miniButtonRight, GUILayout.Width(CopyButtonWidth)))
+                {
+                    EditorGUIUtility.systemCopyBuffer = content;
+                }
+                GUILayout.FlexibleSpace();
+            }
+            
+            using (new GUILayout.HorizontalScope(GUILayout.Width(layoutWidth)))
+            {
+                GUILayout.Label(content, GUILayout.MaxWidth(layoutWidth));
             }
         }
         

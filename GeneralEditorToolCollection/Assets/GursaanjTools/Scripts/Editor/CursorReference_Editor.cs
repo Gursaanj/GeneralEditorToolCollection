@@ -12,6 +12,10 @@ namespace GursaanjTools
         #region Variables
 
         //GUI Labels
+
+        private const string ToUseLabel =
+            "To use as cursor, simply donwload this image and use it as the texture2D argument for the Cursor.SetCursor() method";
+        
         private const float ClearContentWidth = 20f;
         
         //Warning Labels
@@ -110,12 +114,98 @@ namespace GursaanjTools
                 }
                 
                 GUILayout.Space(10f);
+            }
+            
+            if (_currentlySelectedCursor.Equals(GUIContent.none))
+            {
+                return;
+            }
+                
+            GUILayout.FlexibleSpace();
+            float textureWidth = position.width * 0.4f;
+            float previewStyleWidth = textureWidth / 2;
+            float previewWidth = position.width - textureWidth - 30f;
 
-                if (_currentlySelectedCursor.Equals(GUIContent.none))
+            using (new GUILayout.HorizontalScope(EditorStyles.helpBox, GUILayout.MaxHeight(100f)))
+            {
+                using (new GUILayout.VerticalScope(GUILayout.Width(textureWidth)))
                 {
-                    return;
+                    GUILayout.Space(2f);
+
+                    GUILayout.Button(_currentlySelectedCursor, _logic.IsLightPreview ? _logic.WhitePreviewStyle : _logic.BlackPreviewStyle,
+                        GUILayout.Width(textureWidth), GUILayout.Height(90f));
+                    
+                    GUILayout.FlexibleSpace();
+
+                    using (new GUILayout.HorizontalScope())
+                    {
+                        if (GUILayout.Button(_logic.WhitePreviewLabel, EditorStyles.miniButton,
+                            GUILayout.Width(previewStyleWidth)))
+                        {
+                            _logic.IsLightPreview = true;
+                        }
+                        
+                        GUILayout.FlexibleSpace();
+
+                        if (GUILayout.Button(_logic.BlackPreviewLabel, EditorStyles.miniButton,
+                            GUILayout.Width(previewStyleWidth)))
+                        {
+                            _logic.IsLightPreview = false;
+                        }
+                    }
+                }
+                
+                GUILayout.Space(10f);
+
+                using (new GUILayout.VerticalScope())
+                {
+                    using (new GUILayout.HorizontalScope(GUILayout.Width(previewWidth)))
+                    {
+                        GUILayout.Space(5f);
+                        EditorGUILayout.HelpBox($"Width : {_currentlySelectedCursor.image.width} Height : {_currentlySelectedCursor.image.height}", MessageType.None, true);
+                        GUILayout.Space(15f);
+                        if (GUILayout.Button("Download", GUILayout.Height(18f)))
+                        {
+                            _logic.DownloadImageContent(_currentlySelectedCursor, $"{"Cursors"}/{_operatingSystem.ToString()}", true);
+                        }
+                    }
+                    
+                    GUILayout.Space(5f);
+                    
+                    using (new GUILayout.HorizontalScope(GUILayout.Width(previewWidth)))
+                    {
+                        GUILayout.Label("Cursor Name", EditorStyles.boldLabel);
+                        GUILayout.Space(3f);
+                        GUILayout.Label($"\"{_currentlySelectedCursor.tooltip}\"", GUILayout.MaxWidth(previewWidth));
+                        if (GUILayout.Button(_logic.CopyContent, EditorStyles.miniButtonRight))
+                        {
+                            EditorGUIUtility.systemCopyBuffer = $"\"{_currentlySelectedCursor.tooltip}\"";
+                        }
+                        GUILayout.FlexibleSpace();
+                    }
+                    
+                    GUILayout.Space(3f);
+
+                    using (new GUILayout.VerticalScope(GUILayout.Width(previewWidth)))
+                    {
+                        GUILayout.Label("To Implement", EditorStyles.boldLabel);
+                        
+                        GUIStyle style = new GUIStyle(EditorStyles.label);
+                        style.wordWrap = true;
+                        
+                        GUILayout.TextArea(ToUseLabel, style);
+                    }
+                    
+                    GUILayout.FlexibleSpace();
                 }
             }
+            
+            Event current = Event.current;
+            if (current.isKey && current.keyCode == KeyCode.Escape)
+            {
+                _currentlySelectedCursor = GUIContent.none;
+            }
+
         }
 
         #endregion
@@ -163,7 +253,6 @@ namespace GursaanjTools
         {
             foreach (string cursorName in _cursorNames)
             {
-                Debug.Log(cursorName);
                 GUIContent cursor = _logic.GetImageContent(cursorName);
 
                 if (cursor == null || cursor.Equals(GUIContent.none))

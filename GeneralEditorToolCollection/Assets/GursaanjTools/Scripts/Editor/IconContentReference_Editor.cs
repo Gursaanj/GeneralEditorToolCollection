@@ -245,7 +245,8 @@ namespace GursaanjTools
                 }
             }
 
-            if (Event.current.isKey && Event.current.keyCode == KeyCode.Escape)
+            Event current = Event.current;
+            if (current.isKey && current.keyCode == KeyCode.Escape)
             {
                 _currentlySelectedIcon = GUIContent.none;
             }

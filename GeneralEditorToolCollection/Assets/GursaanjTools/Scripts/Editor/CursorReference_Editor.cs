@@ -14,9 +14,23 @@ namespace GursaanjTools
         //GUI Labels
         private const string CursorNameLabel = "Cursor Name";
         private const string ToImplementLabel = "To Implement";
+        private const string OperatingSystemLabel = "Operating System";
+        private const string DownloadVisibleCursors = "Download visible cursors";
         private const string ToUseLabel = "To use as cursor, simply donwload this image and use it as the texture2D argument for the Cursor.SetCursor() method";
-        
+
+        private const float ToolbarLabelWidth = 120f;
+        private const float OperatingSystemWidth = 75f;
+        private const float BorderPadding = 10f;
+        private const float LabelPadding = 3f;
+        private const float TexturePreviewRatio = 0.4f;
+        private const float PreviewMaxHeight = 100f;
+        private const float PreviewTextureHeight = 90f;
+        private const float PreviewWidthPadding = 30f;
+        private const float PreviewLabelPadding = 5f;
+        private const float DownloadLabelPadding = 15f;
+        private const float DownloadButtonHeight = 18f;
         private const float ClearContentWidth = 20f;
+        private const float CursorButtonSize = 40f;
         
         //Warning Labels
         private const string UnableToLoadAssetsError = "Issue with loading Editor Asset Utilities, unable to retrieve information";
@@ -27,14 +41,15 @@ namespace GursaanjTools
         private const string LinuxCursorsPath = "linux";
         private const string MacCursorsPath = "macos";
         private const string WindowsCursorsPath = "windows";
-
+        
+        private readonly List<GUIContent> _windowCursors = new List<GUIContent>();
+        private readonly List<GUIContent> _macCursors = new List<GUIContent>();
+        private readonly List<GUIContent> _linuxCursors = new List<GUIContent>();
+        private readonly List<GUIContent> _otherCursors = new List<GUIContent>();
+        
         private EditorResourceLogic _logic;
         private List<string> _cursorNames = new List<string>();
         private OperatingSystemFamily _operatingSystem = OperatingSystemFamily.Windows;
-        private List<GUIContent> _windowCursors = new List<GUIContent>();
-        private List<GUIContent> _macCursors = new List<GUIContent>();
-        private List<GUIContent> _linuxCursors = new List<GUIContent>();
-        private List<GUIContent> _otherCursors = new List<GUIContent>();
         private List<GUIContent> _currentCursors = new List<GUIContent>();
         private GUIContent _currentlySelectedCursor = GUIContent.none;
         
@@ -76,11 +91,11 @@ namespace GursaanjTools
             {
                 _scrollPosition = scrollScope.scrollPosition;
                 float pixelsPerPoint = EditorGUIUtility.pixelsPerPoint;
-                GUILayout.Space(10f);
+                GUILayout.Space(BorderPadding);
 
                 float renderWidth = Screen.width / pixelsPerPoint - _logic.ScrollBarWidth;
-                int gridWidth = Mathf.FloorToInt(renderWidth / 40f);
-                float marginPadding = (renderWidth - 40f * gridWidth) / 2;
+                int gridWidth = Mathf.FloorToInt(renderWidth / CursorButtonSize);
+                float marginPadding = (renderWidth - CursorButtonSize * gridWidth) / 2;
 
                 int currentRow = 0;
                 int cursorIndex = 0;
@@ -97,8 +112,8 @@ namespace GursaanjTools
                             int currentIndex = i + currentRow * gridWidth;
                             GUIContent currentCursor = _currentCursors[currentIndex];
 
-                            if (GUILayout.Button(currentCursor, _logic.IconButtonStyle, GUILayout.Width(40f),
-                                GUILayout.Height(40f)))
+                            if (GUILayout.Button(currentCursor, _logic.IconButtonStyle, GUILayout.Width(CursorButtonSize),
+                                GUILayout.Height(CursorButtonSize)))
                             {
                                 _currentlySelectedCursor = currentCursor;
                             }
@@ -114,7 +129,7 @@ namespace GursaanjTools
                     currentRow++;
                 }
                 
-                GUILayout.Space(10f);
+                GUILayout.Space(BorderPadding);
             }
             
             if (_currentlySelectedCursor.Equals(GUIContent.none))
@@ -124,18 +139,18 @@ namespace GursaanjTools
                 
             GUILayout.FlexibleSpace();
             string cursorName = $"\"{_currentlySelectedCursor.tooltip}\"";
-            float textureWidth = position.width * 0.4f;
+            float textureWidth = position.width * TexturePreviewRatio;
             float previewStyleWidth = textureWidth / 2;
-            float previewWidth = position.width - textureWidth - 30f;
+            float previewWidth = position.width - textureWidth - PreviewWidthPadding;
 
-            using (new GUILayout.HorizontalScope(EditorStyles.helpBox, GUILayout.MaxHeight(100f)))
+            using (new GUILayout.HorizontalScope(EditorStyles.helpBox, GUILayout.MaxHeight(PreviewMaxHeight)))
             {
                 using (new GUILayout.VerticalScope(GUILayout.Width(textureWidth)))
                 {
-                    GUILayout.Space(2f);
+                    GUILayout.Space(LabelPadding);
 
                     GUILayout.Button(_currentlySelectedCursor, _logic.IsLightPreview ? _logic.WhitePreviewStyle : _logic.BlackPreviewStyle,
-                        GUILayout.Width(textureWidth), GUILayout.Height(90f));
+                        GUILayout.Width(textureWidth), GUILayout.Height(PreviewTextureHeight));
                     
                     GUILayout.FlexibleSpace();
 
@@ -157,16 +172,16 @@ namespace GursaanjTools
                     }
                 }
                 
-                GUILayout.Space(10f);
+                GUILayout.Space(BorderPadding);
 
                 using (new GUILayout.VerticalScope())
                 {
                     using (new GUILayout.HorizontalScope(GUILayout.Width(previewWidth)))
                     {
-                        GUILayout.Space(5f);
+                        GUILayout.Space(PreviewLabelPadding);
                         EditorGUILayout.HelpBox($"Width : {_currentlySelectedCursor.image.width} Height : {_currentlySelectedCursor.image.height}", MessageType.None, true);
-                        GUILayout.Space(15f);
-                        if (GUILayout.Button(_logic.DownloadLabel, GUILayout.Height(18f)))
+                        GUILayout.Space(DownloadLabelPadding);
+                        if (GUILayout.Button(_logic.DownloadLabel, GUILayout.Height(DownloadButtonHeight)))
                         {
                             if (_logic.DownloadImageContent(_currentlySelectedCursor, $"{SubDirectory}/{_operatingSystem.ToString()}"))
                             {
@@ -175,12 +190,12 @@ namespace GursaanjTools
                         }
                     }
                     
-                    GUILayout.Space(5f);
+                    GUILayout.Space(PreviewLabelPadding);
                     
                     using (new GUILayout.HorizontalScope(GUILayout.Width(previewWidth)))
                     {
                         GUILayout.Label(CursorNameLabel, EditorStyles.boldLabel);
-                        GUILayout.Space(3f);
+                        GUILayout.Space(LabelPadding);
                         GUILayout.Label(cursorName, GUILayout.MaxWidth(previewWidth));
                         if (GUILayout.Button(_logic.CopyContent, EditorStyles.miniButtonRight))
                         {
@@ -189,7 +204,7 @@ namespace GursaanjTools
                         GUILayout.FlexibleSpace();
                     }
                     
-                    GUILayout.Space(3f);
+                    GUILayout.Space(LabelPadding);
 
                     using (new GUILayout.VerticalScope(GUILayout.Width(previewWidth)))
                     {
@@ -211,7 +226,7 @@ namespace GursaanjTools
 
         public void AddItemsToMenu(GenericMenu menu)
         {
-            menu.AddItem(new GUIContent("Download visible cursors"), false, _logic.DownloadSelectionOfImages, new ContentInformation(_currentCursors, $"{SubDirectory}/{_operatingSystem.ToString()}"));
+            menu.AddItem(new GUIContent(DownloadVisibleCursors), false, _logic.DownloadSelectionOfImages, new ContentInformation(_currentCursors, $"{SubDirectory}/{_operatingSystem.ToString()}"));
         }
 
         #endregion
@@ -222,8 +237,8 @@ namespace GursaanjTools
         {
             using (new GUILayout.HorizontalScope(EditorStyles.toolbar))
             {
-                GUILayout.Label("Operating System", EditorStyles.boldLabel, GUILayout.Width(120f));
-                _operatingSystem = (OperatingSystemFamily)EditorGUILayout.EnumPopup(_operatingSystem, EditorStyles.toolbarDropDown, GUILayout.Width(75f));
+                GUILayout.Label(OperatingSystemLabel, EditorStyles.boldLabel, GUILayout.Width(ToolbarLabelWidth));
+                _operatingSystem = (OperatingSystemFamily)EditorGUILayout.EnumPopup(_operatingSystem, EditorStyles.toolbarDropDown, GUILayout.Width(OperatingSystemWidth));
                 GUI.SetNextControlName(controlName);
                 _searchField = GUILayout.TextField(_searchField, EditorStyles.toolbarSearchField);
                 if (GUILayout.Button(_logic.ClearSearch, EditorStyles.toolbarButton,

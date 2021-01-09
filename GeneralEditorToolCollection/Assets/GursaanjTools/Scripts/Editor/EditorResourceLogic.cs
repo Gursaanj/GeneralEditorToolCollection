@@ -7,6 +7,19 @@ using UnityEngine;
 
 namespace GursaanjTools
 {
+    
+    public struct ContentInformation
+    {
+        public readonly List<GUIContent> Contents;
+        public readonly string SubDirectory;
+
+        public ContentInformation(List<GUIContent> contents, string subDirectory)
+        {
+            this.Contents = contents;
+            this.SubDirectory = subDirectory;
+        }
+    }
+    
     public class EditorResourceLogic
     {
         #region Variables
@@ -15,18 +28,22 @@ namespace GursaanjTools
         private const string CopyIconTooltip = "Copy to clipboard";
         private const string ClearIcon = "winbtn_win_close";
         private const string ClearSearchTooltip = "Clear Search";
-        private const string YesLabel = "Yes";
-        private const string NoLabel = "No";
-        private const string LightThemeLabel = "Light";
-        private const string DarkThemeLabel = "Dark";
-        private const string DownloadLabel = "Download Image";
         
         private const float CopyButtonWidth = 20f;
         private const float DownloadButtonOffset = 15f;
-
-        private const float _ScrollBarWidth = 13f;
         
-        private const string DownloadedMessage = "{0} has been downloaded";
+        private const string InternalLightThemeLabel = "Light";
+        private const string InternalDarkThemeLabel = "Dark";
+        private const string InternalDownloadLabel = "Download";
+        private const string InternalDownloadedMessage = "{0} has been downloaded";
+        private const float InternalScrollBarWidth = 13f;
+
+        private const string UnableToMassDownloadError = "Unable to mass download";
+        private const string DownloadProgressTitle = "Downloading current selection of images";
+        private const string DownloadCountLabel = "Downloading {0} images";
+        private const string DownloadMessage = "Downloading {0}";
+        private const string CantDownloadIconError = "Image number {0} can't be downloaded";
+        private const string NoImagesWarning = "No Images to download";
         private const string ImageAlreadyExistsMessage = "{0} Already exists within designated folder, unable to download";
         
         private const string EditorAssetBundleMethod = "GetEditorAssetBundle";
@@ -39,6 +56,7 @@ namespace GursaanjTools
         private GUIStyle _iconButtonStyle;
         private GUIStyle _blackPreviewStyle;
         private GUIStyle _whitePreviewStyle;
+        private GUIStyle _wordWrapStyle;
         private GUIContent _copyContent;
         private GUIContent _clearSearch;
 
@@ -51,18 +69,18 @@ namespace GursaanjTools
         public bool IsLightPreview { get; set; } = false;
 
         public GUIStyle BlackPreviewStyle => _blackPreviewStyle;
-
         public GUIStyle WhitePreviewStyle => _whitePreviewStyle;
-        public string BlackPreviewLabel => DarkThemeLabel;
-        public string WhitePreviewLabel => LightThemeLabel;
+        public GUIStyle WordWrapStyle => _wordWrapStyle;
+        public string DarkThemeLabel => InternalDarkThemeLabel;
+        public string LightThemeLabel => InternalLightThemeLabel;
 
         public GUIContent CopyContent => _copyContent;
 
         public GUIContent ClearSearch => _clearSearch;
-
         public string PNGFileExtension => PngFileExtension;
-
-        public float ScrollBarWidth => _ScrollBarWidth;
+        public float ScrollBarWidth => InternalScrollBarWidth;
+        public string DownloadLabel => InternalDownloadLabel;
+        public string DownloadMessageLabel => InternalDownloadedMessage;
 
         #endregion
 
@@ -130,7 +148,59 @@ namespace GursaanjTools
             return appropriateNames;
         }
         
-        public void DownloadImageContent(GUIContent content, string subDirectory, bool displayConfirmation = false)
+        public void DownloadSelectionOfImages(object guiContentInfo)
+        {
+            if (guiContentInfo.Equals(null))
+            {
+                Debug.LogError(UnableToMassDownloadError);
+                return;
+            }
+
+            ContentInformation guiContentInformation = (ContentInformation) guiContentInfo;
+
+            if (guiContentInformation.Equals(null))
+            {
+                Debug.LogError(UnableToMassDownloadError);
+                return;
+            }
+            
+            List<GUIContent> contents = guiContentInformation.Contents;
+            int totalCount = contents.Count;
+            
+            if (totalCount == 0)
+            {
+                Debug.LogWarning(NoImagesWarning);
+                return;
+            }
+            
+            string progressTitle = string.Format(DownloadProgressTitle);
+
+            EditorUtility.DisplayProgressBar(progressTitle, string.Format(DownloadCountLabel, totalCount), 0.0f);
+
+            for (int i = 0; i < totalCount; i++)
+            {
+                GUIContent content = contents[i];
+
+                if (content.Equals(GUIContent.none) || content.image == null || string.IsNullOrEmpty(content.tooltip))
+                {
+                    Debug.LogError(string.Format(CantDownloadIconError, i));
+                    continue;
+                }
+
+                if (EditorUtility.DisplayCancelableProgressBar(progressTitle,
+                    string.Format(DownloadMessage, content.tooltip), (float) i / totalCount))
+                {
+                    EditorUtility.ClearProgressBar();
+                    return;
+                }
+                
+                DownloadImageContent(content, guiContentInformation.SubDirectory);
+            }
+            
+            EditorUtility.ClearProgressBar();
+        }
+        
+        public bool DownloadImageContent(GUIContent content, string subDirectory)
         {
             string contentName = content.tooltip;
             
@@ -141,7 +211,7 @@ namespace GursaanjTools
             if (File.Exists(completePath))
             {
                 Debug.Log(string.Format(ImageAlreadyExistsMessage, contentName));
-                return;
+                return false;
             }
             
             Texture2D image = (Texture2D)content.image;
@@ -152,40 +222,19 @@ namespace GursaanjTools
             
             AssetDatabase.Refresh();
 
-            if (displayConfirmation)
-            {
-                //DisplayDialogue(UpdateTitle, string.Format(DownloadedMessage, contentName), false);
-            }
+            return true;
         }
-        
-        public void CreatePreviewLabel(float layoutWidth, string label, string content, GUIStyle previewLabelStyle = null)
-        {
-            using (new GUILayout.HorizontalScope(GUILayout.Width(layoutWidth)))
-            {
-                if (previewLabelStyle == null)
-                {
-                    GUILayout.Label(label);
-                }
-                else
-                {
-                    GUILayout.Label(label, previewLabelStyle);
-                }
 
-                GUILayout.Space(3f);
-                if (GUILayout.Button(_copyContent, EditorStyles.miniButtonRight, GUILayout.Width(CopyButtonWidth)))
-                {
-                    EditorGUIUtility.systemCopyBuffer = content;
-                }
-                GUILayout.FlexibleSpace();
-            }
-            
-            using (new GUILayout.HorizontalScope(GUILayout.Width(layoutWidth)))
+        public void HandleContentEvents(ref GUIContent content)
+        {
+            Event current = Event.current;
+
+            if (current.isKey && current.keyCode == KeyCode.Escape)
             {
-                GUILayout.Label(content, GUILayout.MaxWidth(layoutWidth));
+                content = GUIContent.none;
             }
         }
-        
-        
+
         private void CreateGUIStyles()
         {
             _iconButtonStyle = new GUIStyle(EditorStyles.miniButton);
@@ -205,6 +254,9 @@ namespace GursaanjTools
 
             _whitePreviewStyle = new GUIStyle(_iconButtonStyle);
             SetPreviewBackgrounds(ref _whitePreviewStyle, whiteBackground);
+            
+            _wordWrapStyle = new GUIStyle(EditorStyles.label);
+            _wordWrapStyle.wordWrap = true;
             
             _copyContent = EditorGUIUtility.IconContent(CopyIcon);
             _copyContent.tooltip = CopyIconTooltip;

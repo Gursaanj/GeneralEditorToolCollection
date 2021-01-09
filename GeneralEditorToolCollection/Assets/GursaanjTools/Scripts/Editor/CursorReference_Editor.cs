@@ -12,15 +12,16 @@ namespace GursaanjTools
         #region Variables
 
         //GUI Labels
-
-        private const string ToUseLabel =
-            "To use as cursor, simply donwload this image and use it as the texture2D argument for the Cursor.SetCursor() method";
+        private const string CursorNameLabel = "Cursor Name";
+        private const string ToImplementLabel = "To Implement";
+        private const string ToUseLabel = "To use as cursor, simply donwload this image and use it as the texture2D argument for the Cursor.SetCursor() method";
         
         private const float ClearContentWidth = 20f;
         
         //Warning Labels
-        
-        
+        private const string UnableToLoadAssetsError = "Issue with loading Editor Asset Utilities, unable to retrieve information";
+
+        private const string SubDirectory = "Cursors";
         private const string CursorsPath = "Cursors";
         private const string EditorResourceUtility = "UnityEditorInternal.EditorResourcesUtility";
         private const string LinuxCursorsPath = "linux";
@@ -52,7 +53,7 @@ namespace GursaanjTools
 
             if (_cursorNames == null)
             {
-                Debug.LogError("Issue with loading Editor Asset Utilities, unable to retrieve information");
+                Debug.LogError(UnableToLoadAssetsError);
                 Close();
             }
 
@@ -122,6 +123,7 @@ namespace GursaanjTools
             }
                 
             GUILayout.FlexibleSpace();
+            string cursorName = $"\"{_currentlySelectedCursor.tooltip}\"";
             float textureWidth = position.width * 0.4f;
             float previewStyleWidth = textureWidth / 2;
             float previewWidth = position.width - textureWidth - 30f;
@@ -139,7 +141,7 @@ namespace GursaanjTools
 
                     using (new GUILayout.HorizontalScope())
                     {
-                        if (GUILayout.Button(_logic.WhitePreviewLabel, EditorStyles.miniButton,
+                        if (GUILayout.Button(_logic.LightThemeLabel, EditorStyles.miniButton,
                             GUILayout.Width(previewStyleWidth)))
                         {
                             _logic.IsLightPreview = true;
@@ -147,7 +149,7 @@ namespace GursaanjTools
                         
                         GUILayout.FlexibleSpace();
 
-                        if (GUILayout.Button(_logic.BlackPreviewLabel, EditorStyles.miniButton,
+                        if (GUILayout.Button(_logic.DarkThemeLabel, EditorStyles.miniButton,
                             GUILayout.Width(previewStyleWidth)))
                         {
                             _logic.IsLightPreview = false;
@@ -164,9 +166,12 @@ namespace GursaanjTools
                         GUILayout.Space(5f);
                         EditorGUILayout.HelpBox($"Width : {_currentlySelectedCursor.image.width} Height : {_currentlySelectedCursor.image.height}", MessageType.None, true);
                         GUILayout.Space(15f);
-                        if (GUILayout.Button("Download", GUILayout.Height(18f)))
+                        if (GUILayout.Button(_logic.DownloadLabel, GUILayout.Height(18f)))
                         {
-                            _logic.DownloadImageContent(_currentlySelectedCursor, $"{"Cursors"}/{_operatingSystem.ToString()}", true);
+                            if (_logic.DownloadImageContent(_currentlySelectedCursor, $"{SubDirectory}/{_operatingSystem.ToString()}"))
+                            {
+                                DisplayDialogue(UpdateTitle, string.Format(_logic.DownloadMessageLabel, _currentlySelectedCursor.tooltip), false);
+                            }
                         }
                     }
                     
@@ -174,12 +179,12 @@ namespace GursaanjTools
                     
                     using (new GUILayout.HorizontalScope(GUILayout.Width(previewWidth)))
                     {
-                        GUILayout.Label("Cursor Name", EditorStyles.boldLabel);
+                        GUILayout.Label(CursorNameLabel, EditorStyles.boldLabel);
                         GUILayout.Space(3f);
-                        GUILayout.Label($"\"{_currentlySelectedCursor.tooltip}\"", GUILayout.MaxWidth(previewWidth));
+                        GUILayout.Label(cursorName, GUILayout.MaxWidth(previewWidth));
                         if (GUILayout.Button(_logic.CopyContent, EditorStyles.miniButtonRight))
                         {
-                            EditorGUIUtility.systemCopyBuffer = $"\"{_currentlySelectedCursor.tooltip}\"";
+                            EditorGUIUtility.systemCopyBuffer = cursorName;
                         }
                         GUILayout.FlexibleSpace();
                     }
@@ -188,24 +193,16 @@ namespace GursaanjTools
 
                     using (new GUILayout.VerticalScope(GUILayout.Width(previewWidth)))
                     {
-                        GUILayout.Label("To Implement", EditorStyles.boldLabel);
+                        GUILayout.Label(ToImplementLabel, EditorStyles.boldLabel);
                         
-                        GUIStyle style = new GUIStyle(EditorStyles.label);
-                        style.wordWrap = true;
-                        
-                        GUILayout.TextArea(ToUseLabel, style);
+                        GUILayout.TextArea(ToUseLabel, _logic.WordWrapStyle);
                     }
                     
                     GUILayout.FlexibleSpace();
                 }
             }
             
-            Event current = Event.current;
-            if (current.isKey && current.keyCode == KeyCode.Escape)
-            {
-                _currentlySelectedCursor = GUIContent.none;
-            }
-
+            _logic.HandleContentEvents(ref _currentlySelectedCursor);
         }
 
         #endregion
@@ -214,7 +211,7 @@ namespace GursaanjTools
 
         public void AddItemsToMenu(GenericMenu menu)
         {
-            
+            menu.AddItem(new GUIContent("Download visible cursors"), false, _logic.DownloadSelectionOfImages, new ContentInformation(_currentCursors, $"{SubDirectory}/{_operatingSystem.ToString()}"));
         }
 
         #endregion

@@ -255,9 +255,9 @@ namespace GursaanjTools
             return CursorsPath;
 #else
             var assembly = typeof(EditorGUIUtility).Assembly;
-            var resourceUtility = assembly.GetType(EditorResourceUtility);
-            var iconsPathProperty = resourceUtility.GetProperty(CursorsPath, BindingFlags.Static | BindingFlags.Public);
-            return (string)iconsPathProperty.GetValue(null, new object[] { });
+            var resourceUtility = assembly.GetType(_logic.EditorResourceUtility);
+            var PathProperty = resourceUtility.GetProperty(CursorsPath, BindingFlags.Static | BindingFlags.Public);
+            return (string)PathProperty.GetValue(null, new object[] { });
 #endif
         }
 

@@ -147,6 +147,14 @@ namespace GursaanjTools
         {
             CursorReference_Editor.Init(typeof(CursorReference_Editor), EditorWindowData.EditorWindowInformations["Cursor Reference"]);
         }
+        #endregion
+
+        #region Fonts
+        [MenuItem("GursaanjTools/References/Internal Fonts")]
+        public static void FontsReferenceTool()
+        {
+            FontReference_Editor.Init(typeof(FontReference_Editor), EditorWindowData.EditorWindowInformations["Fonts Reference"]);
+        }
 
         #endregion
         

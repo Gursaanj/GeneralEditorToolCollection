@@ -32,6 +32,7 @@ namespace GursaanjTools
         private const float CopyButtonWidth = 20f;
         private const float DownloadButtonOffset = 15f;
         
+        private const string InternalEditorResourceUtility = "UnityEditorInternal.EditorResourcesUtility";
         private const string InternalLightThemeLabel = "Light";
         private const string InternalDarkThemeLabel = "Dark";
         private const string InternalDownloadLabel = "Download";
@@ -47,7 +48,6 @@ namespace GursaanjTools
         private const string ImageAlreadyExistsMessage = "{0} Already exists within designated folder, unable to download";
         
         private const string EditorAssetBundleMethod = "GetEditorAssetBundle";
-        private const string EditorResourceUtility = "UnityEditorInternal.EditorResourcesUtility";
         private const string ProOnlyIconIdentifier = "d_";
         private const string MainDirectory = "Assets/UnityEditorResources";
         
@@ -67,7 +67,7 @@ namespace GursaanjTools
         public GUIStyle IconButtonStyle => _iconButtonStyle;
 
         public bool IsLightPreview { get; set; } = false;
-
+        public string EditorResourceUtility => InternalEditorResourceUtility;
         public GUIStyle BlackPreviewStyle => _blackPreviewStyle;
         public GUIStyle WhitePreviewStyle => _whitePreviewStyle;
         public GUIStyle WordWrapStyle => _wordWrapStyle;

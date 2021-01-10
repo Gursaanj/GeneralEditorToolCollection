@@ -4,17 +4,28 @@ using System.Reflection;
 using GursaanjTools;
 using UnityEditor;
 using UnityEngine;
-using Object = System.Object;
 
 public class FontReference_Editor : GuiControlEditorWindow
 {
     #region Variables
     
     //GUI Labels
+    private const string FontNameLabel = "Font Name:";
+    private const string FullMethodLabel = "Full Method";
+
+    private const float FontBoxHeight = 40f;
+    private const float FontNamePadding = 10f;
+    private const float PreviewMaxHeight = 130f;
+    private const float VerticalPreviewPadding = 10f;
+    private const float HorizontalPreviewPadding = 20f;
+    private const float CopyContentWidth = 30f;
+    private const float CopyContentHeight = 18f;
     
     //Warning Labels
 
     private const string FontsPath = "Fonts";
+
+    private const int FixedFontSize = 15;
     
     private readonly string[] FontExtensions = new string[2] {".ttf", ".otf"};
     
@@ -65,16 +76,16 @@ public class FontReference_Editor : GuiControlEditorWindow
             {
                 _scrollPosition = scrollScope.scrollPosition;
 
-                for (int i = 0, count =_styles.Count; i < count; i++)
+                for (int i = 0, count = _styles.Count; i < count; i++)
                 {
                     GUIStyle style = _styles[i];
-                    using (new GUILayout.HorizontalScope(EditorStyles.helpBox, GUILayout.Height(40f)))
+                    using (new GUILayout.HorizontalScope(EditorStyles.helpBox, GUILayout.Height(FontBoxHeight)))
                     {
                         GUILayout.FlexibleSpace();
                         
                         using (new GUILayout.VerticalScope())
                         {
-                            GUILayout.Space(10f);
+                            GUILayout.Space(FontNamePadding);
                             
                             if (GUILayout.Button(style.font.name, style))
                             {
@@ -96,19 +107,19 @@ public class FontReference_Editor : GuiControlEditorWindow
             string fontName = $"\"{_currentStyle.font.name}.ttf\"";
             string fullMethodName = $"(Font) EditorGUIUtility.Load({fontName})";
 
-            using (new GUILayout.VerticalScope(EditorStyles.helpBox, GUILayout.MaxHeight(130f)))
+            using (new GUILayout.VerticalScope(EditorStyles.helpBox, GUILayout.MaxHeight(PreviewMaxHeight)))
             {
-                GUILayout.Space(10f);
+                GUILayout.Space(VerticalPreviewPadding);
                 using (new GUILayout.HorizontalScope())
                 {
-                    GUILayout.Space(20f);
-                    GUILayout.Label("Font Name:", EditorStyles.boldLabel);
+                    GUILayout.Space(HorizontalPreviewPadding);
+                    GUILayout.Label(FontNameLabel, EditorStyles.boldLabel);
                     GUILayout.Label(fontName);
-                    if (GUILayout.Button(_logic.CopyContent, GUILayout.Width(30f), GUILayout.Height(18f)))
+                    if (GUILayout.Button(_logic.CopyContent, GUILayout.Width(CopyContentWidth), GUILayout.Height(CopyContentHeight)))
                     {
                         EditorGUIUtility.systemCopyBuffer = fontName;
                     }
-                    GUILayout.Space(20f);
+                    GUILayout.Space(HorizontalPreviewPadding);
                 }
                 
                 GUILayout.Space(5f);
@@ -119,9 +130,9 @@ public class FontReference_Editor : GuiControlEditorWindow
                     {
                         using (new GUILayout.HorizontalScope())
                         {
-                            GUILayout.Space(20f);
-                            GUILayout.Label("Full Method", EditorStyles.boldLabel);
-                            if (GUILayout.Button(_logic.CopyContent, GUILayout.Width(30f), GUILayout.Height(18f)))
+                            GUILayout.Space(HorizontalPreviewPadding);
+                            GUILayout.Label(FullMethodLabel, EditorStyles.boldLabel);
+                            if (GUILayout.Button(_logic.CopyContent, GUILayout.Width(CopyContentWidth), GUILayout.Height(CopyContentHeight)))
                             {
                                 EditorGUIUtility.systemCopyBuffer = fullMethodName;
                             }
@@ -132,9 +143,7 @@ public class FontReference_Editor : GuiControlEditorWindow
                 }
             }
         }
-        
         _logic.HandleContentEvents(ref _currentStyle);
-
     }
 
     #endregion
@@ -159,7 +168,7 @@ public class FontReference_Editor : GuiControlEditorWindow
         GUIStyle style = new GUIStyle(EditorStyles.miniButton)
         {
             font = font,
-            fontSize = 15,
+            fontSize = FixedFontSize,
             alignment = TextAnchor.MiddleCenter
         };
 

@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using GursaanjTools;
 using UnityEditor;
 using UnityEngine;
+using Object = System.Object;
 
 public class FontReference_Editor : GuiControlEditorWindow
 {
@@ -16,11 +16,14 @@ public class FontReference_Editor : GuiControlEditorWindow
 
     private const string FontsPath = "Fonts";
     
-    private List<Font> _fonts = new List<Font>();
+    private readonly string[] FontExtensions = new string[2] {".ttf", ".otf"};
+    
+    private List<GUIStyle> _styles = new List<GUIStyle>();
+    private GUIStyle _currentStyle = GUIStyle.none;
     private EditorResourceLogic _logic;
     
     private Vector2 _scrollPosition = Vector2.zero;
-    
+
     #endregion
 
     #region BuiltIn Mehtods
@@ -28,8 +31,7 @@ public class FontReference_Editor : GuiControlEditorWindow
     private void OnEnable()
     {
         _logic = new EditorResourceLogic();
-        List<string> fontNames =
-            _logic.GetAppropriateNames(_logic.GetEditorAssetBundle(), GetFontsPath(), new[] {".ttf", ".otf"});
+        List<string> fontNames = _logic.GetAppropriateNames(_logic.GetEditorAssetBundle(), GetFontsPath(), FontExtensions);
 
         if (fontNames == null)
         {
@@ -42,18 +44,17 @@ public class FontReference_Editor : GuiControlEditorWindow
             {
                 continue;
             }
-
+            
             Font font = (Font) EditorGUIUtility.Load(fontName);
-
+            
             if (font.Equals(null))
             {
-                Debug.Log("damn");
+                Debug.Log($"{fontName} Could not be loaded");
                 continue;
             }
-
-            _fonts.Add(font);
+            
+            _styles.Add(GetGUIStyle(font));
         }
-
     }
 
     protected override void CreateGUI(string controlName)
@@ -64,17 +65,76 @@ public class FontReference_Editor : GuiControlEditorWindow
             {
                 _scrollPosition = scrollScope.scrollPosition;
 
-                foreach (Font font in _fonts)
+                for (int i = 0, count =_styles.Count; i < count; i++)
                 {
-                    using (new GUILayout.HorizontalScope(EditorStyles.helpBox, GUILayout.Height(60f)))
+                    GUIStyle style = _styles[i];
+                    using (new GUILayout.HorizontalScope(EditorStyles.helpBox, GUILayout.Height(40f)))
                     {
                         GUILayout.FlexibleSpace();
-                        GUILayout.Label("EXAMPLE Text", new GUIStyle{font = font});
+                        
+                        using (new GUILayout.VerticalScope())
+                        {
+                            GUILayout.Space(10f);
+                            
+                            if (GUILayout.Button(style.font.name, style))
+                            {
+                                _currentStyle = style;
+                            }
+                        }
+                        
                         GUILayout.FlexibleSpace();
                     }
                 }
             }
+
+            if (_currentStyle.Equals(GUIStyle.none))
+            {
+                return;
+            }
+            
+            GUILayout.FlexibleSpace();
+            string fontName = $"\"{_currentStyle.font.name}.ttf\"";
+            string fullMethodName = $"(Font) EditorGUIUtility.Load({fontName})";
+
+            using (new GUILayout.VerticalScope(EditorStyles.helpBox, GUILayout.MaxHeight(130f)))
+            {
+                GUILayout.Space(10f);
+                using (new GUILayout.HorizontalScope())
+                {
+                    GUILayout.Space(20f);
+                    GUILayout.Label("Font Name:", EditorStyles.boldLabel);
+                    GUILayout.Label(fontName);
+                    if (GUILayout.Button(_logic.CopyContent, GUILayout.Width(30f), GUILayout.Height(18f)))
+                    {
+                        EditorGUIUtility.systemCopyBuffer = fontName;
+                    }
+                    GUILayout.Space(20f);
+                }
+                
+                GUILayout.Space(5f);
+
+                using (new GUILayout.HorizontalScope())
+                {
+                    using (new GUILayout.VerticalScope())
+                    {
+                        using (new GUILayout.HorizontalScope())
+                        {
+                            GUILayout.Space(20f);
+                            GUILayout.Label("Full Method", EditorStyles.boldLabel);
+                            if (GUILayout.Button(_logic.CopyContent, GUILayout.Width(30f), GUILayout.Height(18f)))
+                            {
+                                EditorGUIUtility.systemCopyBuffer = fullMethodName;
+                            }
+                            GUILayout.FlexibleSpace();
+                        }
+                        GUILayout.Label(fullMethodName);
+                    }
+                }
+            }
         }
+        
+        _logic.HandleContentEvents(ref _currentStyle);
+
     }
 
     #endregion
@@ -83,7 +143,7 @@ public class FontReference_Editor : GuiControlEditorWindow
 
     private string GetFontsPath()
     {
-#if UNITY_2018_2_OR_NEWER
+#if UNITY_2018_3_OR_NEWER
         
         return UnityEditor.Experimental.EditorResources.fontsPath;
 #else
@@ -93,7 +153,19 @@ public class FontReference_Editor : GuiControlEditorWindow
         return (string)pathProperty.GetValue(null, new object[] { });
 #endif
     }
-    
+
+    private GUIStyle GetGUIStyle(Font font)
+    {
+        GUIStyle style = new GUIStyle(EditorStyles.miniButton)
+        {
+            font = font,
+            fontSize = 15,
+            alignment = TextAnchor.MiddleCenter
+        };
+
+        return style;
+    }
+
 
     #endregion
 }

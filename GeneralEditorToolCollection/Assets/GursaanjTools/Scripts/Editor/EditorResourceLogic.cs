@@ -235,6 +235,16 @@ namespace GursaanjTools
             }
         }
 
+        public void HandleContentEvents(ref GUIStyle style)
+        {
+            Event current = Event.current;
+
+            if (current.isKey && current.keyCode == KeyCode.Escape)
+            {
+                style = GUIStyle.none;
+            }
+        }
+
         private void CreateGUIStyles()
         {
             _iconButtonStyle = new GUIStyle(EditorStyles.miniButton);

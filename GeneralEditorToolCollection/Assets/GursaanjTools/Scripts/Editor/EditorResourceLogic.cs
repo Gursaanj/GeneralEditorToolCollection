@@ -8,7 +8,7 @@ using UnityEngine;
 namespace GursaanjTools
 {
     
-    public struct ContentInformation
+    public readonly struct ContentInformation
     {
         public readonly List<GUIContent> Contents;
         public readonly string SubDirectory;

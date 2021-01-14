@@ -39,6 +39,7 @@ namespace GursaanjTools
         private const string InternalDownloadedMessage = "{0} has been downloaded";
         private const float InternalScrollBarWidth = 13f;
 
+        private const string ErrorTitle = "Error";
         private const string UnableToMassDownloadError = "Unable to mass download";
         private const string DownloadProgressTitle = "Downloading current selection of images";
         private const string DownloadCountLabel = "Downloading {0} images";
@@ -46,6 +47,7 @@ namespace GursaanjTools
         private const string CantDownloadIconError = "Image number {0} can't be downloaded";
         private const string NoImagesWarning = "No Images to download";
         private const string ImageAlreadyExistsMessage = "{0} Already exists within designated folder, unable to download";
+        private const string ConfirmationMessage = "Sounds Good";
         
         private const string EditorAssetBundleMethod = "GetEditorAssetBundle";
         private const string ProOnlyIconIdentifier = "d_";
@@ -57,6 +59,7 @@ namespace GursaanjTools
         private GUIStyle _blackPreviewStyle;
         private GUIStyle _whitePreviewStyle;
         private GUIStyle _wordWrapStyle;
+        private GUIStyle _previewStyle;
         private GUIContent _copyContent;
         private GUIContent _clearSearch;
 
@@ -71,6 +74,7 @@ namespace GursaanjTools
         public GUIStyle BlackPreviewStyle => _blackPreviewStyle;
         public GUIStyle WhitePreviewStyle => _whitePreviewStyle;
         public GUIStyle WordWrapStyle => _wordWrapStyle;
+        public GUIStyle PreviewStyle => _previewStyle;
         public string DarkThemeLabel => InternalDarkThemeLabel;
         public string LightThemeLabel => InternalLightThemeLabel;
 
@@ -152,7 +156,7 @@ namespace GursaanjTools
         {
             if (guiContentInfo.Equals(null))
             {
-                Debug.LogError(UnableToMassDownloadError);
+                EditorUtility.DisplayDialog(ErrorTitle, UnableToMassDownloadError, ConfirmationMessage);
                 return;
             }
 
@@ -160,7 +164,7 @@ namespace GursaanjTools
 
             if (guiContentInformation.Equals(null))
             {
-                Debug.LogError(UnableToMassDownloadError);
+                EditorUtility.DisplayDialog(ErrorTitle, UnableToMassDownloadError, ConfirmationMessage);
                 return;
             }
             
@@ -169,7 +173,7 @@ namespace GursaanjTools
             
             if (totalCount == 0)
             {
-                Debug.LogWarning(NoImagesWarning);
+                EditorUtility.DisplayDialog(ErrorTitle, NoImagesWarning, ConfirmationMessage);
                 return;
             }
             
@@ -267,6 +271,9 @@ namespace GursaanjTools
             
             _wordWrapStyle = new GUIStyle(EditorStyles.label);
             _wordWrapStyle.wordWrap = true;
+            
+            _previewStyle = new GUIStyle(EditorStyles.boldLabel);
+            _previewStyle.padding = new RectOffset(0,0,0,-5);
             
             _copyContent = EditorGUIUtility.IconContent(CopyIcon);
             _copyContent.tooltip = CopyIconTooltip;

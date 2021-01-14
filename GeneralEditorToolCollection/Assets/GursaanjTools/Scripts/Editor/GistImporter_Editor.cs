@@ -21,6 +21,7 @@ namespace GursaanjTools
         private const string ImportGistProgressBar = "Importing Gist...";
 
         private const float GistURLLabelWidth = 30f;
+        private const float FieldWidth = 200f;
         private const float VerticalPadding = 5f;
         
         //Warning Labels
@@ -61,7 +62,7 @@ namespace GursaanjTools
             {
                 GUILayout.Label(GistURLLabel, EditorStyles.boldLabel, GUILayout.Width(GistURLLabelWidth));
                 GUI.SetNextControlName(controlName);
-                _gistURL = GUILayout.TextField(_gistURL, GUILayout.ExpandWidth(false));
+                _gistURL = GUILayout.TextField(_gistURL, GUILayout.Width(FieldWidth));
                 if (GUILayout.Button(ImportGistLabel, EditorStyles.miniButtonMid) || IsReturnPressed())
                 {
                     ImportGist(_gistURL);

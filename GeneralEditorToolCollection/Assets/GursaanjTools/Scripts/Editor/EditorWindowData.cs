@@ -29,7 +29,7 @@ namespace GursaanjTools
             {"Object Aligner", new EditorWindowInformation(new GUIContent("Align Selected Objects"), new Vector2(330, 260), new Vector2(330, 260))},
             {"GameObject Finder", new EditorWindowInformation(new GUIContent("Find References"), new Vector2(300, 400), new Vector2(300, 400))},
             {"Selection Log", new EditorWindowInformation(new GUIContent("View Selection Log"), new Vector2(300,200), new Vector2(300,200))},
-            {"Gist Importer", new EditorWindowInformation(new GUIContent("Import Gist File"), new Vector2(300, 50), new Vector2(300, 50))},
+            {"Gist Importer", new EditorWindowInformation(new GUIContent("Import Gist File"), new Vector2(350, 50), new Vector2(350, 50))},
             {"Camera Capture", new EditorWindowInformation(new GUIContent("Take Screenshot"), new Vector2(500, 400), new Vector2(800, 500))},
             {"Spotlight Searcher", new EditorWindowInformation(new GUIContent("Asset Search"), new Vector2(500, 500), new Vector2(500, 500))},
             {"IconContent Reference", new EditorWindowInformation(new GUIContent("Internal Editor Icons"), new Vector2(600, 300), new Vector2(600, 600))},

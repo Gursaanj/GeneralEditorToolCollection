@@ -28,10 +28,7 @@ namespace GursaanjTools
         private const string CopyIconTooltip = "Copy to clipboard";
         private const string ClearIcon = "winbtn_win_close";
         private const string ClearSearchTooltip = "Clear Search";
-        
-        private const float CopyButtonWidth = 20f;
-        private const float DownloadButtonOffset = 15f;
-        
+
         private const string InternalEditorResourceUtility = "UnityEditorInternal.EditorResourcesUtility";
         private const string InternalLightThemeLabel = "Light";
         private const string InternalDarkThemeLabel = "Dark";

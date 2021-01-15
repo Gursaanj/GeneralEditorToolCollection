@@ -33,6 +33,7 @@ namespace GursaanjTools
             {"Camera Capture", new EditorWindowInformation(new GUIContent("Take Screenshot"), new Vector2(500, 400), new Vector2(800, 500))},
             {"Spotlight Searcher", new EditorWindowInformation(new GUIContent("Asset Search"), new Vector2(500, 500), new Vector2(500, 500))},
             {"IconContent Reference", new EditorWindowInformation(new GUIContent("Internal Editor Icons"), new Vector2(600, 300), new Vector2(600, 600))},
+            {"SkinContent Reference", new EditorWindowInformation(new GUIContent("Internal Editor Skins"), new Vector2(600, 300), new Vector2(600, 600))},
             {"Cursor Reference", new EditorWindowInformation(new GUIContent("Internal Cursors"), new Vector2(500, 250), new Vector2(600, 250))},
             {"Fonts Reference", new EditorWindowInformation(new GUIContent("Internal Fonts"), new Vector2(370, 400), new Vector2(370, 500))}
         };

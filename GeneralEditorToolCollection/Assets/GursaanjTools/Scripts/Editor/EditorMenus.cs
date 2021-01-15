@@ -141,6 +141,15 @@ namespace GursaanjTools
         }
         #endregion
 
+        #region Builtin Skin Content
+        [MenuItem("GursaanjTools/References/Internal Skins")]
+        public static void BuiltinSkinUtilityReferenceTool()
+        {
+            BuiltinSkinReference_Editor.Init(typeof(BuiltinSkinReference_Editor), EditorWindowData.EditorWindowInformations["SkinContent Reference"]);
+        }
+
+        #endregion
+
         #region Cursors
         [MenuItem("GursaanjTools/References/Internal Cursors")]
         public static void CursorsReferenceTool()

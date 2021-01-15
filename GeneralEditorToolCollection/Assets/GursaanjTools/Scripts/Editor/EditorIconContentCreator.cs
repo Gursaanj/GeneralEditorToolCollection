@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace GursaanjTools
 {
-    public enum IconContentSize
+    public enum ContentSize
     {
         Small,
         Medium,
@@ -37,16 +37,13 @@ namespace GursaanjTools
         #region Variables
         
         //GUI Labels
-        private const string IconSizesLabel = "Filter icons by size";
-        private const string IconNameLabel = "Name of Icon";
-        private const string IconFullMethod = "Full Method";
+        private const string FullMethodLabel = "Full Method";
         
         private const string YesLabel = "Yes";
         private const string NoLabel = "No";
-        private const string DownloadAllOfSizeLabel = "Download the presented {0} sized Icons";
 
-        private const float IconSizeLabelWidth = 120f;
-        private const float IconSizesWidth = 180f;
+        private const float ContentSizeLabelWidth = 120f;
+        private const float ContentSizesWidth = 180f;
         private const float PreviewSectionMaxHeight = 130f;
         private const float ClearButtonWidth = 20f;
         private const float CopyButtonWidth = 20f;
@@ -61,13 +58,10 @@ namespace GursaanjTools
         private const float DownloadButtonOffset = 15f;
 
         //Warning Labels
-        private const string NoIconsFoundWarning = "No Icons Found!!";
-
         private const string InappropriateSizeWarning = "Inappropriate Size selected";
 
         private const string PngFileExtension = ".png";
         private const string AssetFileExtension = ".asset";
-        private const string SubDirectory = "Icons";
 
         private const int SmallToMediumLimit = 36;
         private const int MediumToLargeLimit = 72;
@@ -75,16 +69,23 @@ namespace GursaanjTools
         private const float SmallButtonSize = 40f;
         private const float MediumButtonSize = 70f;
         private const float LargeButtonSize = 100f;
+        
+        //Window Specific Labels
+        private readonly string ContentSizeFilterLabel = "Filter {0} by size";
+        private readonly string ContentNameLabel = "Name of {0}";
+        private readonly string DownloadPresentedContent = "Download the presented {0}";
+        private readonly string NoContentFoundWarning = "No {0} Found!!";
+        
+        private readonly string[] ContentSizes = Enum.GetNames(typeof(ContentSize));
 
-        private readonly string[] IconContentSizes = Enum.GetNames(typeof(IconContentSize));
-
-        private InternalEditorResourceImageInformation _information;
+        private readonly InternalEditorResourceImageInformation _information;
+        
         private EditorResourceLogic _logic;
 
-        private List<string> _imageNames = new List<string>();
-        private List<GUIContent> _smallIcons = new List<GUIContent>();
-        private List<GUIContent> _mediumIcons = new List<GUIContent>();
-        private List<GUIContent> _largeIcons = new List<GUIContent>();
+        private List<string> contentNames = new List<string>();
+        private List<GUIContent> _smallContent = new List<GUIContent>();
+        private List<GUIContent> _mediumContent = new List<GUIContent>();
+        private List<GUIContent> _largeContent = new List<GUIContent>();
         private List<GUIContent> _currentSelection = new List<GUIContent>();
         private GUIContent _currentlySelected = GUIContent.none;
         private Vector2 _scrollPosition = Vector2.zero;
@@ -92,7 +93,7 @@ namespace GursaanjTools
 
         //GUI Fields
         private string _searchField = string.Empty;
-        private IconContentSize _selectedContentSize = IconContentSize.Small;
+        private ContentSize _selectedContentSize = ContentSize.Small;
         
         #endregion
 
@@ -101,32 +102,27 @@ namespace GursaanjTools
         public EditorIconContentCreator(InternalEditorResourceImageInformation info)
         {
             _information = info;
+            ContentSizeFilterLabel = string.Format(ContentSizeFilterLabel, info.PluralName);
+            ContentNameLabel = string.Format(ContentNameLabel, info.ImageName);
+            DownloadPresentedContent = string.Format(DownloadPresentedContent, info.PluralName);
+            NoContentFoundWarning = string.Format(NoContentFoundWarning, info.PluralName);
             InitializeContent();
         }
 
         #endregion
-
-        #region IHasCustomMenu Implementation
         
-        public void AddItemsToMenu(GenericMenu menu)
-        {
-            menu.AddItem(new GUIContent(string.Format(DownloadAllOfSizeLabel, _selectedContentSize.ToString())),false, _logic.DownloadSelectionOfImages, new ContentInformation(_currentSelection, $"{SubDirectory}/{_selectedContentSize.ToString()}"));
-        }
-        
-        #endregion
-
         #region Custom Methods
 
         public void CreateWindowGUI(string controlName, Rect position)
         {
             CreateToolbar(controlName);
 
-            _currentSelection = GetSizeAppropriateIcons(_selectedContentSize);
+            _currentSelection = GetSizeAppropriateContent(_selectedContentSize);
 
             if (!string.IsNullOrEmpty(_searchField))
             {
                 _currentSelection = _currentSelection
-                    .Where(icon => icon.tooltip.ToLower().Contains(_searchField.ToLower())).ToList();
+                    .Where(content => content.tooltip.ToLower().Contains(_searchField.ToLower())).ToList();
             }
             
             using (var scrollScope = new GUILayout.ScrollViewScope(_scrollPosition))
@@ -140,10 +136,10 @@ namespace GursaanjTools
                 float marginPadding = (renderWidth - _buttonSize * gridWidth) / 2;
 
                 int currentRow = 0;
-                int iconIndex = 0;
-                int totalIconCount = _currentSelection.Count;
+                int contentIndex = 0;
+                int totalContentCount = _currentSelection.Count;
 
-                while (iconIndex < totalIconCount)
+                while (contentIndex < totalContentCount)
                 {
                     using (new GUILayout.HorizontalScope())
                     {
@@ -151,18 +147,18 @@ namespace GursaanjTools
 
                         for (int i = 0; i < gridWidth; i++)
                         {
-                            int currentIconIndex = i + currentRow * gridWidth;
-                            GUIContent currentIcon = _currentSelection[currentIconIndex];
+                            int currentContentIndex = i + currentRow * gridWidth;
+                            GUIContent currentContent = _currentSelection[currentContentIndex];
 
-                            if (GUILayout.Button(currentIcon, _logic.IconButtonStyle, GUILayout.Width(_buttonSize),
+                            if (GUILayout.Button(currentContent, _logic.IconButtonStyle, GUILayout.Width(_buttonSize),
                                 GUILayout.Height(_buttonSize)))
                             {
-                                _currentlySelected = currentIcon;
+                                _currentlySelected = currentContent;
                             }
 
-                            iconIndex++;
+                            contentIndex++;
 
-                            if (iconIndex == totalIconCount)
+                            if (contentIndex == totalContentCount)
                             {
                                 break;
                             }
@@ -228,34 +224,38 @@ namespace GursaanjTools
                         GUILayout.Space(DownloadButtonOffset);
                         if (GUILayout.Button(_logic.DownloadLabel))
                         {
-                            if (_logic.DownloadImageContent(_currentlySelected, $"{SubDirectory}/{_selectedContentSize.ToString()}"))
-                            { 
-                                EditorUtility.DisplayDialog("Hi", string.Format(_logic.DownloadMessageLabel, _currentlySelected.tooltip), "yup");
+                            if (_logic.DownloadImageContent(_currentlySelected, $"{_information.SubDirectory}/{_selectedContentSize.ToString()}"))
+                            {
+                                _logic.DisplayUpdate(string.Format(_logic.DownloadMessageLabel, _currentlySelected.tooltip));
                             }
                         }
                     }
 
                     GUILayout.Space(PreviewHeightPadding);
-                    CreatePreviewLabel(previewWidth,IconNameLabel, $"\"{_currentlySelected.tooltip}\"");
+                    CreatePreviewLabel(previewWidth,ContentNameLabel, $"\"{_currentlySelected.tooltip}\"");
                     GUILayout.Space(PreviewHeightPadding);
-                    CreatePreviewLabel(previewWidth,IconFullMethod, $"EditorGUIUtility.IconContent(\"{_currentlySelected.tooltip}\")");
+                    CreatePreviewLabel(previewWidth,FullMethodLabel, $"EditorGUIUtility.IconContent(\"{_currentlySelected.tooltip}\")");
                     GUILayout.FlexibleSpace();
                 }
             }
 
             _logic.HandleContentEvents(ref _currentlySelected);
         }
-
-
+        
+        public void AddItemsToMenu(GenericMenu menu)
+        {
+            menu.AddItem(new GUIContent(DownloadPresentedContent),false, _logic.DownloadSelectionOfImages, new ContentInformation(_currentSelection, $"{_information.SubDirectory}/{_selectedContentSize.ToString()}"));
+        }
+        
         private void InitializeContent()
         {
             _logic = new EditorResourceLogic();
             string[] iconExtensions = new string[2] {PngFileExtension, AssetFileExtension};
-            _imageNames = _logic.GetAppropriateNames(_logic.GetEditorAssetBundle(), _information.PrefixPath, iconExtensions);
+            contentNames = _logic.GetAppropriateNames(_logic.GetEditorAssetBundle(), _information.PrefixPath, iconExtensions);
             
-            if (_imageNames == null || _imageNames.Count == 0)
+            if (contentNames == null || contentNames.Count == 0)
             {
-                EditorUtility.DisplayDialog("Error", NoIconsFoundWarning, "Sounds Good");
+                _logic.DisplayError(NoContentFoundWarning);
                 _information.CloseWindow?.Invoke();
             }
             
@@ -266,8 +266,8 @@ namespace GursaanjTools
         {
             using (new GUILayout.HorizontalScope(EditorStyles.toolbar))
             {
-                GUILayout.Label(IconSizesLabel, EditorStyles.boldLabel, GUILayout.Width(IconSizeLabelWidth));
-                _selectedContentSize = (IconContentSize)GUILayout.SelectionGrid((int)_selectedContentSize, IconContentSizes, IconContentSizes.Length, EditorStyles.toolbarButton, GUILayout.Width(IconSizesWidth));
+                GUILayout.Label(ContentSizeFilterLabel, EditorStyles.boldLabel, GUILayout.Width(ContentSizeLabelWidth));
+                _selectedContentSize = (ContentSize)GUILayout.SelectionGrid((int)_selectedContentSize, ContentSizes, ContentSizes.Length, EditorStyles.toolbarButton, GUILayout.Width(ContentSizesWidth));
                 GUI.SetNextControlName(controlName);
                 _searchField = GUILayout.TextField(_searchField, EditorStyles.toolbarSearchField);
                 if (GUILayout.Button(_logic.ClearSearch, EditorStyles.toolbarButton, GUILayout.Width(ClearButtonWidth)))
@@ -298,7 +298,7 @@ namespace GursaanjTools
         
         private void SortBySizes()
         {
-            foreach (string iconName in _imageNames)
+            foreach (string iconName in contentNames)
             {
                 GUIContent iconContent = GetIconContent(iconName);
 
@@ -318,15 +318,15 @@ namespace GursaanjTools
 
                 if (icon.width <= SmallToMediumLimit || icon.height <= SmallToMediumLimit)
                 {
-                    _smallIcons.Add(iconContent);
+                    _smallContent.Add(iconContent);
                 }
                 else if (icon.width <= MediumToLargeLimit || icon.height <= MediumToLargeLimit)
                 {
-                    _mediumIcons.Add(iconContent);
+                    _mediumContent.Add(iconContent);
                 }
                 else
                 {
-                    _largeIcons.Add(iconContent);
+                    _largeContent.Add(iconContent);
                 }
             }
         }
@@ -336,23 +336,23 @@ namespace GursaanjTools
             return string.IsNullOrEmpty(iconName) ? null : EditorGUIUtility.IconContent(iconName);
         }
 
-        private List<GUIContent> GetSizeAppropriateIcons(IconContentSize contentSize)
+        private List<GUIContent> GetSizeAppropriateContent(ContentSize contentSize)
         {
             switch (contentSize)
             {
-                case IconContentSize.Small:
+                case ContentSize.Small:
                     _buttonSize = SmallButtonSize;
-                    return _smallIcons;
-                case IconContentSize.Medium:
+                    return _smallContent;
+                case ContentSize.Medium:
                     _buttonSize = MediumButtonSize;
-                    return _mediumIcons;
-                case IconContentSize.Large:
+                    return _mediumContent;
+                case ContentSize.Large:
                     _buttonSize = LargeButtonSize;
-                    return _largeIcons;
+                    return _largeContent;
                 default:
                     Debug.LogWarning(InappropriateSizeWarning);
                     _buttonSize = SmallButtonSize;
-                    return _smallIcons;
+                    return _smallContent;
             }
         }
         

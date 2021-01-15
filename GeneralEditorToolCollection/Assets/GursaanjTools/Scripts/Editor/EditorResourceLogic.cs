@@ -15,8 +15,8 @@ namespace GursaanjTools
 
         public ContentInformation(List<GUIContent> contents, string subDirectory)
         {
-            this.Contents = contents;
-            this.SubDirectory = subDirectory;
+            Contents = contents;
+            SubDirectory = subDirectory;
         }
     }
     
@@ -38,8 +38,9 @@ namespace GursaanjTools
         private const string InternalDownloadLabel = "Download";
         private const string InternalDownloadedMessage = "{0} has been downloaded";
         private const float InternalScrollBarWidth = 13f;
-
+        
         private const string ErrorTitle = "Error";
+        private const string UpdateTitle = "Update";
         private const string UnableToMassDownloadError = "Unable to mass download";
         private const string DownloadProgressTitle = "Downloading current selection of images";
         private const string DownloadCountLabel = "Downloading {0} images";
@@ -68,9 +69,7 @@ namespace GursaanjTools
         #region Properties
 
         public GUIStyle IconButtonStyle => _iconButtonStyle;
-
         public bool IsLightPreview { get; set; } = false;
-        public string EditorResourceUtility => InternalEditorResourceUtility;
         public GUIStyle BlackPreviewStyle => _blackPreviewStyle;
         public GUIStyle WhitePreviewStyle => _whitePreviewStyle;
         public GUIStyle WordWrapStyle => _wordWrapStyle;
@@ -260,6 +259,21 @@ namespace GursaanjTools
             Type resourceUtility = assembly.GetType(InternalEditorResourceUtility);
             PropertyInfo iconsPathProperty = resourceUtility.GetProperty(pathName, BindingFlags.Static | BindingFlags.Public);
             return (string)iconsPathProperty.GetValue(null, new object[] { });
+        }
+
+        public bool DisplayError(string errorMessage)
+        {
+            return DisplayDialogue(ErrorTitle, errorMessage);
+        }
+
+        public bool DisplayUpdate(string updateMessage)
+        {
+            return DisplayDialogue(UpdateTitle, updateMessage);
+        }
+
+        private bool DisplayDialogue(string title, string message)
+        {
+            return EditorUtility.DisplayDialog(title, message, ConfirmationMessage);
         }
 
         private void CreateGUIStyles()

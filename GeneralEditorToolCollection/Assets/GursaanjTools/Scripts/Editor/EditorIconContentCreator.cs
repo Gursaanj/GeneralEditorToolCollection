@@ -14,26 +14,26 @@ namespace GursaanjTools
         Large
     }
     
+    public readonly struct InternalEditorResourceImageInformation
+    {
+        public readonly string PrefixPath;
+        public readonly string ImageName;
+        public readonly string PluralName;
+        public readonly string SubDirectory;
+        public readonly Action CloseWindow;
+
+        public InternalEditorResourceImageInformation(string prefixPath, string imageName, string pluralName, string subDirectory, Action closeWindow)
+        {
+            PrefixPath = prefixPath;
+            ImageName = imageName;
+            PluralName = pluralName;
+            SubDirectory = subDirectory;
+            CloseWindow = closeWindow;
+        }
+    }
+    
     public class EditorIconContentCreator
     {
-        public readonly struct InternalEditorResourceImageInformation
-        {
-            public readonly string PrefixPath;
-            public readonly string ImageName;
-            public readonly string PluralName;
-            public readonly string SubDirectory;
-            public readonly Action CloseWindow;
-
-            public InternalEditorResourceImageInformation(string prefixPath, string imageName, string pluralName, string subDirectory, Action closeWindow)
-            {
-                PrefixPath = prefixPath;
-                ImageName = imageName;
-                PluralName = pluralName;
-                SubDirectory = subDirectory;
-                CloseWindow = closeWindow;
-            }
-        }
-
         #region Variables
         
         //GUI Labels
@@ -104,6 +104,15 @@ namespace GursaanjTools
             InitializeContent();
         }
 
+        #endregion
+
+        #region IHasCustomMenu Implementation
+        
+        public void AddItemsToMenu(GenericMenu menu)
+        {
+            menu.AddItem(new GUIContent(string.Format(DownloadAllOfSizeLabel, _selectedContentSize.ToString())),false, _logic.DownloadSelectionOfImages, new ContentInformation(_currentSelection, $"{SubDirectory}/{_selectedContentSize.ToString()}"));
+        }
+        
         #endregion
 
         #region Custom Methods

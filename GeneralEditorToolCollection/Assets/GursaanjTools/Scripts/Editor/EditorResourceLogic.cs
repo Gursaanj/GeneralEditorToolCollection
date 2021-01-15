@@ -249,6 +249,19 @@ namespace GursaanjTools
             }
         }
 
+        public string GetPath(string pathName)
+        {
+            if (string.IsNullOrEmpty(pathName))
+            {
+                return null;
+            }
+
+            Assembly assembly = typeof(EditorGUIUtility).Assembly;
+            Type resourceUtility = assembly.GetType(InternalEditorResourceUtility);
+            PropertyInfo iconsPathProperty = resourceUtility.GetProperty(pathName, BindingFlags.Static | BindingFlags.Public);
+            return (string)iconsPathProperty.GetValue(null, new object[] { });
+        }
+
         private void CreateGUIStyles()
         {
             _iconButtonStyle = new GUIStyle(EditorStyles.miniButton);

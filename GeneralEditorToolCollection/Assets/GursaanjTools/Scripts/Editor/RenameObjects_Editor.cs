@@ -122,8 +122,7 @@ namespace GursaanjTools
         for (int i = 0; i < _selectedGameObjects.Length; i++)
         {
             string finalName = GetFinalName();
-            
-            //TODO: Look into EnsureUniqueNameForSibiling
+
             if (_shouldAddNumbering && i > 0)
             {
                 finalName = string.Format(FinalNameFormat, finalName, i.ToString());

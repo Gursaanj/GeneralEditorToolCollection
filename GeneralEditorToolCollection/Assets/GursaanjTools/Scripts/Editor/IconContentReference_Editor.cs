@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
 using UnityEditor;
@@ -8,20 +7,13 @@ using UnityEngine;
 
 namespace GursaanjTools
 {
-    public enum IconSize
-    {
-        Small,
-        Medium,
-        Large
-    }
-
     public class IconContentReference_Editor : GuiControlEditorWindow, IHasCustomMenu
     {
         #region Variables
         
         //GUI Labels
         private const string IconSizesLabel = "Filter icons by size";
-        private const string IconNameLabel = "Name of Icon Content";
+        private const string IconNameLabel = "Name of Icon";
         private const string IconFullMethod = "Full Method";
         
         private const string YesLabel = "Yes";
@@ -42,12 +34,11 @@ namespace GursaanjTools
         private const float PreviewHeightPadding = 5f;
         private const float PreviewLabelVerticalOffset = 3f;
         private const float DownloadButtonOffset = 15f;
-        private const float ScrollBarWidth = 13f;
-        
+
         //Warning Labels
         private const string NoIconsFoundWarning = "No Icons Found!!";
 
-        private const string InappropriateSizeWarning = "Inappropriate Icon Size selected";
+        private const string InappropriateSizeWarning = "Inappropriate Size selected";
 
         private const string EditorResourceUtility = "UnityEditorInternal.EditorResourcesUtility";
         private const string IconsPath = "iconsPath";
@@ -63,22 +54,23 @@ namespace GursaanjTools
         private const float MediumButtonSize = 70f;
         private const float LargeButtonSize = 100f;
 
-        private readonly string[] IconSizes = Enum.GetNames(typeof(IconSize));
+        private readonly string[] IconContentSizes = Enum.GetNames(typeof(IconContentSize));
 
         private EditorResourceLogic _logic;
+        private EditorIconContentCreator _contentCreator;
 
-        private List<string> _iconNames = new List<string>();
+        private List<string> _imageNames = new List<string>();
         private List<GUIContent> _smallIcons = new List<GUIContent>();
         private List<GUIContent> _mediumIcons = new List<GUIContent>();
         private List<GUIContent> _largeIcons = new List<GUIContent>();
-        private List<GUIContent> _currentSelectionOfIcons = new List<GUIContent>();
-        private GUIContent _currentlySelectedIcon = GUIContent.none;
+        private List<GUIContent> _currentSelection = new List<GUIContent>();
+        private GUIContent _currentlySelected = GUIContent.none;
         private Vector2 _scrollPosition = Vector2.zero;
         private float _buttonSize = SmallButtonSize;
 
         //GUI Fields
         private string _searchField = string.Empty;
-        private IconSize _selectedSize = IconSize.Small;
+        private IconContentSize _selectedContentSize = IconContentSize.Small;
         
         
         #endregion
@@ -87,146 +79,152 @@ namespace GursaanjTools
 
         private void OnEnable()
         {
-            _logic = new EditorResourceLogic();
-            string[] iconExtensions = new string[2] {PngFileExtension, AssetFileExtension};
-            _iconNames = _logic.GetAppropriateNames(_logic.GetEditorAssetBundle(), GetIconPath(), iconExtensions);
+            // _logic = new EditorResourceLogic();
+            // string[] iconExtensions = new string[2] {PngFileExtension, AssetFileExtension};
+            // _imageNames = _logic.GetAppropriateNames(_logic.GetEditorAssetBundle(), GetIconPath(), iconExtensions);
+            //
+            // if (_imageNames == null || _imageNames.Count == 0)
+            // {
+            //     DisplayDialogue(ErrorTitle, NoIconsFoundWarning, false);
+            //     Close();
+            // }
+            //
+            // SortBySizes();
             
-            if (_iconNames == null || _iconNames.Count == 0)
-            {
-                DisplayDialogue(ErrorTitle, NoIconsFoundWarning, false);
-                Close();
-            }
+            EditorIconContentCreator.InternalEditorResourceImageInformation info = new EditorIconContentCreator.InternalEditorResourceImageInformation(GetIconPath(), "Icon", "Icons", "Icons", () => Close());
             
-            SortIconsBySizes();
+            _contentCreator = new EditorIconContentCreator(info);
+            
         }
 
         protected override void CreateGUI(string controlName)
         {
-            CreateToolbar(controlName);
-
-            _currentSelectionOfIcons = GetSizeAppropriateIcons(_selectedSize);
-
-            if (!string.IsNullOrEmpty(_searchField))
-            {
-                _currentSelectionOfIcons = _currentSelectionOfIcons
-                    .Where(icon => icon.tooltip.ToLower().Contains(_searchField.ToLower())).ToList();
-            }
-            
-            using (var scrollScope = new GUILayout.ScrollViewScope(_scrollPosition))
-            {
-                _scrollPosition = scrollScope.scrollPosition;
-                float pixelsPerPoint = EditorGUIUtility.pixelsPerPoint;
-                GUILayout.Space(PrimaryPadding);
-
-                float renderWidth = Screen.width / pixelsPerPoint - ScrollBarWidth;
-                int gridWidth = Mathf.FloorToInt(renderWidth / _buttonSize);
-                float marginPadding = (renderWidth - _buttonSize * gridWidth) / 2;
-
-                int currentRow = 0;
-                int iconIndex = 0;
-                int totalIconCount = _currentSelectionOfIcons.Count;
-
-                while (iconIndex < totalIconCount)
-                {
-                    using (new GUILayout.HorizontalScope())
-                    {
-                        GUILayout.Space(marginPadding);
-
-                        for (int i = 0; i < gridWidth; i++)
-                        {
-                            int currentIconIndex = i + currentRow * gridWidth;
-                            GUIContent currentIcon = _currentSelectionOfIcons[currentIconIndex];
-
-                            if (GUILayout.Button(currentIcon, _logic.IconButtonStyle, GUILayout.Width(_buttonSize),
-                                GUILayout.Height(_buttonSize)))
-                            {
-                                _currentlySelectedIcon = currentIcon;
-                            }
-
-                            iconIndex++;
-
-                            if (iconIndex == totalIconCount)
-                            {
-                                break;
-                            }
-                        }
-                    }
-
-                    currentRow++;
-                }
-                
-                GUILayout.Space(PrimaryPadding);
-                
-            }
-
-            if (_currentlySelectedIcon.Equals(GUIContent.none))
-            {
-                return;
-            }
-
-            GUILayout.FlexibleSpace();
-            float textureWidth = position.width * TextureWidthRatio;
-            float previewStyleWidth = textureWidth / 2;
-            float previewWidth = position.width - textureWidth - PreviewWidthPadding;
-
-            using (new GUILayout.HorizontalScope(EditorStyles.helpBox,GUILayout.MaxHeight(PreviewSectionMaxHeight)))
-            {
-                using (new GUILayout.VerticalScope(GUILayout.Width(textureWidth)))
-                {
-                    GUILayout.Space(TextureBorderOffset);
-
-                    GUILayout.Button(_currentlySelectedIcon, _logic.IsLightPreview ? _logic.WhitePreviewStyle : _logic.BlackPreviewStyle, GUILayout.Width(textureWidth - TextureBorderOffset),
-                        GUILayout.Height(TextureHeight));
-                    
-                    GUILayout.FlexibleSpace();
-
-                    using (new GUILayout.HorizontalScope())
-                    {
-                        if (GUILayout.Button(_logic.LightThemeLabel, EditorStyles.miniButton, GUILayout.Width(previewStyleWidth)))
-                        {
-                            _logic.IsLightPreview = true;
-                        }
-                        
-                        GUILayout.FlexibleSpace();
-
-                        if (GUILayout.Button(_logic.DarkThemeLabel, EditorStyles.miniButton, GUILayout.Width(previewStyleWidth)))
-                        {
-                            _logic.IsLightPreview = false;
-                        }
-                    }
-                }
-
-                GUILayout.Space(PrimaryPadding);
-
-                using (new GUILayout.VerticalScope())
-                {
-                    GUILayout.Space(PreviewHeightPadding);
-                    using (new GUILayout.HorizontalScope(GUILayout.Width(previewWidth)))
-                    {
-                        StringBuilder info = new StringBuilder();
-                        info.AppendLine($"Width : {_currentlySelectedIcon.image.width} Height : {_currentlySelectedIcon.image.height}");
-                        string proSkinLabel = _logic.IsProOnly(_currentlySelectedIcon.tooltip) ? YesLabel : NoLabel;
-                        info.Append($"Is ProSkin Icon? {proSkinLabel}");
-                        EditorGUILayout.HelpBox(info.ToString(), MessageType.None);
-                        GUILayout.Space(DownloadButtonOffset);
-                        if (GUILayout.Button(_logic.DownloadLabel))
-                        {
-                            if (_logic.DownloadImageContent(_currentlySelectedIcon, $"{SubDirectory}/{_selectedSize.ToString()}"))
-                            {
-                                DisplayDialogue(UpdateTitle, string.Format(_logic.DownloadMessageLabel, _currentlySelectedIcon.tooltip), false);
-                            }
-                        }
-                    }
-
-                    GUILayout.Space(PreviewHeightPadding);
-                    CreatePreviewLabel(previewWidth,IconNameLabel, $"\"{_currentlySelectedIcon.tooltip}\"");
-                    GUILayout.Space(PreviewHeightPadding);
-                    CreatePreviewLabel(previewWidth,IconFullMethod, $"EditorGUIUtility.IconContent(\"{_currentlySelectedIcon.tooltip}\")");
-                    GUILayout.FlexibleSpace();
-                }
-            }
-
-            _logic.HandleContentEvents(ref _currentlySelectedIcon);
+            // CreateToolbar(controlName);
+            //
+            // _currentSelection = GetSizeAppropriateIcons(_selectedContentSize);
+            //
+            // if (!string.IsNullOrEmpty(_searchField))
+            // {
+            //     _currentSelection = _currentSelection
+            //         .Where(icon => icon.tooltip.ToLower().Contains(_searchField.ToLower())).ToList();
+            // }
+            //
+            // using (var scrollScope = new GUILayout.ScrollViewScope(_scrollPosition))
+            // {
+            //     _scrollPosition = scrollScope.scrollPosition;
+            //     float pixelsPerPoint = EditorGUIUtility.pixelsPerPoint;
+            //     GUILayout.Space(PrimaryPadding);
+            //
+            //     float renderWidth = Screen.width / pixelsPerPoint - _logic.ScrollBarWidth;
+            //     int gridWidth = Mathf.FloorToInt(renderWidth / _buttonSize);
+            //     float marginPadding = (renderWidth - _buttonSize * gridWidth) / 2;
+            //
+            //     int currentRow = 0;
+            //     int iconIndex = 0;
+            //     int totalIconCount = _currentSelection.Count;
+            //
+            //     while (iconIndex < totalIconCount)
+            //     {
+            //         using (new GUILayout.HorizontalScope())
+            //         {
+            //             GUILayout.Space(marginPadding);
+            //
+            //             for (int i = 0; i < gridWidth; i++)
+            //             {
+            //                 int currentIconIndex = i + currentRow * gridWidth;
+            //                 GUIContent currentIcon = _currentSelection[currentIconIndex];
+            //
+            //                 if (GUILayout.Button(currentIcon, _logic.IconButtonStyle, GUILayout.Width(_buttonSize),
+            //                     GUILayout.Height(_buttonSize)))
+            //                 {
+            //                     _currentlySelected = currentIcon;
+            //                 }
+            //
+            //                 iconIndex++;
+            //
+            //                 if (iconIndex == totalIconCount)
+            //                 {
+            //                     break;
+            //                 }
+            //             }
+            //         }
+            //
+            //         currentRow++;
+            //     }
+            //     
+            //     GUILayout.Space(PrimaryPadding);
+            //     
+            // }
+            //
+            // if (_currentlySelected.Equals(GUIContent.none))
+            // {
+            //     return;
+            // }
+            //
+            // GUILayout.FlexibleSpace();
+            // float textureWidth = position.width * TextureWidthRatio;
+            // float previewStyleWidth = textureWidth / 2;
+            // float previewWidth = position.width - textureWidth - PreviewWidthPadding;
+            //
+            // using (new GUILayout.HorizontalScope(EditorStyles.helpBox,GUILayout.MaxHeight(PreviewSectionMaxHeight)))
+            // {
+            //     using (new GUILayout.VerticalScope(GUILayout.Width(textureWidth)))
+            //     {
+            //         GUILayout.Space(TextureBorderOffset);
+            //
+            //         GUILayout.Button(_currentlySelected, _logic.IsLightPreview ? _logic.WhitePreviewStyle : _logic.BlackPreviewStyle, GUILayout.Width(textureWidth - TextureBorderOffset),
+            //             GUILayout.Height(TextureHeight));
+            //         
+            //         GUILayout.FlexibleSpace();
+            //
+            //         using (new GUILayout.HorizontalScope())
+            //         {
+            //             if (GUILayout.Button(_logic.LightThemeLabel, EditorStyles.miniButton, GUILayout.Width(previewStyleWidth)))
+            //             {
+            //                 _logic.IsLightPreview = true;
+            //             }
+            //             
+            //             GUILayout.FlexibleSpace();
+            //
+            //             if (GUILayout.Button(_logic.DarkThemeLabel, EditorStyles.miniButton, GUILayout.Width(previewStyleWidth)))
+            //             {
+            //                 _logic.IsLightPreview = false;
+            //             }
+            //         }
+            //     }
+            //
+            //     GUILayout.Space(PrimaryPadding);
+            //
+            //     using (new GUILayout.VerticalScope())
+            //     {
+            //         GUILayout.Space(PreviewHeightPadding);
+            //         using (new GUILayout.HorizontalScope(GUILayout.Width(previewWidth)))
+            //         {
+            //             StringBuilder info = new StringBuilder();
+            //             info.AppendLine($"Width : {_currentlySelected.image.width} Height : {_currentlySelected.image.height}");
+            //             string proSkinLabel = _logic.IsProOnly(_currentlySelected.tooltip) ? YesLabel : NoLabel;
+            //             info.Append($"Is ProSkin Icon? {proSkinLabel}");
+            //             EditorGUILayout.HelpBox(info.ToString(), MessageType.None);
+            //             GUILayout.Space(DownloadButtonOffset);
+            //             if (GUILayout.Button(_logic.DownloadLabel))
+            //             {
+            //                 if (_logic.DownloadImageContent(_currentlySelected, $"{SubDirectory}/{_selectedContentSize.ToString()}"))
+            //                 {
+            //                     DisplayDialogue(UpdateTitle, string.Format(_logic.DownloadMessageLabel, _currentlySelected.tooltip), false);
+            //                 }
+            //             }
+            //         }
+            //
+            //         GUILayout.Space(PreviewHeightPadding);
+            //         CreatePreviewLabel(previewWidth,IconNameLabel, $"\"{_currentlySelected.tooltip}\"");
+            //         GUILayout.Space(PreviewHeightPadding);
+            //         CreatePreviewLabel(previewWidth,IconFullMethod, $"EditorGUIUtility.IconContent(\"{_currentlySelected.tooltip}\")");
+            //         GUILayout.FlexibleSpace();
+            //     }
+            // }
+            //
+            // _logic.HandleContentEvents(ref _currentlySelected);
+            _contentCreator.CreateWindowGUI(controlName, position);
         }
 
         #endregion
@@ -235,7 +233,7 @@ namespace GursaanjTools
 
         public void AddItemsToMenu(GenericMenu menu)
         {
-            menu.AddItem(new GUIContent(string.Format(DownloadAllOfSizeLabel, _selectedSize.ToString())),false, _logic.DownloadSelectionOfImages, new ContentInformation(_currentSelectionOfIcons, $"{SubDirectory}/{_selectedSize.ToString()}"));
+            menu.AddItem(new GUIContent(string.Format(DownloadAllOfSizeLabel, _selectedContentSize.ToString())),false, _logic.DownloadSelectionOfImages, new ContentInformation(_currentSelection, $"{SubDirectory}/{_selectedContentSize.ToString()}"));
         }
 
         #endregion
@@ -247,7 +245,7 @@ namespace GursaanjTools
             using (new GUILayout.HorizontalScope(EditorStyles.toolbar))
             {
                 GUILayout.Label(IconSizesLabel, EditorStyles.boldLabel, GUILayout.Width(IconSizeLabelWidth));
-                _selectedSize = (IconSize)GUILayout.SelectionGrid((int)_selectedSize, IconSizes, IconSizes.Length, EditorStyles.toolbarButton, GUILayout.Width(IconSizesWidth));
+                _selectedContentSize = (IconContentSize)GUILayout.SelectionGrid((int)_selectedContentSize, IconContentSizes, IconContentSizes.Length, EditorStyles.toolbarButton, GUILayout.Width(IconSizesWidth));
                 GUI.SetNextControlName(controlName);
                 _searchField = GUILayout.TextField(_searchField, EditorStyles.toolbarSearchField);
                 if (GUILayout.Button(_logic.ClearSearch, EditorStyles.toolbarButton, GUILayout.Width(ClearButtonWidth)))
@@ -288,9 +286,9 @@ namespace GursaanjTools
 #endif
         }
 
-        private void SortIconsBySizes()
+        private void SortBySizes()
         {
-            foreach (string iconName in _iconNames)
+            foreach (string iconName in _imageNames)
             {
                 GUIContent iconContent = GetIconContent(iconName);
 
@@ -328,17 +326,17 @@ namespace GursaanjTools
             return string.IsNullOrEmpty(iconName) ? null : EditorGUIUtility.IconContent(iconName);
         }
 
-        private List<GUIContent> GetSizeAppropriateIcons(IconSize size)
+        private List<GUIContent> GetSizeAppropriateIcons(IconContentSize contentSize)
         {
-            switch (size)
+            switch (contentSize)
             {
-                case IconSize.Small:
+                case IconContentSize.Small:
                     _buttonSize = SmallButtonSize;
                     return _smallIcons;
-                case IconSize.Medium:
+                case IconContentSize.Medium:
                     _buttonSize = MediumButtonSize;
                     return _mediumIcons;
-                case IconSize.Large:
+                case IconContentSize.Large:
                     _buttonSize = LargeButtonSize;
                     return _largeIcons;
                 default:

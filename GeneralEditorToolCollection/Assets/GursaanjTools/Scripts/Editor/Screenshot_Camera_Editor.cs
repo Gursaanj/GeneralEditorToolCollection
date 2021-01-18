@@ -6,7 +6,6 @@ namespace GursaanjTools
     //Todo: Options needed : Include Transparent background, Do you just want just the green/blue/red, so on. Place Texture Format, RenderTexture Format in advanced options
     //Todo: Allow bool for Alpha or Inverted Colors
     //Todo: Change entire guilayout to use scopes if possible
-    [CustomEditor(typeof(Camera))]
     public class Screenshot_Camera_Editor : GuiControlEditorWindow
     {
         #region Variables

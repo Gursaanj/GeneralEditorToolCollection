@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEditor;
+﻿using UnityEditor;
 using UnityEngine;
 
 namespace GursaanjTools
@@ -7,6 +6,7 @@ namespace GursaanjTools
     //Todo: Options needed : Include Transparent background, Do you just want just the green/blue/red, so on. Place Texture Format, RenderTexture Format in advanced options
     //Todo: Allow bool for Alpha or Inverted Colors
     //Todo: Change entire guilayout to use scopes if possible
+    [CustomEditor(typeof(Camera))]
     public class Screenshot_Camera_Editor : GuiControlEditorWindow
     {
         #region Variables
@@ -32,12 +32,13 @@ namespace GursaanjTools
         private string[] _cameraObjectNames;
         private int _chosenCameraIndex;
         private Camera _chosenCamera;
-        private Texture _texture = EditorGUIUtility.whiteTexture;
+        private Texture _texture = null;
         private Vector2Int _dimensions = new Vector2Int(1024, 1024);
         private RenderTextureFormat _renderTextureFormat = RenderTextureFormat.Default;
         private TextureFormat _textureFormat = TextureFormat.RGB565;
 
         private bool _canDrawTexture = true;
+        private bool doOnce = false;
 
         #endregion
 
@@ -46,6 +47,7 @@ namespace GursaanjTools
         private void OnEnable()
         {
             GetAllCameras();
+            doOnce = true;
         }
 
         protected override void CreateGUI(string controlName)
@@ -76,7 +78,6 @@ namespace GursaanjTools
                     {
                         _canDrawTexture = true;
                     }
-
                 }
                 
                 EditorGUILayout.Space(VerticalPadding);
@@ -189,12 +190,23 @@ namespace GursaanjTools
             {
                 return;
             }
-            
-            SerializedObject a = new SerializedObject(camera);
 
-            if (a.hasModifiedProperties)
+            if (doOnce)
             {
-                Debug.Log("Hey");
+                doOnce = false;
+
+                // PropertyInfo[] properties = camera.GetType().GetProperties();
+                // PropertyInfo clearFlagPropertyInfo = camera.GetType().GetProperty("clearFlags");
+                // FieldInfo[] fieldInfos = camera.GetType()
+                //     .GetFields();
+                //
+                // foreach (var field in fieldInfos)
+                // {
+                //     Debug.Log($"Field: {field}");
+                // }
+
+                //Debug.Log(clearFlagPropertyInfo.GetValue(camera).ToString());
+                //Todo Create Custom Editor (inheriting from Editor) for Camera to do Camera Editing
             }
         }
 

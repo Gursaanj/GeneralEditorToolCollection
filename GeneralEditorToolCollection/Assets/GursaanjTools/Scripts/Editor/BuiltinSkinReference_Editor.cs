@@ -1,60 +1,60 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using GursaanjTools;
-using UnityEditor;
-using UnityEngine;
+﻿using UnityEditor;
 
-public class BuiltinSkinReference_Editor : GuiControlEditorWindow, IHasCustomMenu
+namespace GursaanjTools
 {
-    #region Variables
-    
-    private const string SkinsPath = "BuiltinSkinsPath";
-
-    private const string ContentName = "Skin";
-    private const string PluralContent = "Skins";
-    private const string SubDirectory = "Builtin Skins";
-        
-    private EditorResourceLogic _logic;
-    private EditorIconContentCreator _contentCreator;
-    
-    #endregion
-
-    #region Builtin Methods
-
-    private void OnEnable()
+    public class BuiltinSkinReference_Editor : GuiControlEditorWindow, IHasCustomMenu
     {
-        InternalEditorResourceImageInformation info = new InternalEditorResourceImageInformation(GetBuiltinSkinsPath(),
-            ContentName, PluralContent, SubDirectory, () => Close());
-        _logic = new EditorResourceLogic();
-        _contentCreator = new EditorIconContentCreator(info);
-    }
+        #region Variables
 
-    protected override void CreateGUI(string controlName)
-    {
-        _contentCreator.CreateWindowGUI(controlName, position);
-    }
+        private const string SkinsPath = "BuiltinSkinsPath";
 
-    #endregion
+        private const string ContentName = "Skin";
+        private const string PluralContent = "Skins";
+        private const string SubDirectory = "Builtin Skins";
 
-    #region IHasCustomMenu Implementation 
-    
-    public void AddItemsToMenu(GenericMenu menu)
-    {
-        _contentCreator?.AddItemsToMenu(menu);
-    }
+        private EditorResourceLogic _logic;
+        private EditorIconContentCreator _contentCreator;
 
-    #endregion
+        #endregion
 
-    #region Custom Methods
+        #region Builtin Methods
 
-    private string GetBuiltinSkinsPath()
-    {
+        private void OnEnable()
+        {
+            InternalEditorResourceImageInformation info = new InternalEditorResourceImageInformation(GetBuiltinSkinsPath(),
+                ContentName, PluralContent, SubDirectory, () => Close());
+            _logic = new EditorResourceLogic();
+            _contentCreator = new EditorIconContentCreator(info);
+        }
+
+        protected override void CreateGUI(string controlName)
+        {
+            _contentCreator.CreateWindowGUI(controlName, position);
+        }
+
+        #endregion
+
+        #region IHasCustomMenu Implementation
+
+        public void AddItemsToMenu(GenericMenu menu)
+        {
+            _contentCreator?.AddItemsToMenu(menu);
+        }
+
+        #endregion
+
+        #region Custom Methods
+
+        private string GetBuiltinSkinsPath()
+        {
 #if UNITY_2018_3_OR_NEWER
-        return SubDirectory;
+            return SubDirectory;
+            //return UnityEditor.Experimental.EditorResources.lightSkinSourcePath;
 #else
             return _logic.GetPath(IconsPath);
 #endif
-    }
+        }
 
-    #endregion
+        #endregion
+    }
 }

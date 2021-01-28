@@ -254,8 +254,8 @@ namespace GursaanjTools
 
             Assembly assembly = typeof(EditorGUIUtility).Assembly;
             Type resourceUtility = assembly.GetType(InternalEditorResourceUtility);
-            PropertyInfo iconsPathProperty = resourceUtility.GetProperty(pathName, BindingFlags.Static | BindingFlags.Public);
-            return (string)iconsPathProperty.GetValue(null, new object[] { });
+            PropertyInfo pathProperty = resourceUtility.GetProperty(pathName, BindingFlags.Static | BindingFlags.Public);
+            return pathProperty != null ? (string)pathProperty.GetValue(null, new object[] { }) : null;
         }
 
         public bool DisplayError(string errorMessage)

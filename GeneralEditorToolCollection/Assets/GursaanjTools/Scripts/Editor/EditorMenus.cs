@@ -141,13 +141,20 @@ namespace GursaanjTools
         }
         #endregion
 
-        #region Builtin Skin Content
-        [MenuItem("GursaanjTools/References/Internal Skins")]
-        public static void BuiltinSkinUtilityReferenceTool()
+        #region Builtin DarkSkin Content
+        [MenuItem("GursaanjTools/References/Internal Skins/ Dark Skins")]
+        public static void BuiltinDarkSkinUtilityReferenceTool()
         {
-            BuiltinSkinReference_Editor.Init(typeof(BuiltinSkinReference_Editor), EditorWindowData.EditorWindowInformations["SkinContent Reference"]);
+            BuiltinSkinReference_Editor.Init(typeof(BuiltinSkinReference_Editor), EditorWindowData.EditorWindowInformations["DarkSkinContent Reference"]);
         }
-
+        #endregion
+        
+        #region Builtin DarkSkin Content
+        [MenuItem("GursaanjTools/References/Internal Skins/ Light Skins")]
+        public static void BuiltinLightSkinUtilityReferenceTool()
+        {
+            BuiltinSkinReference_Editor.Init(typeof(BuiltinSkinReference_Editor), EditorWindowData.EditorWindowInformations["LightSkinContent Reference"]);
+        }
         #endregion
 
         #region Cursors

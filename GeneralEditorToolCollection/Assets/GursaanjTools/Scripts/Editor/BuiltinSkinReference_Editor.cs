@@ -49,7 +49,6 @@ namespace GursaanjTools
         {
 #if UNITY_2018_3_OR_NEWER
             return SubDirectory;
-            //return UnityEditor.Experimental.EditorResources.lightSkinSourcePath;
 #else
             return _logic.GetPath(IconsPath);
 #endif
@@ -57,4 +56,6 @@ namespace GursaanjTools
 
         #endregion
     }
+    
+    // Setup To EditorResourceContent -> EditorResourceContentWindow -> EditorContentCreator stuff
 }

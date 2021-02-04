@@ -1,7 +1,15 @@
 ﻿using UnityEditor;
+using UnityEngine;
 
 namespace GursaanjTools
 {
+    public enum SkinType
+    {
+        LightSkin,
+        DarkSkin,
+        Other
+    }
+
     public class BuiltinSkinReference_Editor : GuiControlEditorWindow, IHasCustomMenu
     {
         #region Variables
@@ -18,6 +26,25 @@ namespace GursaanjTools
         #endregion
 
         #region Builtin Methods
+
+        public void Initialize(SkinType type)
+        {
+            switch (type)
+            {
+                case SkinType.LightSkin:
+                    //Create SkinPath for LightSkin
+                    break;
+                case SkinType.DarkSkin:
+                    //Create SkinPath for DarkSkin
+                    break;
+                case SkinType.Other:
+                    //Do Regex shenanigans
+                    break;
+                default:
+                    Debug.Log("No such skin type defined");
+                    break;
+            }
+        }
 
         private void OnEnable()
         {
@@ -50,7 +77,7 @@ namespace GursaanjTools
 #if UNITY_2018_3_OR_NEWER
             return SubDirectory;
 #else
-            return _logic.GetPath(IconsPath);
+            return _logic.GetPath(SkinsPath);
 #endif
         }
 

@@ -149,7 +149,7 @@ namespace GursaanjTools
         }
         #endregion
         
-        #region Builtin DarkSkin Content
+        #region Builtin LightSkin Content
         [MenuItem("GursaanjTools/References/Internal Skins/ Light Skins")]
         public static void BuiltinLightSkinUtilityReferenceTool()
         {

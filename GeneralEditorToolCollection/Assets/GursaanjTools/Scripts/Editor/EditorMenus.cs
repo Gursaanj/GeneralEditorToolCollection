@@ -126,6 +126,12 @@ namespace GursaanjTools
         {
             Screenshot_Camera_Editor.Init(typeof(Screenshot_Camera_Editor) ,EditorWindowData.EditorWindowInformations["Camera Capture"]);
         }
+        
+        [MenuItem("GursaanjTools/Screen Capture/From a camera", true)]
+        public static bool TakeScreenShot_Tool_Validation()
+        {
+            return false;
+        }
 
         #endregion
 

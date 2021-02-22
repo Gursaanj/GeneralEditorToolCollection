@@ -95,7 +95,15 @@ namespace GursaanjTools
             
             return EditorUtility.DisplayDialog(subject, message, ConfirmationMessage);
         }
-        
+
+        protected void CloseWindow()
+        {
+            if (_window != null)
+            {
+                _window.Close();
+            }
+        }
+
         private void FocusOnTextField()
         {
             if (_shouldFocusOnField && _window != null) 

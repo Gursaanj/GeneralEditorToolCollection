@@ -36,7 +36,8 @@ namespace GursaanjTools
             {"LightSkinContent Reference", new EditorWindowInformation(new GUIContent("Internal Editor LightSkins"), new Vector2(600,300), new Vector2(600, 600))},
             {"DarkSkinContent Reference", new EditorWindowInformation(new GUIContent("Internal Editor DarkSkins"), new Vector2(600,300), new Vector2(600, 600))},
             {"Cursor Reference", new EditorWindowInformation(new GUIContent("Internal Cursors"), new Vector2(500, 250), new Vector2(600, 250))},
-            {"Fonts Reference", new EditorWindowInformation(new GUIContent("Internal Fonts"), new Vector2(370, 400), new Vector2(370, 500))}
+            {"Fonts Reference", new EditorWindowInformation(new GUIContent("Internal Fonts"), new Vector2(370, 400), new Vector2(370, 500))},
+            {"Project Setup Wizard", new EditorWindowInformation(new GUIContent("Project Setup Wizard"), new Vector2(300,40), new Vector2(300,40))}
         };
     }
 }

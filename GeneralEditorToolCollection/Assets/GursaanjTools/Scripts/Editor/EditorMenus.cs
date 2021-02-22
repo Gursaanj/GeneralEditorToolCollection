@@ -4,6 +4,20 @@ namespace GursaanjTools
 {
     public static class EditorMenus
     {
+        #region Project Setup EditorWindows
+
+        #region Project Setup Wizard
+
+        [MenuItem("GursaanjTools/Project Tools/ Project Setup Wizard")]
+        public static void SetupProject()
+        {
+            ProjectSetup_Editor.Init(typeof(ProjectSetup_Editor), EditorWindowData.EditorWindowInformations["Project Setup Wizard"]);
+        }
+
+        #endregion
+
+        #endregion
+
         #region Scene Object EditorWindows
 
         #region Object Replacer Tool

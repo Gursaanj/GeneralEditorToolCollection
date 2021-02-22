@@ -81,7 +81,7 @@ namespace GursaanjTools
         public float ScrollBarWidth => InternalScrollBarWidth;
         public string DownloadLabel => InternalDownloadLabel;
         public string DownloadMessageLabel => InternalDownloadedMessage;
-
+        public string EditorResourceUtility => InternalEditorResourceUtility;
         #endregion
 
         #region Constructor
